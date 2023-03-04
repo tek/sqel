@@ -88,6 +88,7 @@ import Sqel.Sql
 import Sqel.Sum (con, con1, con1As, conAs, indexPrefix, mergeSum, sum, sumAs, sumWith)
 import Sqel.Type (
   Array,
+  Enum,
   MSelect,
   Merge,
   Mod,
