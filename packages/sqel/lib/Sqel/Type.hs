@@ -55,8 +55,11 @@ type family NewtypeWrapped' (a :: Type) (ass :: [[Type]]) :: Type where
 type family NewtypeWrapped (a :: Type) :: Type where
   NewtypeWrapped a = NewtypeWrapped' a (GCode a)
 
+type family Newtyped (a :: Type) (s :: DdK) :: DdK where
+  Newtyped a s = Mod (Newtype a (NewtypeWrapped a)) s
+
 type family PrimNewtype (name :: Symbol) (a :: Type) :: DdK where
-  PrimNewtype name a = Mod (Newtype a (NewtypeWrapped a)) (Prim name a)
+  PrimNewtype name a = Newtyped a (Prim name a)
 
 type family Name (name :: Symbol) (dd :: DdK) :: DdK where
   Name name ('DdK _ mods a s) =

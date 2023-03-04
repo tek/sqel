@@ -93,6 +93,7 @@ import Sqel.Type (
   Mods,
   ModsR,
   Name,
+  Newtyped,
   Prim,
   PrimNewtype,
   PrimSel,
