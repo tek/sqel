@@ -68,6 +68,7 @@ import Sqel.Prim (
   migrateRename,
   migrateRenameType,
   mods,
+  newtyped,
   prim,
   primAs,
   primCoerce,

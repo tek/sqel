@@ -2,9 +2,10 @@ module Sqel.Prim where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Generics.SOP (I (I), NP (Nil, (:*)))
+
 import Sqel.Class.Mods (MapMod, SymNP, setMod, symMods)
 import Sqel.Column (nullable)
-import Sqel.Data.Dd (ConCol, Dd (Dd), DdK (DdK), DdStruct (DdPrim), DdType, Struct (Prim))
+import Sqel.Data.Dd (ConCol, Dd (Dd), DdK (DdK), DdStruct (DdPrim), DdType, Sqel', Struct (Prim))
 import Sqel.Data.MigrationParams (
   MigrationDefault (MigrationDefault),
   MigrationDelete (MigrationDelete),
@@ -41,29 +42,29 @@ type IndexColumnWith prefix name =
 type IndexColumn name =
   IndexColumnWith 'DefaultPrefix name
 
-column :: Mods p -> Dd ('DdK 'SelAuto p a 'Prim)
+column :: Mods mods -> Dd ('DdK 'SelAuto mods a 'Prim)
 column m =
   Dd SelWAuto m DdPrim
 
 mods ::
-  SymNP p ps =>
-  p ->
+  SymNP mods ps =>
+  mods ->
   Mods ps
 mods =
   symMods
 
 primMod ::
-  p ->
-  Dd ('DdK 'SelAuto '[p] a 'Prim)
-primMod p =
-  column (Mods (I p :* Nil))
+  mods ->
+  Dd ('DdK 'SelAuto '[mods] a 'Prim)
+primMod ms =
+  column (Mods (I ms :* Nil))
 
 primMods ::
-  SymNP p ps =>
-  p ->
+  SymNP mods ps =>
+  mods ->
   Dd ('DdK 'SelAuto ps a 'Prim)
-primMods p =
-  column (mods p)
+primMods ms =
+  column (mods ms)
 
 prim ::
   ∀ a .
@@ -77,16 +78,38 @@ ignore ::
 ignore =
   selAs (primMod Ignore)
 
-type NewtypeError =
-  Quoted "primNewtype" <> " declares a column for a newtype using " <> Quoted "Generic" <> "."
+-- TODO try to use WhenStuck to decide whether to use the type arg in UnwrapNewtype to print the suggested decl with
+-- Generic
+type NewtypeError combi =
+  Quoted combi <> " declares a column for a newtype using " <> Quoted "Generic" <> "."
+
+-- TODO check whether this should be DdK-polymorphic. consumers get very verbose in the structs when it is, but they
+-- have more quantifiers when it isn't.
+type NewtypeWrap :: Symbol -> Type -> Type -> Constraint
+class NewtypeWrap combi a w | a -> w where
+  newtypeWrap :: Sqel' sel mods w s -> Sqel' sel (Newtype a w : mods) a s
+
+instance (
+    err ~ NewtypeError combi,
+    UnwrapNewtype err a w
+  ) => NewtypeWrap combi a w where
+    newtypeWrap (Dd sel (Mods ms) s) =
+      Dd sel (Mods (I (Newtype @a @w (unwrapNewtype @err) (wrapNewtype @err) ):* ms)) s
+
+newtyped ::
+  ∀ sel mods a w s .
+  NewtypeWrap "newtyped" a w =>
+  Sqel' sel mods w s ->
+  Sqel' sel (Newtype a w : mods) a s
+newtyped =
+  newtypeWrap @"newtyped"
 
 primNewtype ::
-  ∀ a w err .
-  err ~ NewtypeError =>
-  UnwrapNewtype err a w =>
+  ∀ a w .
+  NewtypeWrap "primNewtype" a w =>
   Dd ('DdK 'SelAuto '[Newtype a w] a 'Prim)
 primNewtype =
-  primMod (Newtype (unwrapNewtype @err) (wrapNewtype @err))
+  newtypeWrap @"primNewtype" prim
 
 primCoerce ::
   ∀ a w .
@@ -138,11 +161,11 @@ primAs =
 
 -- TODO are composite arrays legal?
 array ::
-  ∀ f a p sel .
-  Dd ('DdK sel p a 'Prim) ->
-  Dd ('DdK sel (ArrayColumn f : p) (f a) 'Prim)
-array (Dd sel (Mods p) s) =
-  Dd sel (Mods (I ArrayColumn :* p)) s
+  ∀ f a mods sel .
+  Dd ('DdK sel mods a 'Prim) ->
+  Dd ('DdK sel (ArrayColumn f : mods) (f a) 'Prim)
+array (Dd sel (Mods ms) s) =
+  Dd sel (Mods (I ArrayColumn :* ms)) s
 
 migrateDef ::
   ∀ s0 s1 .
@@ -211,10 +234,9 @@ instance MkPrimNewtypes '[] '[] where
 
 instance (
     MkPrimNewtypes as s,
-    err ~ NewtypeError,
-    UnwrapNewtype err a w
+    NewtypeWrap "primNewtypes" a w
   ) => MkPrimNewtypes (a : as) ('DdK 'SelAuto '[Newtype a w] a 'Prim : s) where
-    mkPrimNewtypes = primNewtype :* mkPrimNewtypes @as @s
+    mkPrimNewtypes = newtypeWrap @"primNewtypes" prim :* mkPrimNewtypes @as @s
 
 primNewtypes ::
   ∀ (a :: Type) (s :: [DdK]) .

@@ -20,6 +20,7 @@ import Sqel.Data.Dd (
   DdStruct (DdComp),
   DdType,
   DdTypeSel,
+  Sqel,
   type (:>) ((:>)),
   )
 import Sqel.Data.Mods (pattern NoMods)
@@ -32,7 +33,7 @@ import Sqel.Data.TableSchema (TableSchema)
 import Sqel.Data.Uid (Uid)
 import Sqel.Merge (merge)
 import Sqel.PgType (MkTableSchema, tableSchema)
-import Sqel.Prim (prim, primAs, primNewtypes, prims)
+import Sqel.Prim (array, newtypeWrap, prim, primAs, primNewtypes, prims)
 import Sqel.Product (prod, prodSel)
 import Sqel.Query (checkQuery)
 import Sqel.Query.Combinators (order)
@@ -44,6 +45,7 @@ import Sqel.Test.Bug ()
 import qualified Sqel.Type as T
 import Sqel.Type (Prim, PrimNewtype, Prod, ProdPrimsNewtype, TypeSel, type (*>), type (>))
 import Sqel.Uid (UidDd, uid)
+import Sqel.Column (nullable)
 
 newtype IntNt =
   IntNt { unIntNt :: Int }
@@ -295,10 +297,27 @@ test_statement_con1 :: TestT IO ()
 test_statement_con1 =
   [sql|select "sqel_sum_index__na_nu", "name", "nu" from "na_nu"|] === statement_con1
 
-newtype TextNt =
-  TextNt { unTextNt :: Text }
+newtype Nums =
+  Nums { unNums :: Maybe [Int64] }
   deriving stock (Eq, Show, Generic)
-  deriving newtype (IsString, Ord)
+
+data NtArray =
+  NtArray {
+    nums :: Nums
+  }
+  deriving stock (Eq, Show, Generic)
+
+dd_newtypeArray :: Sqel NtArray _
+dd_newtypeArray =
+  prod (newtypeWrap (nullable (array prim)))
+
+statement_newtypeArray :: Sql
+statement_newtypeArray =
+  toSql (Select (tableSchema dd_newtypeArray))
+
+test_statement_newtypeArray :: TestT IO ()
+test_statement_newtypeArray =
+  [sql|select "nums" from "nt_array"|] === statement_newtypeArray
 
 test_statement :: TestTree
 test_statement =
@@ -309,5 +328,6 @@ test_statement =
     unitTest "higher-order merge statement" test_statement_higherOrder,
     unitTest "higher-order double merge query" test_statement_merge_query_higherOrder,
     unitTest "higher-order with new product class" test_higherOrder2,
-    unitTest "unary con with record and positional fields" test_statement_con1
+    unitTest "unary con with record and positional fields" test_statement_con1,
+    unitTest "newtype array" test_statement_newtypeArray
   ]

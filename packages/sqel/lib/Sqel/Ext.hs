@@ -14,6 +14,7 @@ module Sqel.Ext (
   module Sqel.Codec,
   module Sqel.ReifyCodec,
   module Sqel.ReifyDd,
+  module Sqel.Prim,
 ) where
 
 import Sqel.Class.Mods (
@@ -49,6 +50,7 @@ import Sqel.Data.Mods (
 import Sqel.Data.Sel (IndexName, MkSel (..), MkTSel (..), ReifySel (..), ReifyTSel (..), SelPrefix (..), TypeName)
 import Sqel.Data.SelectExpr (SelectAtom (SelectAtom))
 import Sqel.Names
+import Sqel.Prim (NewtypeWrap (newtypeWrap))
 import Sqel.Product
 import Sqel.ReifyCodec (ReifyCodec)
 import Sqel.ReifyDd (ReifyDd)
