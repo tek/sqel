@@ -87,6 +87,7 @@ import Sqel.Query.Combinators
 import Sqel.Sql
 import Sqel.Sum (con, con1, con1As, conAs, indexPrefix, mergeSum, sum, sumAs, sumWith)
 import Sqel.Type (
+  Array,
   MSelect,
   Merge,
   Mod,
@@ -95,6 +96,7 @@ import Sqel.Type (
   Name,
   Newtyped,
   Prim,
+  PrimArray,
   PrimNewtype,
   PrimSel,
   PrimUnused,

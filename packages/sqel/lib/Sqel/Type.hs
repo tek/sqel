@@ -3,9 +3,10 @@ module Sqel.Type where
 import Generics.SOP.GGP (GCode, GDatatypeInfoOf)
 import Generics.SOP.Type.Metadata (ConstructorInfo (Record), DatatypeInfo (ADT), FieldInfo (FieldInfo))
 import Prelude hiding (Mod)
+
 import qualified Sqel.Data.Dd as Kind
 import Sqel.Data.Dd (DdK (DdK), Struct (Comp))
-import Sqel.Data.Mods (Newtype, NoMods)
+import Sqel.Data.Mods (ArrayColumn, Newtype, NoMods)
 import Sqel.Data.Sel (Sel (SelAuto, SelSymbol, SelUnused), SelPrefix (DefaultPrefix), TSel (TSel))
 import Sqel.Data.SelectExpr (SelectAtom)
 import Sqel.Kind (type (++))
@@ -104,3 +105,9 @@ type family Mod (mod :: Type) (dd :: DdK) :: DdK where
 
 type family MSelect (dd :: DdK) :: DdK where
   MSelect dd = Mod SelectAtom dd
+
+type family Array (f :: Type -> Type) (s :: DdK) :: DdK where
+  Array f s = Mod (ArrayColumn f) s
+
+type family PrimArray (name :: Symbol) (a :: Type) (f :: Type -> Type) :: DdK where
+  PrimArray name a f = Array f (Prim name a)
