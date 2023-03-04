@@ -3,6 +3,7 @@ module Sqel.Migration.Transform where
 import qualified Data.Map as Map
 import Hasql.Statement (Statement)
 import Lens.Micro ((^.))
+
 import Sqel (MkTableSchema (tableSchema))
 import Sqel.Class.MigrationEffect (MigrationEffect (runStatement, runStatement_))
 import Sqel.Data.Dd (Dd, DdType)
@@ -18,14 +19,14 @@ import Sqel.Data.PgTypeName (PgCompName, pattern PgTypeName)
 import Sqel.Data.Sql (sql, toSql)
 import Sqel.Data.SqlFragment (Insert (Insert), Select (Select))
 import Sqel.Data.TableSchema (TableSchema)
-import Sqel.ReifyDd (ReifyDd)
-import Sqel.Sql.Type (createTable)
-import Sqel.Statement (plain, prepared, unprepared)
-
+import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent))
 import Sqel.Migration.Ddl (DdlTypes, ddTable)
 import Sqel.Migration.Run (autoKeys, runTypesMigration)
 import Sqel.Migration.Table (MigrationTables (withMigrationTables))
 import Sqel.Migration.Type (TypeChanges (typeChanges))
+import Sqel.ReifyDd (ReifyDd)
+import Sqel.Sql.Type (createTable)
+import Sqel.Statement (plain, prepared, unprepared)
 
 data MigrateTransform m old new =
   MigrateTransform {
@@ -91,8 +92,10 @@ instance (
     Monad m,
     MigrationEffect m
   ) => CustomMigration m ('Mig old new m (MigrateTransform m old new)) where
-    customMigration _ =
-      transformAndMigrate
+    customMigration Absent _ eligible MigrateTransform {types} =
+      runTypesMigration eligible types
+    customMigration _ _ eligible trans =
+      transformAndMigrate eligible trans
 
     customTypeKeys MigrateTransform {types} =
       pure (autoKeys types)

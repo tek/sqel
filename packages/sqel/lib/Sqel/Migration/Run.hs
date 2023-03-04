@@ -7,6 +7,7 @@ import qualified Data.Text as Text
 import Exon (exon)
 import Generics.SOP (All, NP (Nil, (:*)))
 import Lens.Micro ((^.))
+
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect (runMigrationStatements))
 import Sqel.Data.Migration (
@@ -34,30 +35,22 @@ import Sqel.Data.PgTypeName (
   getPgTypeName,
   )
 import Sqel.Data.Sql (Sql)
-import Sqel.Statement (tableColumnsSql, typeColumnsSql)
-
+import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent, Match, Mismatch))
 import Sqel.Migration.Init (initTable)
-import Sqel.Migration.Metadata (
-  DbCols (DbCols),
-  TypeStatus (Absent, Match, Mismatch),
-  columnMap,
-  logType,
-  typeColumns,
-  typeStatus,
-  )
+import Sqel.Migration.Metadata (DbCols (DbCols), columnMap, logType, typeColumns, typeStatus)
 import Sqel.Migration.Statement (typeStatements)
+import Sqel.Statement (tableColumnsSql, typeColumnsSql)
 
 typeMatchWith ::
   Monad m =>
   MigrationEffect m =>
-  Text ->
   PgTypeName table ->
   PgColumns ->
   Sql ->
   m TypeStatus
-typeMatchWith desc name (PgColumns cols) code = do
+typeMatchWith name (PgColumns cols) code = do
   dbCols <- typeColumns code name
-  logType desc dbCols colsByName
+  logType name dbCols colsByName
   pure (typeStatus dbCols colsByName)
   where
     colsByName = DbCols $ columnMap cols <&> \case
@@ -70,7 +63,7 @@ typeMatch ::
   PgComposite ->
   m TypeStatus
 typeMatch (PgComposite name cols) =
-  typeMatchWith "type" name cols typeColumnsSql
+  typeMatchWith name cols typeColumnsSql
 
 tableMatch ::
   Monad m =>
@@ -81,7 +74,7 @@ tableMatch ::
 tableMatch Absent _ =
   pure Absent
 tableMatch _ (PgTable name cols _ _ _ _) =
-  typeMatchWith "table" name cols tableColumnsSql
+  typeMatchWith name cols tableColumnsSql
 
 matches ::
   Monad m =>
@@ -134,7 +127,7 @@ runMigration status tableName eligible = \case
     runTypesMigration eligible typeActions
     when (status == Match) (runAction tableName tableAction)
   CustomActions actions ->
-    customMigration @m @mig tableName eligible actions
+    customMigration @m @mig status tableName eligible actions
 
 tryRunMigration ::
   ∀ mig m .
@@ -182,6 +175,8 @@ collectDirectMatches actions curMatches =
       False -> Set.member name curMatches
 
 matchMessage :: PgTypeName table -> TypeStatus -> Set PgCompName -> Set PgCompName -> Set PgCompName -> Text
+matchMessage (PgTypeName tableName) Absent _ _ _ =
+  [exon|Table #{tableName}: Absent|]
 matchMessage (PgTypeName tableName) status currentMatches directMatches allMatches =
   [exon|Table #{tableName}: #{show status}
 Matching types: #{showNames currentMatches}
@@ -262,5 +257,6 @@ runMigrations table (Migrations steps) = do
   (status, _) <- runMigrationSteps initialStatus mempty table steps
   MigrationEffect.log [exon|Migrations for '#{name}' concluded with #{show status}|]
   createAbsent table status
+  MigrationEffect.log [exon|Finished migrations for '#{name}'|]
   where
     PgOnlyTableName name = table ^. #name

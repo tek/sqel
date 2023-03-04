@@ -14,8 +14,16 @@ import Sqel.Data.PgType (
   PgPrimName (PgPrimName),
   PgTypeRef (PgTypeRef),
   )
-import Sqel.Data.PgTypeName (PgTableName, pattern PgTypeName, PgTypeName)
+import Sqel.Data.PgTypeName (
+  pattern PgCompName,
+  PgTableName,
+  pattern PgTableName,
+  pattern PgTypeName,
+  PgTypeName,
+  getPgTypeName,
+  )
 import Sqel.Data.Sql (Sql)
+import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent, Match, Mismatch))
 import qualified Sqel.Statement as Statement
 import Sqel.Statement (tableColumnsSql)
 
@@ -42,7 +50,7 @@ typeColumns ::
   PgTypeName table ->
   m DbCols
 typeColumns code (PgTypeName name) = do
-  cols <- traverse mktype =<< MigrationEffect.runStatement name (Statement.dbColumns code)
+  cols <- traverse mktype =<< MigrationEffect.dbCols name (Statement.dbColumns code)
   pure (DbCols (Map.fromList cols))
   where
     mktype = \case
@@ -68,25 +76,27 @@ columnMap :: [PgColumn] -> Map PgColumnName ColumnType
 columnMap =
   Map.fromList . fmap \ PgColumn {name, pgType} -> (name, pgType)
 
+pgKind :: PgTypeName table -> Text
+pgKind = \case
+  PgTableName _ -> "table"
+  PgCompName _ -> "type"
+
 logType ::
   MigrationEffect m =>
-  Text ->
+  PgTypeName table ->
   DbCols ->
   DbCols ->
   m ()
-logType desc dbCols colsByName =
-  MigrationEffect.log [exon|Trying #{desc} with:
+logType name dbCols colsByName
+  | null (unDbCols dbCols) =
+    MigrationEffect.log [exon|Skipping nonexistent #{k} '#{getPgTypeName name}'|]
+  | otherwise =
+    MigrationEffect.log [exon|Trying #{k} '#{getPgTypeName name}' with:
 #{show (pretty (PrettyColMap colsByName))}
-for existing #{desc} with
+for existing #{k} with
 #{show (pretty (PrettyColMap dbCols))}|]
-
-data TypeStatus =
-  Absent
-  |
-  Mismatch
-  |
-  Match
-  deriving stock (Eq, Show, Generic)
+  where
+    k = pgKind name
 
 typeStatus ::
   DbCols ->

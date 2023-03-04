@@ -8,8 +8,10 @@ import Sqel.Migration.Statement (MigrationStatement, migrationSession)
 
 class MigrationEffect m where
   runMigrationStatements :: [MigrationStatement] -> m ()
-  runStatement_ :: q -> Statement q () -> m ()
   runStatement :: q -> Statement q [a] -> m [a]
+  runStatement_ :: q -> Statement q () -> m ()
+  dbCols :: Text -> Statement Text [(Text, Text, Text, Maybe Text)] -> m [(Text, Text, Text, Maybe Text)]
+  dbCols = runStatement
   log :: Text -> m ()
   error :: Text -> m ()
 

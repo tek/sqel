@@ -63,6 +63,7 @@ library
       Sqel.Migration.Column
       Sqel.Migration.Consistency
       Sqel.Migration.Data.Ddl
+      Sqel.Migration.Data.TypeStatus
       Sqel.Migration.Ddl
       Sqel.Migration.Init
       Sqel.Migration.Metadata
@@ -218,6 +219,7 @@ test-suite sqel-unit
       Sqel.Test.Error.QueryColumMismatch
       Sqel.Test.ErrorTest
       Sqel.Test.HasGeneric
+      Sqel.Test.MigrationRunTest
       Sqel.Test.MigrationTest
       Sqel.Test.QueryProjectionTest
       Sqel.Test.SqlCodeTest
@@ -293,12 +295,14 @@ test-suite sqel-unit
       base >=4.12 && <5
     , exon ==1.4.*
     , generics-sop ==0.5.*
+    , hasql ==1.6.*
     , hedgehog ==1.1.*
     , incipit-base ==0.5.*
     , microlens ==0.4.*
     , sqel
     , tasty ==1.4.*
     , tasty-hedgehog ==1.3.*
+    , transformers
   mixins:
       base hiding (Prelude)
     , incipit-base (IncipitBase as Prelude)

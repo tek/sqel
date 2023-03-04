@@ -3,6 +3,7 @@ module Sqel.Data.Migration where
 import Exon (exon)
 import Generics.SOP (NP (Nil, (:*)))
 import Hasql.Encoders (Params)
+import Sqel.Migration.Data.TypeStatus (TypeStatus)
 
 import Sqel.Data.Dd ((:>) ((:>)))
 import Sqel.Data.PgType (ColumnType, PgColumnName, PgColumns, PgTable)
@@ -119,11 +120,11 @@ noMigrations =
 
 class CustomMigration m mig where
   customTypeKeys :: MigExt mig -> m (Set (PgCompName, Bool))
-  customMigration :: PgTableName -> Set PgCompName -> MigExt mig -> m ()
+  customMigration :: TypeStatus -> PgTableName -> Set PgCompName -> MigExt mig -> m ()
 
 instance CustomMigration m ('Mig from to m Void) where
   customTypeKeys = \case
-  customMigration _ _ = \case
+  customMigration _ _ _ = \case
 
 class HoistMigration m n ext ext' | m n ext -> ext' where
   hoistMigration :: (∀ x . m x -> n x) -> ext -> ext'

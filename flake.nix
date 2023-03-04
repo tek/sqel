@@ -14,6 +14,7 @@
       th-desugar = hackage "1.13.1" "0rfiznqlivb8zyykq49z3yz1jazy4g804h0vbmcab3fbmjfga6bz";
       singletons-base = unbreak;
     };
+
   in {
     packages.sqel = ./packages/sqel;
     hpack.packages = import ./ops/hpack.nix { inherit config lib; };

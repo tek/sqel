@@ -111,10 +111,12 @@ in {
       dependencies = [
         "exon ^>= 1.4"
         "generics-sop ^>= 0.5"
+        "hasql ^>= 1.6"
         "hedgehog ^>= 1.1"
         "microlens ^>= 0.4"
         "tasty ^>= 1.4"
         "tasty-hedgehog ^>= 1.3"
+        "transformers"
       ];
     };
 
