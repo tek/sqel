@@ -1,9 +1,9 @@
 module Sqel.Data.Term where
 
+import Sqel.ColumnConstraints (Constraints)
 import Sqel.Data.Dd (DdInc (DdMerge, DdNest), DdSort (DdCon, DdProd, DdSum))
 import Sqel.Data.PgType (PgColumnName, PgPrimName)
 import Sqel.Data.PgTypeName (PgTableName)
-import Sqel.Data.Sql (Sql)
 
 data ProdType =
   Reg
@@ -34,8 +34,7 @@ data DdTerm =
   DdTerm {
     name :: PgColumnName,
     tableName :: Maybe PgTableName,
-    unique :: Bool,
-    constraints :: [Sql],
+    constraints :: Constraints,
     struct :: Struct
   }
   deriving stock (Eq, Show, Generic)

@@ -2,12 +2,11 @@ module Sqel.Data.PgType where
 
 import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Map.Strict as Map
-import qualified Exon
 import Lens.Micro.Extras (view)
 import Prettyprinter (Pretty (pretty), nest, sep, vsep, (<+>))
-import Sqel.SOP.Constraint (symbolText)
-import Sqel.Text.DbIdentifier (dbIdentifierT, dbSymbol)
 
+import qualified Sqel.ColumnConstraints as ColumnConstraints
+import Sqel.ColumnConstraints (Constraints (Constraints))
 import Sqel.Data.PgTypeName (PgCompName, PgTableName, pattern PgTypeName)
 import Sqel.Data.Selector (Selector (unSelector), assign, nameSelector)
 import Sqel.Data.Sql (Sql, ToSql (toSql), sql, sqlQuote)
@@ -22,6 +21,8 @@ import Sqel.Data.SqlFragment (
   Select (Select),
   Update (Update),
   )
+import Sqel.SOP.Constraint (symbolText)
+import Sqel.Text.DbIdentifier (dbIdentifierT, dbSymbol)
 
 newtype PgPrimName =
   PgPrimName { unPgPrimName :: Text }
@@ -93,9 +94,9 @@ pgTypeRefSym =
   pgTypeRef (symbolText @tname)
 
 data ColumnType =
-  ColumnPrim { name :: PgPrimName, unique :: Bool, constraints :: [Sql] }
+  ColumnPrim { name :: PgPrimName, constraints :: Constraints }
   |
-  ColumnComp { pgType :: PgTypeRef, unique :: Bool, constraints :: [Sql] }
+  ColumnComp { pgType :: PgTypeRef, constraints :: Constraints }
   deriving stock (Eq, Show, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
@@ -109,16 +110,16 @@ data PgColumn =
 
 instance Pretty PgColumn where
   pretty = \case
-    PgColumn n (ColumnPrim t _ opt) -> "*" <+> pretty n <+> pretty t <+> sep (pretty <$> opt)
-    PgColumn n (ColumnComp t _ opt) -> "+" <+> pretty n <+> pretty t <+> sep (pretty <$> opt)
+    PgColumn n (ColumnPrim t Constraints {fragments}) -> "*" <+> pretty n <+> pretty t <+> sep (pretty <$> fragments)
+    PgColumn n (ColumnComp t Constraints {fragments}) -> "+" <+> pretty n <+> pretty t <+> sep (pretty <$> fragments)
 
 instance ToSql (Create PgColumn) where
   toSql (Create PgColumn {..}) =
     case pgType of
-      ColumnPrim (PgPrimName tpe) _ (Exon.intercalate " " -> params) ->
-        [sql|##{name} ##{tpe} #{params}|]
-      ColumnComp (PgTypeRef tpe) _ (Exon.intercalate " " -> params) ->
-        [sql|##{name} ##{tpe} #{params}|]
+      ColumnPrim (PgPrimName tpe) constr ->
+        [sql|##{name} ##{tpe} ##{constr}|]
+      ColumnComp (PgTypeRef tpe) constr ->
+        [sql|##{name} ##{tpe} ##{constr}|]
 
 newtype PgColumns =
   PgColumns { unPgColumns :: [PgColumn] }
@@ -126,16 +127,16 @@ newtype PgColumns =
   deriving newtype (FromJSON, ToJSON)
 
 data StructureType =
-  StructurePrim { name :: PgPrimName, unique :: Bool, constraints :: [Sql] }
+  StructurePrim { name :: PgPrimName, constraints :: Constraints }
   |
-  StructureComp { compName :: PgCompName, struct :: PgStructure, unique :: Bool, constraints :: [Sql] }
+  StructureComp { compName :: PgCompName, struct :: PgStructure, constraints :: Constraints }
   deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
 structureToColumn :: StructureType -> ColumnType
 structureToColumn = \case
   StructurePrim {..} -> ColumnPrim {..}
-  StructureComp (PgTypeName ref) _ unique constr -> ColumnComp (PgTypeRef ref) unique constr
+  StructureComp (PgTypeName ref) _ constr -> ColumnComp (PgTypeRef ref) constr
 
 instance Pretty PgColumns where
   pretty (PgColumns cs) =

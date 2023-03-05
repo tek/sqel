@@ -2,6 +2,7 @@ module Sqel.Migration.Init where
 
 import Exon (exon)
 import Lens.Micro ((^.))
+
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect)
 import Sqel.Data.PgType (
@@ -13,10 +14,9 @@ import Sqel.Data.PgType (
   structureToColumns,
   )
 import Sqel.Data.PgTypeName (PgCompName, getPgTypeName)
+import Sqel.Migration.Metadata (DbCols (DbCols), typeColumns)
 import qualified Sqel.Sql.Type as Sql
 import Sqel.Statement (createTable, plain, typeColumnsSql)
-
-import Sqel.Migration.Metadata (DbCols (DbCols), typeColumns)
 
 initComp ::
   Monad m =>
@@ -39,9 +39,9 @@ initType ::
   StructureType ->
   m ()
 initType (PgColumnName _) = \case
-  StructurePrim _ _ _ ->
+  StructurePrim _ _ ->
     unit
-  StructureComp tpe columns _ _ ->
+  StructureComp tpe columns _ ->
     initComp tpe columns
 
 initStructure ::

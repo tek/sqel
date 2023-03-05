@@ -6,6 +6,10 @@ import qualified Exon
 import Hasql.Encoders (Params)
 import qualified Hasql.Session as Session
 import Hasql.Session (Session)
+import qualified Text.Show as Show
+
+import qualified Sqel.ColumnConstraints
+import Sqel.ColumnConstraints (Constraints (Constraints))
 import qualified Sqel.Data.Migration as Migration
 import Sqel.Data.Migration (
   ColumnAction (AddColumn, RemoveColumn, RenameColumn, RenameColumnType),
@@ -30,7 +34,6 @@ import Sqel.Data.PgTypeName (
 import Sqel.Data.Sql (Sql (Sql), sql)
 import qualified Sqel.Sql.Type as Sql
 import Sqel.Statement (unprepared)
-import qualified Text.Show as Show
 
 data MigrationStatement where
   MigrationStatement :: p -> Params p -> Sql -> MigrationStatement
@@ -73,8 +76,8 @@ columnStatements' typeName = \case
       PgCompName _ -> unit
     where
       (optFrag, colTypeName) = case tpe of
-        ColumnPrim (PgPrimName n) _ opt -> (opt, Sql n)
-        ColumnComp (PgTypeRef n) _ opt -> (opt, Sql n)
+        ColumnPrim (PgPrimName n) Constraints {fragments} -> (fragments, Sql n)
+        ColumnComp (PgTypeRef n) Constraints {fragments} -> (fragments, Sql n)
   RemoveColumn (PgColumnName name) _ ->
     alter_ \ alter attr -> [sql|#{alter} drop #{attr} ##{name}|]
   RenameColumn (PgColumnName old) (PgColumnName new) ->

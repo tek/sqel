@@ -1,7 +1,5 @@
 module Sqel.Sql.Type where
 
-import qualified Exon
-
 import qualified Sqel.Data.PgType as PgTable
 import Sqel.Data.PgType (
   ColumnType (ColumnComp, ColumnPrim),
@@ -23,18 +21,18 @@ columnSpec ::
   PgColumn ->
   Sql
 columnSpec = \case
-  PgColumn (PgColumnName name) (ColumnPrim (PgPrimName tpe) _ (Exon.intercalate " " -> params)) ->
-    [sql|##{dquote name} ##{tpe} #{params}|]
-  PgColumn (PgColumnName name) (ColumnComp (PgTypeRef tpe) _ (Exon.intercalate " " -> params)) ->
-    [sql|##{dquote name} ##{tpe} #{params}|]
+  PgColumn (PgColumnName name) (ColumnPrim (PgPrimName tpe) constr) ->
+    [sql|##{dquote name} ##{tpe} ##{constr}|]
+  PgColumn (PgColumnName name) (ColumnComp (PgTypeRef tpe) constr) ->
+    [sql|##{dquote name} ##{tpe} ##{constr}|]
 
 typeColumnSpec ::
   PgColumn ->
   Sql
 typeColumnSpec = \case
-  PgColumn (PgColumnName name) (ColumnPrim (PgPrimName tpe) _ _) ->
+  PgColumn (PgColumnName name) (ColumnPrim (PgPrimName tpe) _) ->
     [sql|##{dquote name} ##{tpe}|]
-  PgColumn (PgColumnName name) (ColumnComp (PgTypeRef tpe) _ _) ->
+  PgColumn (PgColumnName name) (ColumnComp (PgTypeRef tpe) _) ->
     [sql|##{dquote name} ##{tpe}|]
 
 createTable ::
@@ -51,7 +49,6 @@ dropTable ::
 dropTable name =
    [sql|drop table if exists ##{name}|]
 
--- TODO make PgTypeRef et al quote automatically by using @ToSegment@
 createProdType ::
   PgComposite ->
   Sql

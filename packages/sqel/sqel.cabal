@@ -38,6 +38,7 @@ library
       Sqel.Comp
       Sqel.Data.Codec
       Sqel.Data.Dd
+      Sqel.Data.ExistingColumn
       Sqel.Data.FieldPath
       Sqel.Data.FragType
       Sqel.Data.Migration
@@ -108,6 +109,7 @@ library
       lib
   default-extensions:
       StandaloneKindSignatures
+      OverloadedRecordDot
       AllowAmbiguousTypes
       ApplicativeDo
       BangPatterns
@@ -229,6 +231,7 @@ test-suite sqel-unit
       test
   default-extensions:
       StandaloneKindSignatures
+      OverloadedRecordDot
       AllowAmbiguousTypes
       ApplicativeDo
       BangPatterns

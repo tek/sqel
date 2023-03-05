@@ -6,7 +6,11 @@ import qualified Hasql.Encoders as Encoders
 import Hasql.Encoders (Params)
 import Hasql.Statement (Statement (Statement))
 import Lens.Micro ((^.))
+
+import qualified Sqel.ColumnConstraints
+import Sqel.ColumnConstraints (Constraints (Constraints))
 import Sqel.Data.Codec (Encoder (Encoder))
+import Sqel.Data.ExistingColumn (ExistingColumn (ExistingColumn))
 import qualified Sqel.Data.PgType as PgTable
 import Sqel.Data.PgType (
   ColumnType (ColumnPrim),
@@ -90,7 +94,7 @@ insert (TableSchema col _ params) =
 
 uniqueColumn :: PgColumn -> Maybe Selector
 uniqueColumn = \case
-  PgColumn (PgColumnName name) (ColumnPrim _ True _) ->
+  PgColumn (PgColumnName name) (ColumnPrim _ Constraints {unique = True}) ->
     Just (Selector (Sql (dquote name)))
   _ ->
     Nothing
@@ -125,20 +129,22 @@ upsert (TableSchema tab _ params) =
 
 dbColumns ::
   Sql ->
-  Statement Text [(Text, Text, Text, Maybe Text)]
+  Statement Text [ExistingColumn]
 dbColumns code =
   prepared code decoder encoder
   where
     decoder =
-      (,,,) <$> text' <*> text' <*> text' <*> Decoders.column (Decoders.nullable Decoders.text)
+      ExistingColumn <$> text' <*> text' <*> text' <*> Decoders.column (Decoders.nullable Decoders.text) <*> bool'
     text' =
       Decoders.column (Decoders.nonNullable Decoders.text)
+    bool' =
+      Decoders.column (Decoders.nonNullable Decoders.bool)
     encoder =
       Encoders.param (Encoders.nonNullable Encoders.text)
 
 columnsSql :: Sql -> Sql -> Sql -> Sql
 columnsSql entity container namePrefix =
-  [sql|select c.#{entity}_name, c.data_type, c.#{namePrefix}udt_name, e.data_type
+  [sql|select c.#{entity}_name, c.data_type, c.#{namePrefix}udt_name, e.data_type, c.is_nullable
        from information_schema.#{entity}s c left join information_schema.element_types e
        on ((c.#{container}_catalog, c.#{container}_schema, c.#{container}_name, 'TABLE', c.dtd_identifier)
        = (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier))

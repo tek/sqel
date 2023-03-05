@@ -25,7 +25,7 @@
       args = ["-fprint-potential-instances"];
       preludePackage = "incipit-base";
       preludeModule = "IncipitBase";
-      extensions = ["StandaloneKindSignatures"];
+      extensions = ["StandaloneKindSignatures" "OverloadedRecordDot"];
     };
     hackage.versionFile = "ops/version.nix";
     compat.enable = false;

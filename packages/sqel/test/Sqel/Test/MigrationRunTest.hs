@@ -2,47 +2,61 @@
 
 module Sqel.Test.MigrationRunTest where
 
+import Control.Monad.Trans.Class (MonadTrans, lift)
+import Control.Monad.Trans.Reader (ReaderT (runReaderT), asks)
 import Control.Monad.Trans.Writer.Strict (WriterT (runWriterT), tell)
+import qualified Data.Map.Strict as Map
 import Exon (exon)
 import Hasql.Statement (Statement (Statement))
 import Hedgehog (TestT, (===))
 import Lens.Micro ((^.))
-import Prelude hiding (sum)
 
 import Sqel.Class.MigrationEffect (MigrationEffect (..))
 import Sqel.Data.Dd (Sqel, type (:>) ((:>)))
-import Sqel.Data.Migration (Mig (Mig), Migrations, migrate)
+import Sqel.Data.ExistingColumn (ExistingColumn (ExistingColumn))
+import Sqel.Data.Migration (AutoMigrations, Mig (Mig), Migrations, migrate)
+import Sqel.Data.Sql (Sql (Sql), unSql)
 import Sqel.Data.TableSchema (TableSchema)
 import Sqel.Migration.Run (runMigrations)
+import Sqel.Migration.Statement (MigrationStatement (MigrationStatement))
+import Sqel.Migration.Table (migrateAuto)
 import Sqel.Migration.Transform (MigrateTransform, migrateTransform)
 import Sqel.Names (typeAs)
 import Sqel.PgType (tableSchema)
 import Sqel.Prim (prim, primNullable)
 import Sqel.Product (prod)
+import Sqel.Statement (tableColumnsSql)
 
 newtype MockDb m a =
-  MockDb { unMockDb :: WriterT [Text] m a }
-  deriving stock (Eq, Show, Generic)
+  MockDb { unMockDb :: ReaderT (Map Text [ExistingColumn]) (WriterT [Text] m) a }
+  deriving stock (Generic)
   deriving newtype (Functor, Applicative, Monad)
+
+instance MonadTrans MockDb where
+  lift = MockDb . lift . lift
 
 stmt ::
   Monad m =>
   ByteString ->
   MockDb m [a]
 stmt c = do
-  MockDb (tell [decodeUtf8 c])
+  MockDb (lift (tell [decodeUtf8 c]))
   pure []
 
-instance Monad m => MigrationEffect (MockDb m) where
-  runMigrationStatements _ = unit
+instance MonadFail m => MigrationEffect (MockDb m) where
+  runMigrationStatements =
+    traverse_ \ (MigrationStatement _ _ (Sql code)) -> MockDb (lift (tell [code]))
   runStatement _ (Statement code _ _ _) = stmt code
   runStatement_ _ (Statement code _ _ _) = void (stmt code)
+  dbCols name (Statement code _ _ _) = do
+    _ <- stmt code
+    fromMaybe mempty <$> MockDb (asks (Map.lookup name))
   log _ = unit
-  error _ = unit
+  error err = lift (fail (toString err))
 
-runMockDb :: MockDb m a -> m (a, [Text])
-runMockDb (MockDb ma) =
-  runWriterT ma
+runMockDb :: Map Text [ExistingColumn] -> MockDb m a -> m (a, [Text])
+runMockDb cols (MockDb ma) =
+  runWriterT (runReaderT ma cols)
 
 data Dat1 =
   Dat1 {
@@ -80,12 +94,41 @@ schema =
 targetLogs :: [Text]
 targetLogs =
   [
-    [exon|select c.column_name, c.data_type, c. udt_name, e.data_type from information_schema.columns c left join information_schema.element_types e on ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) = (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where c.table_name = $1|],
+    unSql tableColumnsSql,
     [exon|create table "dat" ("num" bigint, "name" text not null)|]
   ]
 
 test_migrationTransformAbsent :: TestT IO ()
 test_migrationTransformAbsent = do
-  ((), logs) <- runMockDb do
+  ((), logs) <- runMockDb mempty do
     runMigrations (schema ^. #pg) migrations
   targetLogs === logs
+
+migrationsExtraColumn ::
+  AutoMigrations (MockDb m) '[Dat1] Dat
+migrationsExtraColumn =
+  migrate (
+    migrateAuto dd_Dat1 dd_Dat
+  )
+
+targetLogsExtraColumn :: [Text]
+targetLogsExtraColumn =
+  [
+    unSql tableColumnsSql,
+    unSql tableColumnsSql,
+    [exon|alter table "dat" add column num bigint|]
+  ]
+
+test_migrationExtraColumn :: TestT IO ()
+test_migrationExtraColumn = do
+  ((), logs) <- runMockDb cols do
+    runMigrations (schema ^. #pg) migrationsExtraColumn
+  targetLogsExtraColumn === logs
+  where
+    cols =
+      [
+        ("dat", [
+          ExistingColumn "name" "text" "" Nothing False,
+          ExistingColumn "nonsense" "text" "" Nothing True
+        ])
+      ]

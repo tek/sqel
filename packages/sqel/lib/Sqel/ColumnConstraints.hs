@@ -1,7 +1,10 @@
 module Sqel.ColumnConstraints where
 
+import Data.Aeson (FromJSON, ToJSON)
+import qualified Exon
 import Generics.SOP (I (I), NP (Nil, (:*)))
 import Lens.Micro ((%~), (.~))
+
 import Sqel.Data.Mods (
   Mods (Mods),
   Nullable (Nullable),
@@ -9,18 +12,30 @@ import Sqel.Data.Mods (
   PrimaryKey (PrimaryKey),
   Unique (Unique),
   )
-import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Sql (Sql, ToSql (toSql), sql)
+
+data ConstraintsAcc =
+  ConstraintsAcc {
+    unique :: Bool,
+    nullable :: Bool,
+    simple :: [Sql]
+  }
+  deriving stock (Eq, Show, Generic)
 
 data Constraints =
   Constraints {
     unique :: Bool,
     nullable :: Bool,
-    extra :: [Sql]
+    fragments :: [Sql]
   }
   deriving stock (Eq, Show, Generic)
+  deriving anyclass (ToJSON, FromJSON)
+
+instance ToSql Constraints where
+  toSql Constraints {fragments} = Exon.intercalate " " fragments
 
 class ColumnConstraint mod where
-  columnConstraint :: mod -> Constraints -> Constraints
+  columnConstraint :: mod -> ConstraintsAcc -> ConstraintsAcc
 
 instance {-# overlappable #-} ColumnConstraint mod where
   columnConstraint _ = id
@@ -30,30 +45,30 @@ instance ColumnConstraint Nullable where
     #nullable .~ True
 
 instance ColumnConstraint PrimaryKey where
-  columnConstraint PrimaryKey Constraints {..} =
-    Constraints {
+  columnConstraint PrimaryKey ConstraintsAcc {..} =
+    ConstraintsAcc {
       unique = True,
-      extra = "primary key" : extra,
+      simple = "primary key" : simple,
       ..
     }
 
 instance ColumnConstraint PgDefault where
   columnConstraint (PgDefault val) =
-    #extra %~ ([sql|default ##{val}|] :)
+    #simple %~ ([sql|default ##{val}|] :)
 
 instance ColumnConstraint Unique where
-  columnConstraint Unique Constraints {..} =
-    Constraints {
+  columnConstraint Unique ConstraintsAcc {..} =
+    ConstraintsAcc {
       unique = True,
-      extra = "unique" : extra,
+      simple = "unique" : simple,
       ..
     }
 
 class ColumnConstraints mods where
-  collectConstraints :: NP I mods -> Constraints
+  collectConstraints :: NP I mods -> ConstraintsAcc
 
 instance ColumnConstraints '[] where
-  collectConstraints Nil = Constraints False False []
+  collectConstraints Nil = ConstraintsAcc False False []
 
 instance (
     ColumnConstraint mod,
@@ -65,10 +80,10 @@ instance (
 columnConstraints ::
   ColumnConstraints mods =>
   Mods mods ->
-  (Bool, [Sql])
+  Constraints
 columnConstraints (Mods mods) =
-  (unique, notNull <> extra)
+  Constraints {fragments = notNull <> simple, ..}
   where
     notNull | nullable = []
             | otherwise = ["not null"]
-    Constraints {..} = collectConstraints mods
+    ConstraintsAcc {..} = collectConstraints mods

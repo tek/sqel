@@ -7,6 +7,8 @@ import qualified Exon
 import Exon (exon)
 import Lens.Micro (_1, _2, _3, _4, (^.))
 import Lens.Micro.Extras (view)
+import Type.Errors (ErrorMessage)
+
 import Sqel.Class.MatchView (MatchProjection)
 import Sqel.Data.Codec (Codec (Codec), FullCodec)
 import Sqel.Data.Dd (Dd, DdK, DdType)
@@ -38,21 +40,20 @@ import Sqel.ReifyDd (ReifyDd (reifyDd))
 import Sqel.SOP.Error (Quoted)
 import Sqel.Sql.Prepared (dollar)
 import Sqel.Text.Quote (dquote)
-import Type.Errors (ErrorMessage)
 
 pgColumn ::
   DdTerm ->
   ([PgColumn], [(PgColumnName, StructureType)], Map PgTypeRef PgComposite, [NonEmpty PgColumnName])
 pgColumn = \case
-  DdTerm name _ unique constr (Prim t) ->
-    ([PgColumn name (ColumnPrim t unique constr)], [(name, StructurePrim t unique constr)], mempty, [pure name])
-  DdTerm name _ unique constr (Comp typeName c i sub) ->
+  DdTerm name _ constr (Prim t) ->
+    ([PgColumn name (ColumnPrim t constr)], [(name, StructurePrim t constr)], mempty, [pure name])
+  DdTerm name _ constr (Comp typeName c i sub) ->
     case comp typeName c i sub of
       (compType@(PgComposite cname _), struct, types, False, sels) ->
         (colType, structType, Map.insert ref compType types, (name <|) <$> sels)
         where
-          colType = [PgColumn name (ColumnComp ref unique constr)]
-          structType = [(name, StructureComp cname struct unique constr)]
+          colType = [PgColumn name (ColumnComp ref constr)]
+          structType = [(name, StructureComp cname struct constr)]
           ref = pgCompRef cname
       (PgComposite _ (PgColumns columns), PgStructure struct, types, True, sels) ->
         (columns, struct, types, sels)
@@ -84,8 +85,8 @@ mkValues (PgStructure base) =
   snd (mapAccumL mkCol (1 :: Int) base)
   where
     mkCol (n :: Int) = \case
-      (_, StructurePrim _ _ _) -> (n + 1, [sql|##{dollar n}|])
-      (_, StructureComp _ (PgStructure cols) _ _) ->
+      (_, StructurePrim _ _) -> (n + 1, [sql|##{dollar n}|])
+      (_, StructureComp _ (PgStructure cols) _) ->
         (newN, [sql|row(#{Exon.intercalate ", " sub})|])
         where
           (newN, sub) =
@@ -106,12 +107,12 @@ mkTable (PgColumnName name) tableName cols types selectors struct =
 
 toTable :: DdTerm -> PgTable a
 toTable = \case
-  DdTerm name tableName unique constr (Prim t) ->
+  DdTerm name tableName constr (Prim t) ->
     mkTable name tableName cols [] [pure name] struct
     where
-      cols = PgColumns [PgColumn name (ColumnPrim t unique constr)]
-      struct = PgStructure [(name, StructurePrim t unique constr)]
-  DdTerm name tableName _ _ (Comp typeName c i sub) ->
+      cols = PgColumns [PgColumn name (ColumnPrim t constr)]
+      struct = PgStructure [(name, StructurePrim t constr)]
+  DdTerm name tableName _ (Comp typeName c i sub) ->
     mkTable name tableName cols types paths struct
     where
       (PgComposite _ cols, struct, types, _, paths) = comp typeName c i sub

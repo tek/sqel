@@ -61,9 +61,9 @@ instance (
     ReifySel sel name
   ) => ReifyDd ('DdK sel mods a 'Prim) where
     reifyDd (Dd sel mods@(Mods ms) DdPrim) =
-      DdTerm (pgColumnName name) (unSetTableName <$> maybeMod mods) unique constraints (Term.Prim (reifyPrimName @a ms))
+      DdTerm (pgColumnName name) (unSetTableName <$> maybeMod mods) constraints (Term.Prim (reifyPrimName @a ms))
       where
-        (unique, constraints) = columnConstraints mods
+        constraints = columnConstraints mods
         name = reifySel sel
 
 instance (
@@ -72,9 +72,9 @@ instance (
     ReifyDdComp sub
   ) => ReifyDd ('DdK sel mods a ('Comp tsel c i sub)) where
     reifyDd (Dd sel mods (DdComp (TSelW (Proxy :: Proxy '(tname, tpe))) c i sub)) =
-      DdTerm (pgColumnName name) (unSetTableName <$> maybeMod mods) unique constraints struct
+      DdTerm (pgColumnName name) (unSetTableName <$> maybeMod mods) constraints struct
       where
-        (unique, constraints) = columnConstraints mods
+        constraints = columnConstraints mods
         struct = Term.Comp typeName (demoteComp c) (demoteInc i) (reifyDdComp sub)
         name = case sel of
           SelWSymbol (Proxy :: Proxy name) -> symbolText @name
