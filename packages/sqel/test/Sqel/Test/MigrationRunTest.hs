@@ -10,6 +10,8 @@ import Exon (exon)
 import Hasql.Statement (Statement (Statement))
 import Hedgehog (TestT, (===))
 import Lens.Micro ((^.))
+import Test (unitTest)
+import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Class.MigrationEffect (MigrationEffect (..))
 import Sqel.Data.Dd (Sqel, type (:>) ((:>)))
@@ -17,13 +19,14 @@ import Sqel.Data.ExistingColumn (ExistingColumn (ExistingColumn))
 import Sqel.Data.Migration (AutoMigrations, Mig (Mig), Migrations, migrate)
 import Sqel.Data.Sql (Sql (Sql), unSql)
 import Sqel.Data.TableSchema (TableSchema)
+import Sqel.Migration.Data.TypeStatus (TypeStatus (Match))
 import Sqel.Migration.Run (runMigrations)
 import Sqel.Migration.Statement (MigrationStatement (MigrationStatement))
 import Sqel.Migration.Table (migrateAuto)
 import Sqel.Migration.Transform (MigrateTransform, migrateTransform)
 import Sqel.Names (typeAs)
 import Sqel.PgType (tableSchema)
-import Sqel.Prim (prim, primNullable)
+import Sqel.Prim (array, newtyped, prim, primNullable)
 import Sqel.Product (prod)
 import Sqel.Statement (tableColumnsSql)
 
@@ -100,12 +103,11 @@ targetLogs =
 
 test_migrationTransformAbsent :: TestT IO ()
 test_migrationTransformAbsent = do
-  ((), logs) <- runMockDb mempty do
+  (_, logs) <- runMockDb mempty do
     runMigrations (schema ^. #pg) migrations
   targetLogs === logs
 
-migrationsExtraColumn ::
-  AutoMigrations (MockDb m) '[Dat1] Dat
+migrationsExtraColumn :: AutoMigrations (MockDb m) '[Dat1] Dat
 migrationsExtraColumn =
   migrate (
     migrateAuto dd_Dat1 dd_Dat
@@ -121,7 +123,7 @@ targetLogsExtraColumn =
 
 test_migrationExtraColumn :: TestT IO ()
 test_migrationExtraColumn = do
-  ((), logs) <- runMockDb cols do
+  (_, logs) <- runMockDb cols do
     runMigrations (schema ^. #pg) migrationsExtraColumn
   targetLogsExtraColumn === logs
   where
@@ -132,3 +134,80 @@ test_migrationExtraColumn = do
           ExistingColumn "nonsense" "text" "" Nothing True
         ])
       ]
+
+data Old =
+  Old {
+    name :: Text,
+    status :: Text,
+    cats :: [Text]
+  }
+  deriving stock (Eq, Show, Generic)
+
+dd_Old :: Sqel Old _
+dd_Old =
+  typeAs @"new" (prod (prim :> prim :> array prim))
+
+newtype Dogs =
+  Dogs { unDogs :: [Text] }
+  deriving stock (Eq, Show, Generic)
+
+data New =
+  New {
+    name :: Text,
+    status :: Text,
+    dogs :: Dogs
+  }
+  deriving stock (Eq, Show, Generic)
+
+dd_New :: Sqel New _
+dd_New =
+  prod (prim :> prim :> newtyped (array prim))
+
+schemaNew :: TableSchema New
+schemaNew =
+  tableSchema dd_New
+
+transform :: Old -> New
+transform Old {..} = New {dogs = Dogs cats, ..}
+
+migrationsTransform ::
+  Monad m =>
+  Migrations (MockDb m) '[ 'Mig Old New (MockDb m) (MigrateTransform (MockDb m) Old New) ]
+migrationsTransform =
+  migrate (
+    migrateTransform dd_Old dd_New (pure . fmap transform)
+  )
+
+targetLogsTransform :: [Text]
+targetLogsTransform =
+  [
+    unSql tableColumnsSql,
+    unSql tableColumnsSql,
+    [exon|select "name", "status", "cats" from "new"|],
+    [exon|alter table "new" rename to "new-migration-temp"|],
+    [exon|create table "new" ("name" text not null, "status" text not null, "dogs" text[] not null)|]
+  ]
+
+test_migrationTransform :: TestT IO ()
+test_migrationTransform = do
+  (status, logs) <- runMockDb cols do
+    runMigrations (schemaNew ^. #pg) migrationsTransform
+  Match === status
+  targetLogsTransform === logs
+  where
+    cols =
+      [
+        ("new", [
+          ExistingColumn "name" "text" "" Nothing False,
+          ExistingColumn "status" "text" "" Nothing False,
+          ExistingColumn "cats" "ARRAY" "" (Just "text") False
+        ])
+      ]
+
+test_migrations :: TestTree
+test_migrations =
+  testGroup "migrations" [
+    unitTest "transform with absent table" test_migrationTransformAbsent,
+    unitTest "extraneous nullable columns" test_migrationExtraColumn,
+    unitTest "transform with present table" test_migrationTransform
+  ]

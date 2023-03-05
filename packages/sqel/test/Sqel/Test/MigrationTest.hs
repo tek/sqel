@@ -102,7 +102,7 @@ tableStmtsTarget =
     [exon|create table "dat" ("name" text not null)|]
   ]
 
-test_migration :: TestT IO ()
-test_migration = do
+test_migrationStatements :: TestT IO ()
+test_migrationStatements = do
   stmtsTarget === (migrationStatementSql <$> stmts)
   tableStmtsTarget === tableStmts

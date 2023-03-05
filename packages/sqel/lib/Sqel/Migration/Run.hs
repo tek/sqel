@@ -248,11 +248,11 @@ runMigrations ::
   All (CustomMigration m) migs =>
   PgTable a ->
   Migrations m migs ->
-  m ()
+  m TypeStatus
 runMigrations table (Migrations steps) = do
   MigrationEffect.log [exon|Checking migrations for '#{name}'|]
   initialStatus <- tableMatch Match table
   (status, _) <- runMigrationSteps initialStatus mempty table steps
-  conclusion table status
+  status <$ conclusion table status
   where
     PgOnlyTableName name = table ^. #name
