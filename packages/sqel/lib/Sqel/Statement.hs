@@ -134,11 +134,12 @@ dbColumns code =
   prepared code decoder encoder
   where
     decoder =
-      ExistingColumn <$> text' <*> text' <*> text' <*> Decoders.column (Decoders.nullable Decoders.text) <*> bool'
+      ExistingColumn <$> text' <*> text' <*> text' <*> Decoders.column (Decoders.nullable Decoders.text) <*> (yesOrNo <$> text')
     text' =
       Decoders.column (Decoders.nonNullable Decoders.text)
-    bool' =
-      Decoders.column (Decoders.nonNullable Decoders.bool)
+    yesOrNo = \case
+      "YES" -> True
+      _ -> False
     encoder =
       Encoders.param (Encoders.nonNullable Encoders.text)
 
