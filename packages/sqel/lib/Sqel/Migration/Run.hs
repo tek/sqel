@@ -53,8 +53,9 @@ typeMatchWith ::
   m TypeStatus
 typeMatchWith name (PgColumns cols) code = do
   dbCols <- typeColumns code name
-  logType name dbCols targetCols
-  pure (typeStatus dbCols targetCols)
+  let status = typeStatus dbCols targetCols
+  logType name status dbCols targetCols
+  pure status
   where
     targetCols = DbCols $ columnMap cols <&> \case
       ColumnPrim n Constraints {nullable} -> (Right n, nullable)

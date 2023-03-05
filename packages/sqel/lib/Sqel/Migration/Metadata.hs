@@ -114,15 +114,20 @@ checkMismatch (DbCols dbCols) (DbCols targetCols) =
 logType ::
   MigrationEffect m =>
   PgTypeName table ->
+  TypeStatus ->
   DbCols ->
   DbCols ->
   m ()
-logType name dbCols targetCols =
-  MigrationEffect.log message
+logType name status dbCols targetCols =
+  MigrationEffect.log (message status)
   where
-    message | null (unDbCols dbCols) = [exon|Skipping nonexistent #{k} '#{n}'|]
-            | onlyExtraneousNullable dbCols targetCols = [exon|DB #{k} '#{n}' matches|]
-            | otherwise = [exon|Trying migration for #{k} '#{n}' with:
+    message = \case
+      Absent ->
+        [exon|Skipping nonexistent #{k} '#{n}'|]
+      Match ->
+        [exon|DB #{k} '#{n}' matches|]
+      Mismatch _ ->
+        [exon|Trying migration for #{k} '#{n}' with:
 #{show (pretty (PrettyColMap targetCols))}
 for existing #{k} with
 #{show (pretty (PrettyColMap dbCols))}|]
