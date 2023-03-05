@@ -65,6 +65,7 @@ library
       Sqel.Migration.Consistency
       Sqel.Migration.Data.Ddl
       Sqel.Migration.Data.TypeStatus
+      Sqel.Migration.Dd
       Sqel.Migration.Ddl
       Sqel.Migration.Init
       Sqel.Migration.Metadata

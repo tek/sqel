@@ -3,15 +3,9 @@ module Sqel.Prim where
 import Data.Aeson (FromJSON, ToJSON)
 import Generics.SOP (I (I), NP (Nil, (:*)))
 
-import Sqel.Class.Mods (MapMod, SymNP, setMod, symMods)
+import Sqel.Class.Mods (SymNP, symMods)
 import Sqel.Column (nullable)
-import Sqel.Data.Dd (ConCol, Dd (Dd), DdK (DdK), DdStruct (DdPrim), DdType, Sqel', Struct (Prim))
-import Sqel.Data.MigrationParams (
-  MigrationDefault (MigrationDefault),
-  MigrationDelete (MigrationDelete),
-  MigrationRename (MigrationRename),
-  MigrationRenameType (MigrationRenameType),
-  )
+import Sqel.Data.Dd (ConCol, Dd (Dd), DdK (DdK), DdStruct (DdPrim), Sqel', Struct (Prim))
 import Sqel.Data.Mods (
   ArrayColumn (ArrayColumn),
   EnumColumn,
@@ -166,39 +160,6 @@ array ::
   Dd ('DdK sel (ArrayColumn f : mods) (f a) 'Prim)
 array (Dd sel (Mods ms) s) =
   Dd sel (Mods (I ArrayColumn :* ms)) s
-
-migrateDef ::
-  ∀ s0 s1 .
-  MapMod (MigrationDefault (DdType s0)) s0 s1 =>
-  DdType s0 ->
-  Dd s0 ->
-  Dd s1
-migrateDef a =
-  setMod (MigrationDefault a)
-
-migrateRename ::
-  ∀ name s0 s1 .
-  MapMod (MigrationRename name) s0 s1 =>
-  Dd s0 ->
-  Dd s1
-migrateRename =
-  setMod (MigrationRename @name)
-
-migrateRenameType ::
-  ∀ name s0 s1 .
-  MapMod (MigrationRenameType name) s0 s1 =>
-  Dd s0 ->
-  Dd s1
-migrateRenameType =
-  setMod (MigrationRenameType @name)
-
-migrateDelete ::
-  ∀ s0 s1 .
-  MapMod MigrationDelete s0 s1 =>
-  Dd s0 ->
-  Dd s1
-migrateDelete =
-  setMod MigrationDelete
 
 newtype Prims a s =
   Prims { unPrims :: NP Dd s }

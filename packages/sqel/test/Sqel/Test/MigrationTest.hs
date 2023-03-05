@@ -16,9 +16,10 @@ import Sqel.Migration.Consistency (tableStatements)
 import Sqel.Migration.Statement (MigrationStatement, migrationStatementSql, migrationStatements)
 import Sqel.Migration.Table (migrateAuto)
 import Sqel.Names (typeAs)
-import Sqel.Prim (migrateRename, prim, primIndex, primNullable, prims)
+import Sqel.Prim (prim, primIndex, primNullable, prims)
 import Sqel.Product (prod)
 import Sqel.Sum (con, indexPrefix, sum, sumWith)
+import Sqel.Migration.Dd (migrateRename)
 
 data Thing =
   Thing1 { x :: Int, y :: Int }

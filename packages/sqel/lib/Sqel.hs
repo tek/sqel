@@ -6,6 +6,7 @@ module Sqel (
   module Sqel.Prim,
   module Sqel.Product,
   module Sqel.Sum,
+  module Sqel.Migration.Dd,
   module Sqel.Comp,
   module Sqel.Data.Uid,
   module Sqel.Uid,
@@ -52,6 +53,7 @@ import Sqel.Data.Sel (Sel (..), TSel (..))
 import Sqel.Data.TableSchema (TableSchema)
 import Sqel.Data.Uid (Uid (Uid), Uuid)
 import Sqel.Merge (merge)
+import Sqel.Migration.Dd
 import Sqel.Migration.Table (migrateAuto)
 import Sqel.Names (named, typeAs)
 import Sqel.PgType (CheckedProjection, MkTableSchema (tableSchema), fullProjection, projection, toFullProjection)
@@ -63,10 +65,6 @@ import Sqel.Prim (
   enum,
   ignore,
   json,
-  migrateDef,
-  migrateDelete,
-  migrateRename,
-  migrateRenameType,
   mods,
   newtyped,
   prim,

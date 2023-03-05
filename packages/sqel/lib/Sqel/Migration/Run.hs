@@ -28,6 +28,7 @@ import Sqel.Data.PgType (
   PgColumns (PgColumns),
   PgComposite (PgComposite),
   PgTable (PgTable),
+  PgTypeRef (PgTypeRef),
   )
 import Sqel.Data.PgTypeName (
   PgCompName,
@@ -36,6 +37,7 @@ import Sqel.Data.PgTypeName (
   pattern PgTypeName,
   PgTypeName,
   getPgTypeName,
+  pgCompName,
   )
 import Sqel.Data.Sql (Sql)
 import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent, Match, Mismatch))
@@ -188,11 +190,11 @@ runMigrationSteps ::
   PgTable a ->
   NP Migration migs ->
   m (TypeStatus, Set PgCompName)
-runMigrationSteps initialStatus _ _ Nil =
-  pure (initialStatus, mempty)
-runMigrationSteps initialStatus laterMatches table ((Migration currentTable _ actions :: Migration mig) :* t) = do
+runMigrationSteps laterStatus _ _ Nil =
+  pure (laterStatus, mempty)
+runMigrationSteps laterStatus laterMatches table ((Migration currentTable _ actions :: Migration mig) :* t) = do
   -- types that are identical in the database and the current migration's from-table
-  (status, currentTypeMatches) <- matches initialStatus currentTable
+  (status, currentTypeMatches) <- matches laterStatus currentTable
   actionNamesAndAdditions <- typeKeys @mig @m actions
   let
     actionNames = Set.fromList (fst <$> Set.toList actionNamesAndAdditions)
@@ -200,8 +202,6 @@ runMigrationSteps initialStatus laterMatches table ((Migration currentTable _ ac
       Mismatch _ -> True
       _ -> False
     -- actions whose types match the database before any migrations are executed.
-    -- these cannot be additions, since they are absent from the database if they are applicable.
-    -- check whether additions need special treatment, i.e. execute if absent.
     directMatches = collectDirectMatches actionNamesAndAdditions currentTypeMatches
     -- actions whose types either match this migration's from-table or that of a later migration.
     allMatches = Set.union directMatches laterMatches
@@ -212,17 +212,27 @@ runMigrationSteps initialStatus laterMatches table ((Migration currentTable _ ac
     -- to later migrations.
     -- if the current migration's table doesn't match the existing table, we still have to run earlier migrations,
     -- but those don't have to run any type actions.
-    -- if the table is absent, earlier migrations don't have to be run, just like a match.
+    -- if the table is absent, earlier migrations don't have to be run, just like a match, but types are still eligible.
     if not mismatchHere && Set.isSubsetOf actionNames allMatches
     then pure (status, directMatches)
     else do
-      -- if the table matched in an earlier migration, it will match here as well since the earlier migration
+      -- if the table matched in an earlier migration, it will match here as well since the earlier migration was
       -- executed.
       -- same for types, so add earlier matches to the direct matches.
-      (earlierStatus, earlierMatches) <- runMigrationSteps status allMatches table t
-      pure (earlierStatus, Set.union earlierMatches directMatches)
+      (earlierStatus, earlierEligible) <- runMigrationSteps status allMatches table t
+      pure (earlierStatus, Set.union earlierEligible directMatches)
   runMigration @mig newStatus (table ^. #name) eligible actions
-  pure (newStatus, eligible)
+  let
+    -- If this migration or the earlier one mismatched but the later one matched, the new status for the later migration
+    -- should be Match.
+    updateStatus Absent = const Absent
+    updateStatus Match = const Match
+    updateStatus (Mismatch _) = id
+  pure (updateStatus laterStatus newStatus, eligible)
+
+tableTypes :: PgTable a -> Set PgCompName
+tableTypes table =
+  Set.fromList $ Map.keys table.types <&> \ (PgTypeRef n) -> pgCompName n
 
 conclusion ::
   Monad m =>
@@ -236,7 +246,11 @@ conclusion table = \case
     MigrationEffect.log [exon|Finished migrations for '#{name}' by creating the table|]
   s@(Mismatch _) ->
     MigrationEffect.error [exon|Failed to migrate the table #{name} due to #{show (pretty s)}|]
-  Match ->
+  Match -> do
+    (_, newTypes) <- matches Match table
+    let missing = getPgTypeName <$> Set.toList (Set.difference (tableTypes table) newTypes)
+    unless (null missing) do
+      MigrationEffect.error [exon|Migration of types failed for table '#{name}': #{Text.intercalate ", " missing}|]
     MigrationEffect.log [exon|Performed migrations for '#{name}' successfully|]
   where
     name = getPgTypeName table.name
@@ -251,8 +265,8 @@ runMigrations ::
   m TypeStatus
 runMigrations table (Migrations steps) = do
   MigrationEffect.log [exon|Checking migrations for '#{name}'|]
-  initialStatus <- tableMatch Match table
-  (status, _) <- runMigrationSteps initialStatus mempty table steps
+  (initialStatus, initialTypes) <- matches Match table
+  (status, _) <- runMigrationSteps initialStatus initialTypes table steps
   status <$ conclusion table status
   where
     PgOnlyTableName name = table ^. #name
