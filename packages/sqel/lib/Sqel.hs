@@ -28,7 +28,7 @@ module Sqel (
 ) where
 
 import Sqel.Class.MatchView (HasField, HasPath)
-import Sqel.Column (nullable, nullableAs, pgDefault, pk, tableName)
+import Sqel.Column (nullable, nullableAs, pgDefault, pk, tableName, unique)
 import Sqel.Comp (typePrefix)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (Dd (Dd), Sqel, Sqel', (:>) ((:>)))

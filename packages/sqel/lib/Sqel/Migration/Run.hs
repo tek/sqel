@@ -245,7 +245,7 @@ conclusion table = \case
     initTable table
     MigrationEffect.log [exon|Finished migrations for '#{name}' by creating the table|]
   s@(Mismatch _) ->
-    MigrationEffect.error [exon|Failed to migrate the table #{name} due to #{show (pretty s)}|]
+    MigrationEffect.error [exon|Failed to migrate the table '#{name}' due to #{show (pretty s)}|]
   Match -> do
     (_, newTypes) <- matches Match table
     let missing = getPgTypeName <$> Set.toList (Set.difference (tableTypes table) newTypes)

@@ -10,6 +10,7 @@ import Test (unitTest)
 import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Class.MatchView (HasPath)
+import Sqel.Column (nullable, pk, unique)
 import Sqel.Comp (Column, CompName (compName))
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (
@@ -29,6 +30,7 @@ import Sqel.Data.QuerySchema (QuerySchema)
 import Sqel.Data.Sel (MkTSel (mkTSel), Sel (SelAuto), SelW (SelWAuto))
 import Sqel.Data.Sql (Sql, sql, toSql)
 import Sqel.Data.SqlFragment (Create (Create), Select (Select))
+import qualified Sqel.Data.TableSchema as TableSchema
 import Sqel.Data.TableSchema (TableSchema)
 import Sqel.Data.Uid (Uid)
 import Sqel.Merge (merge)
@@ -40,12 +42,12 @@ import Sqel.Query.Combinators (order)
 import Sqel.ReifyCodec (ReifyCodec)
 import Sqel.ReifyDd (ReifyDd)
 import qualified Sqel.Sql.Select as Sql
+import Sqel.Statement (upsertSql)
 import Sqel.Sum (ConColumn (con), con1, sum)
 import Sqel.Test.Bug ()
 import qualified Sqel.Type as T
 import Sqel.Type (Prim, PrimNewtype, Prod, ProdPrimsNewtype, TypeSel, type (*>), type (>))
 import Sqel.Uid (UidDd, uid)
-import Sqel.Column (nullable)
 
 newtype IntNt =
   IntNt { unIntNt :: Int }
@@ -319,6 +321,21 @@ test_statement_newtypeArray :: TestT IO ()
 test_statement_newtypeArray =
   [sql|select "nums" from "nt_array"|] === statement_newtypeArray
 
+data Ups =
+  Ups {
+    uni :: Text,
+    equi :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+schema_Ups :: TableSchema (Uid Int Ups)
+schema_Ups =
+  tableSchema (uid (pk prim) (prod (unique prim :> prim)))
+
+test_statement_upsert :: TestT IO ()
+test_statement_upsert =
+  [sql|insert into "ups" ("id", "uni", "equi") values ($1, $2, $3) on conflict ("id", "uni") do update set "id" = $1, "uni" = $2, "equi" = $3|] === (upsertSql schema_Ups.pg)
+
 test_statement :: TestTree
 test_statement =
   testGroup "statement" [
@@ -329,5 +346,6 @@ test_statement =
     unitTest "higher-order double merge query" test_statement_merge_query_higherOrder,
     unitTest "higher-order with new product class" test_higherOrder2,
     unitTest "unary con with record and positional fields" test_statement_con1,
-    unitTest "newtype array" test_statement_newtypeArray
+    unitTest "newtype array" test_statement_newtypeArray,
+    unitTest "upsert" test_statement_upsert
   ]

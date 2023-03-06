@@ -2,7 +2,13 @@ module Sqel.Column where
 
 import Sqel.Class.Mods (AddMod (addMod), MapMod, amendMod)
 import Sqel.Data.Dd (Dd (Dd), DdK (DdK), Struct (Prim))
-import Sqel.Data.Mods (Nullable (Nullable), PgDefault (PgDefault), PrimaryKey (PrimaryKey), SetTableName (SetTableName))
+import Sqel.Data.Mods (
+  Nullable (Nullable),
+  PgDefault (PgDefault),
+  PrimaryKey (PrimaryKey),
+  SetTableName (SetTableName),
+  Unique (Unique),
+  )
 import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Sql (Sql)
 import Sqel.Names.Rename (Rename, rename)
@@ -14,6 +20,13 @@ pk ::
   Dd s1
 pk =
   addMod PrimaryKey
+
+unique ::
+  AddMod Unique s0 s1 =>
+  Dd s0 ->
+  Dd s1
+unique =
+  addMod Unique
 
 class MkNullable s0 s1 | s0 -> s1 where
   mkNullable :: Dd s0 -> Dd s1
