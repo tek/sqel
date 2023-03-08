@@ -1,10 +1,10 @@
 {
-  description = "Polysemy effects for databases";
+  description = "Guided derivation for Hasql statements";
 
   inputs = {
-    hix.url = git+https://git.tryp.io/tek/hix;
+    hix.url = "git+https://git.tryp.io/tek/hix";
     hls.url = "github:haskell/haskell-language-server?ref=1.9.0.0";
-    exon.url = git+https://git.tryp.io/tek/exon;
+    exon.url = "git+https://git.tryp.io/tek/exon";
   };
 
   outputs = { hix, hls, exon, ... }:

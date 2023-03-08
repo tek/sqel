@@ -34,7 +34,7 @@ type family PathConstraint (path :: [Symbol]) :: ErrorMessage where
 type family AvailStuckMsg (viewType :: Symbol) (table :: DdK) (field :: FieldPath) :: ErrorMessage where
   AvailStuckMsg viewType table ('FieldPath path tpe) =
     UnknownMsg viewType ('FieldPath path tpe) %
-    "This is likely due to the structure type " <> QuotedType table <> " being polymorphic." %
+    "This is likely due to the structure type " <> QuotedType table <> " being polymorphic or not in scope." %
     "Try adding the constraint:" %
     "  " <> QuotedError (PathConstraint path <> " " <> tpe <> " " <> table)
 

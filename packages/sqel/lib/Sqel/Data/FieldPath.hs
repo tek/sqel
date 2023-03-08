@@ -1,11 +1,11 @@
 module Sqel.Data.FieldPath where
 
-import Sqel.Kind (type (++))
-import Sqel.SOP.Error (JoinSep, QuotedType, Unlines)
 import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (Comp (Sum), CompInc (Merge), Dd, DdK (DdK), Struct (Comp, Prim))
 import Sqel.Data.Sel (Sel (SelAuto, SelIndex, SelPath, SelSymbol, SelUnused))
+import Sqel.Kind (type (++))
+import Sqel.SOP.Error (JoinSep, QuotedType, Unlines)
 
 data FieldPath =
   FieldPath {
@@ -45,6 +45,7 @@ type family FieldPathsProd prefix s where
 type FieldPaths :: DdK -> [FieldPath]
 type family FieldPaths s where
   FieldPaths ('DdK ('SelSymbol name) _ t 'Prim) = '[ 'FieldPath '[name] t]
+  FieldPaths ('DdK ('SelSymbol name) _ _ ('Comp _ _ _ sub)) = FieldPathsProd '[name] sub
   FieldPaths ('DdK _ _ _ ('Comp _ _ _ sub)) = FieldPathsProd '[] sub
   FieldPaths s = TypeError ("FieldPaths: " <> s)
 
@@ -55,7 +56,7 @@ type family PathEq (f1 :: FieldPath) (f2 :: FieldPath) :: Bool where
   PathEq _ _ = 'False
 
 type family ShowField (field :: FieldPath) :: ErrorMessage where
-  ShowField ('FieldPath path tpe) = "  " <> JoinSep "." path <> " [" <> tpe <> "]"
+  ShowField ('FieldPath path tpe) = "  " <> JoinSep "." path <> ": " <> QuotedType tpe
 
 type family ShowFields (fields :: [FieldPath]) :: [ErrorMessage] where
   ShowFields '[] = '[]

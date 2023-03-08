@@ -37,10 +37,10 @@ queryColumnMismatchMessage =
     [
       "\8226 The query column \8216pog.p1\8217 with type \8216Int\8217 does not correspond to a table column.",
         "The specified table contains these fields:",
-        "name [Text]",
-        "po.p1 [Int]",
-        "po.p2 [Text]",
-        "id [Int64]"
+        "name: \8216Text\8217",
+        "po.p1: \8216Int\8217",
+        "po.p2: \8216Text\8217",
+        "id: \8216Int64\8217"
     ]
 
 prodTooFewMessage :: [Text]

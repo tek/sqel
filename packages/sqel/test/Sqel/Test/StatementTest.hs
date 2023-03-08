@@ -26,6 +26,7 @@ import Sqel.Data.Dd (
   )
 import Sqel.Data.Mods (pattern NoMods)
 import Sqel.Data.Order (Order (Desc))
+import qualified Sqel.Data.QuerySchema as QuerySchema
 import Sqel.Data.QuerySchema (QuerySchema)
 import Sqel.Data.Sel (MkTSel (mkTSel), Sel (SelAuto), SelW (SelWAuto))
 import Sqel.Data.Sql (Sql, sql, toSql)
@@ -34,6 +35,7 @@ import qualified Sqel.Data.TableSchema as TableSchema
 import Sqel.Data.TableSchema (TableSchema)
 import Sqel.Data.Uid (Uid)
 import Sqel.Merge (merge)
+import Sqel.Names (named)
 import Sqel.PgType (MkTableSchema, tableSchema)
 import Sqel.Prim (array, newtypeWrap, prim, primAs, primNewtypes, prims)
 import Sqel.Product (prod, prodSel)
@@ -334,7 +336,52 @@ schema_Ups =
 
 test_statement_upsert :: TestT IO ()
 test_statement_upsert =
-  [sql|insert into "ups" ("id", "uni", "equi") values ($1, $2, $3) on conflict ("id", "uni") do update set "id" = $1, "uni" = $2, "equi" = $3|] === (upsertSql schema_Ups.pg)
+  [sql|
+  insert into "ups" ("id", "uni", "equi")
+  values ($1, $2, $3) on conflict ("id", "uni")
+  do update set "id" = $1, "uni" = $2, "equi" = $3|] === upsertSql schema_Ups.pg
+data Nc1 =
+  Nc1 {
+    name :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+data Nc =
+  Nc {
+    nc1 :: Nc1,
+    cat :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+data Qn =
+  Qn {
+    name :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+dd_Nc :: Sqel Nc _
+dd_Nc =
+  prod (prod prim :> prim)
+
+dd_Qn :: Sqel Qn _
+dd_Qn =
+  named @"nc1" (prod prim)
+
+query_namedComp :: QuerySchema Qn Nc
+query_namedComp =
+  checkQuery dd_Qn dd_Nc
+
+schema_namedComp :: TableSchema Nc
+schema_namedComp =
+  tableSchema dd_Nc
+
+stmt_namedCompQuery :: Sql
+stmt_namedCompQuery =
+  Sql.selectWhere query_namedComp schema_namedComp
+
+test_namedCompQuery :: TestT IO ()
+test_namedCompQuery =
+  [sql|select ("nc1").name, "cat" from "nc" where (("nc1")."name" = $1)|] === stmt_namedCompQuery
 
 test_statement :: TestTree
 test_statement =
@@ -347,5 +394,6 @@ test_statement =
     unitTest "higher-order with new product class" test_higherOrder2,
     unitTest "unary con with record and positional fields" test_statement_con1,
     unitTest "newtype array" test_statement_newtypeArray,
-    unitTest "upsert" test_statement_upsert
+    unitTest "upsert" test_statement_upsert,
+    unitTest "composite query with named root" test_namedCompQuery
   ]
