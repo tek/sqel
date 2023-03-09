@@ -338,8 +338,31 @@ test_statement_upsert :: TestT IO ()
 test_statement_upsert =
   [sql|
   insert into "ups" ("id", "uni", "equi")
-  values ($1, $2, $3) on conflict ("id", "uni")
+  values ($1, $2, $3)
+  on conflict ("id", "uni")
   do update set "id" = $1, "uni" = $2, "equi" = $3|] === upsertSql schema_Ups.pg
+
+data SumKey =
+  SK1 { sk1 :: Int }
+  |
+  SK2 { sk2 :: Int }
+  deriving stock (Eq, Show, Generic)
+
+dd_SumKey :: Sqel SumKey _
+dd_SumKey =
+  sum (con1 prim :> con1 prim)
+
+schema_Ups_sumKey :: TableSchema (Uid SumKey Ups)
+schema_Ups_sumKey =
+  tableSchema (uid (pk dd_SumKey) (prod (prim :> prim)))
+
+test_statement_upsert_sumKey :: TestT IO ()
+test_statement_upsert_sumKey =
+  [sql|
+  insert into "ups" ("id", "uni", "equi")
+  values (row($1, $2, $3), $4, $5)
+  on conflict ("id")
+  do update set "id" = row($1, $2, $3), "uni" = $4, "equi" = $5|] === upsertSql schema_Ups_sumKey.pg
 data Nc1 =
   Nc1 {
     name :: Text
@@ -395,5 +418,6 @@ test_statement =
     unitTest "unary con with record and positional fields" test_statement_con1,
     unitTest "newtype array" test_statement_newtypeArray,
     unitTest "upsert" test_statement_upsert,
+    unitTest "upsert with sum key" test_statement_upsert_sumKey,
     unitTest "composite query with named root" test_namedCompQuery
   ]

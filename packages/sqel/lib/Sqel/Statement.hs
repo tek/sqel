@@ -13,7 +13,7 @@ import Sqel.Data.Codec (Encoder (Encoder))
 import Sqel.Data.ExistingColumn (ExistingColumn (ExistingColumn))
 import qualified Sqel.Data.PgType as PgTable
 import Sqel.Data.PgType (
-  ColumnType (ColumnPrim),
+  ColumnType (ColumnPrim, ColumnComp),
   PgColumn (PgColumn),
   PgColumnName (PgColumnName),
   PgColumns (PgColumns),
@@ -95,6 +95,8 @@ insert (TableSchema col _ params) =
 uniqueColumn :: PgColumn -> Maybe Selector
 uniqueColumn = \case
   PgColumn (PgColumnName name) (ColumnPrim _ Constraints {unique = True}) ->
+    Just (Selector (Sql (dquote name)))
+  PgColumn (PgColumnName name) (ColumnComp _ Constraints {unique = True}) ->
     Just (Selector (Sql (dquote name)))
   _ ->
     Nothing
