@@ -26,7 +26,7 @@ instance All Show ps => Pretty (Mods ps) where
   pretty (Mods ps) =
     hsep (hcollapse (hcmap (Proxy @Show) (K . viaShow) ps))
 
-data Nullable = Nullable
+data Nullable = Nullable { guardQuery :: Bool }
   deriving stock (Show)
 
 data Unique = Unique

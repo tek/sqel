@@ -14,7 +14,7 @@ import Sqel.Data.Dd (
   Struct (Comp, Prim),
   )
 import Sqel.Data.FragType (FragType (Where))
-import Sqel.Data.Mods (Ignore (Ignore), Mods (Mods), Nullable (Nullable), Newtype)
+import Sqel.Data.Mods (Ignore (Ignore), Mods (Mods), Newtype, Nullable (Nullable))
 import Sqel.Data.Sel (Sel (SelSymbol, SelUnused), SelW (SelWAuto, SelWSymbol))
 import Sqel.Data.SelectExpr (
   SelectAtom (SelectAtom),
@@ -67,9 +67,9 @@ instance PrimSelectExpr (Ignore : mods) where
 instance (
     PrimSelectExpr mods
   ) => PrimSelectExpr (Nullable : mods) where
-    primSelectExpr selector prev (Mods (I Nullable :* mods)) =
+    primSelectExpr selector prev (Mods (I (Nullable grd) :* mods)) =
       case primSelectExpr selector prev (Mods mods) of
-        SelectExprAtom type_ code ->
+        SelectExprAtom type_ code | grd ->
           SelectExprAtom type_ \ i -> [sql|(#{dollar i} is null or #{code i})|]
         expr -> expr
 

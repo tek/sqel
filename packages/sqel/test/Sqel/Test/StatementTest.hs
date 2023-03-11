@@ -13,7 +13,7 @@ import Sqel.Test.Statement.MergeProdTest (test_statement_merge_prod)
 import Sqel.Test.Statement.MergeSumTest (test_statement_merge_sum)
 import Sqel.Test.Statement.NamedCompQuery (test_namedCompQuery)
 import Sqel.Test.Statement.NewtypeArrayTest (test_statement_newtypeArray)
-import Sqel.Test.Statement.NullableQueryTest (test_statement_nullableQuery)
+import Sqel.Test.Statement.NullableQueryTest (test_statement_nullableQuery, test_statement_orNullQuery)
 import Sqel.Test.Statement.OrderTest (test_statement_order)
 import Sqel.Test.Statement.UpsertTest (test_statement_upsert, test_statement_upsert_sumKey)
 
@@ -31,7 +31,8 @@ test_statement =
     unitTest "upsert" test_statement_upsert,
     unitTest "upsert with sum key" test_statement_upsert_sumKey,
     unitTest "composite query with named root" test_namedCompQuery,
-    unitTest "query with nullable field" test_statement_nullableQuery
+    unitTest "query with nullable field" test_statement_nullableQuery,
+    unitTest "query with unguarded nullable field" test_statement_orNullQuery
     -- ,
     -- unitTest "join" test_statement_updateFrom
   ]

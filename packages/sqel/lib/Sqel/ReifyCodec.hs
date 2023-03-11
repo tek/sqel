@@ -131,7 +131,7 @@ instance ReifyPrimCodec FullCodec (PrimValueCodec a : ps) a where
 instance (
     ReifyPrimCodec ValueCodec ps a
   ) => ReifyPrimCodec FullCodec (Nullable : ps) (Maybe a) where
-    reifyPrimCodec (I Nullable :* ps) =
+    reifyPrimCodec (I (Nullable _) :* ps) =
       Codec {
         encoder = Encoder (columnEncoderNullable encoder) (ignoreEncoder encoder),
         decoder = Decoder (columnDecoderNullable decoder) (void ignoreDecoder)
@@ -150,7 +150,7 @@ instance ReifyPrimCodec Encoder (PrimValueEncoder a : ps) a where
 instance (
     ReifyPrimCodec Encoders.Value ps a
   ) => ReifyPrimCodec Encoder (Nullable : ps) (Maybe a) where
-    reifyPrimCodec (I Nullable :* ps) =
+    reifyPrimCodec (I (Nullable _) :* ps) =
       Encoder (columnEncoderNullable encoder) (ignoreEncoder encoder)
       where
         encoder = reifyPrimCodec @Encoders.Value ps

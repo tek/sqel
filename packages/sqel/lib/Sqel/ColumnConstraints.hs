@@ -41,7 +41,7 @@ instance {-# overlappable #-} ColumnConstraint mod where
   columnConstraint _ = id
 
 instance ColumnConstraint Nullable where
-  columnConstraint Nullable =
+  columnConstraint (Nullable _) =
     #nullable .~ True
 
 instance ColumnConstraint PrimaryKey where

@@ -36,7 +36,7 @@ instance (
 instance (
     ReifyPrimName a mods
   ) => ReifyPrimName (Maybe a) (Nullable : mods) where
-    reifyPrimName (I Nullable :* mods) = reifyPrimName @a mods
+    reifyPrimName (I (Nullable _) :* mods) = reifyPrimName @a mods
 
 instance (
     ReifyPrimName a mods

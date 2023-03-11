@@ -42,7 +42,17 @@ nullable ::
   Dd s2
 nullable =
   mkNullable .
-  addMod Nullable
+  addMod (Nullable True)
+
+orNull ::
+  ∀ s0 s1 s2 .
+  AddMod Nullable s0 s1 =>
+  MkNullable s1 s2 =>
+  Dd s0 ->
+  Dd s2
+orNull =
+  mkNullable .
+  addMod (Nullable False)
 
 nullableAs ::
   ∀ name s0 s1 s2 .

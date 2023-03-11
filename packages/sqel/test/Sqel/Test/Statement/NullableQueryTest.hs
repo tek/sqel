@@ -2,7 +2,7 @@ module Sqel.Test.Statement.NullableQueryTest where
 
 import Hedgehog (TestT, (===))
 
-import Sqel.Column (nullable)
+import Sqel.Column (nullable, orNull)
 import Sqel.Data.Dd (Sqel, type (:>) ((:>)))
 import Sqel.Data.QuerySchema (QuerySchema)
 import Sqel.Data.Sql (Sql, sql)
@@ -37,15 +37,28 @@ data Q =
   }
   deriving stock (Eq, Show, Generic)
 
-target_order :: Sql
-target_order =
+target_nullable :: Sql
+target_nullable =
   [sql|select "num", "name" from "dat" where (($1 is null or "num" >= $1) and ($2 is null or "name" = $2))|]
 
 test_statement_nullableQuery :: TestT IO ()
 test_statement_nullableQuery =
-  target_order === Sql.selectWhere qs ts
+  target_nullable === Sql.selectWhere qs ts
   where
     ts :: TableSchema Dat
     ts = tableSchema dd_Dat
     qs :: QuerySchema Q Dat
     qs = checkQuery (prod (nullable (greaterEq primNewtype) :> nullable prim)) dd_Dat
+
+target_orNull :: Sql
+target_orNull =
+  [sql|select "num", "name" from "dat" where ("num" >= $1 and "name" = $2)|]
+
+test_statement_orNullQuery :: TestT IO ()
+test_statement_orNullQuery =
+  target_orNull === Sql.selectWhere qs ts
+  where
+    ts :: TableSchema Dat
+    ts = tableSchema dd_Dat
+    qs :: QuerySchema Q Dat
+    qs = checkQuery (prod (orNull (greaterEq primNewtype) :> orNull prim)) dd_Dat
