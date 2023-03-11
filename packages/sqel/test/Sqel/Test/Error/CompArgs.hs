@@ -1,4 +1,4 @@
-{-# options_ghc -Wno-partial-type-signatures -fdefer-type-errors -Wno-deferred-type-errors #-}
+{-# options_ghc -fdefer-type-errors -Wno-deferred-type-errors #-}
 
 module Sqel.Test.Error.CompArgs where
 

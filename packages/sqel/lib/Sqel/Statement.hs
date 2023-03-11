@@ -28,7 +28,7 @@ import Sqel.Data.SqlFragment (
   Delete (Delete),
   Insert (Insert),
   Returning (Returning),
-  Update (Update),
+  UpdateSet (UpdateSet),
   )
 import Sqel.Data.TableSchema (TableSchema (TableSchema))
 import Sqel.ResultShape (ResultShape (resultShape))
@@ -113,7 +113,7 @@ conflictFragment table@PgTable {columns = PgColumns columns} =
     format Nothing =
       ""
     format (Just cols) =
-      [sql|on conflict (##{CommaSep (toList cols)}) do ##{Update table}|]
+      [sql|on conflict (##{CommaSep (toList cols)}) do ##{UpdateSet table}|]
     uniques =
       nonEmpty [n | UniqueName (Selector n) <- columns]
 

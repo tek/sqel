@@ -20,6 +20,7 @@ import Sqel.Data.SqlFragment (
   Returning (Returning),
   Select (Select),
   Update (Update),
+  UpdateSet (UpdateSet),
   )
 import Sqel.SOP.Constraint (symbolText)
 import Sqel.Text.DbIdentifier (dbIdentifierT, dbSymbol)
@@ -211,7 +212,11 @@ instance ToSql (Select (PgTable a)) where
     [sql|##{Select selectors} ##{From name}|]
 
 instance ToSql (Update (PgTable a)) where
-  toSql (Update PgTable {columns = PgColumns columns, values = TableValues values}) =
+  toSql (Update PgTable {name}) =
+    [sql|update ##{name}|]
+
+instance ToSql (UpdateSet (PgTable a)) where
+  toSql (UpdateSet PgTable {columns = PgColumns columns, values = TableValues values}) =
     [sql|update set ##{CommaSep assigns}|]
     where
       assigns = zipWith assign colNames values

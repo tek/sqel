@@ -1,5 +1,3 @@
-{-# options_ghc -Wno-partial-type-signatures #-}
-
 module Sqel.Test.MigrationRunTest where
 
 import Control.Monad.Trans.Class (MonadTrans, lift)

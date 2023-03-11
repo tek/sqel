@@ -2,7 +2,7 @@ module Sqel.Query.Combinators where
 
 import Sqel.Class.Mods (MapMod, setMod)
 import Sqel.Data.Dd (Dd (Dd), DdK (DdK), Struct (Prim))
-import Sqel.Data.FragType (FragType (Limit, Offset, Order, Where))
+import Sqel.Data.FragType (FragType (Custom, Limit, Offset, Order, Where))
 import Sqel.Data.Order (Order)
 import Sqel.Data.Sel (Sel (SelAuto, SelUnused), mkSel)
 import Sqel.Data.SelectExpr (SelectAtom (SelectAtom))
@@ -93,3 +93,10 @@ order ::
   Dd ('DdK 'SelAuto '[SelectAtom] a 'Prim)
 order dir =
   primMod (SelectAtom (Order dir) (\ (Selector sel) _ -> sel))
+
+set ::
+  MapMod SelectAtom s0 s1 =>
+  Dd s0 ->
+  Dd s1
+set =
+  setMod (SelectAtom (Custom 1 "set") (\ sel i -> [sql|##{sel} = #{dollar i}|]))

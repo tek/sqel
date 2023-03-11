@@ -22,7 +22,7 @@
     devGhc.compiler = "ghc925";
     inherit overrides;
     ghci = {
-      args = ["-fprint-potential-instances"];
+      args = ["-fprint-potential-instances" "-Wno-partial-type-signatures"];
       preludePackage = "incipit-base";
       preludeModule = "IncipitBase";
       extensions = ["StandaloneKindSignatures" "OverloadedRecordDot"];

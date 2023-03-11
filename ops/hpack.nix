@@ -46,6 +46,7 @@ let
     "-Wmissing-deriving-strategies"
     "-Widentities"
     "-Wunused-packages"
+    "-Wno-partial-type-signatures"
   ];
 
   dependencies = [

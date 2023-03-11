@@ -1,8 +1,7 @@
 module Sqel.Query.SelectExpr where
 
-import Generics.SOP (All, K (K), NP ((:*)), hcmap, hcollapse)
+import Generics.SOP (All, I (I), K (K), NP (Nil, (:*)), hcmap, hcollapse)
 
-import Sqel.Class.Mods (GetMod (getMod), MaybeMod (maybeMod))
 import Sqel.Data.Dd (
   Comp (Prod, Sum),
   CompInc (Merge, Nest),
@@ -15,8 +14,8 @@ import Sqel.Data.Dd (
   Struct (Comp, Prim),
   )
 import Sqel.Data.FragType (FragType (Where))
-import Sqel.Data.Mods (Ignore (Ignore))
-import Sqel.Data.Sel (Sel (SelSymbol, SelUnused), SelW (SelWAuto))
+import Sqel.Data.Mods (Ignore (Ignore), Mods (Mods), Nullable (Nullable), Newtype)
+import Sqel.Data.Sel (Sel (SelSymbol, SelUnused), SelW (SelWAuto, SelWSymbol))
 import Sqel.Data.SelectExpr (
   SelectAtom (SelectAtom),
   SelectExpr (SelectExprAtom, SelectExprIgnore, SelectExprList, SelectExprSum),
@@ -35,29 +34,67 @@ guardSum = \case
   SelectExprList op sub -> SelectExprList op (guardSum <$> sub)
   expr -> expr
 
+skipPrimMod ::
+  PrimSelectExpr mods =>
+  Maybe Selector ->
+  Maybe SelectAtom ->
+  Mods (mod : mods) ->
+  SelectExpr
+skipPrimMod selector prev (Mods (_ :* mods)) =
+  primSelectExpr selector prev (Mods mods)
+
+type PrimSelectExpr :: [Type] -> Constraint
+class PrimSelectExpr mods where
+  primSelectExpr :: Maybe Selector -> Maybe SelectAtom -> Mods mods -> SelectExpr
+
+instance PrimSelectExpr '[] where
+  primSelectExpr selector prev (Mods Nil) =
+    SelectExprAtom type_ (code (fold selector))
+    where
+      SelectAtom type_ code =
+        fromMaybe whereEq prev
+
+instance (
+    PrimSelectExpr mods
+  ) => PrimSelectExpr (SelectAtom : mods) where
+    primSelectExpr selector _ (Mods (I atom :* mods)) =
+      primSelectExpr selector (Just atom) (Mods mods)
+
+instance PrimSelectExpr (Ignore : mods) where
+    primSelectExpr _ _ (Mods (I Ignore :* _)) =
+      SelectExprIgnore
+
+instance (
+    PrimSelectExpr mods
+  ) => PrimSelectExpr (Nullable : mods) where
+    primSelectExpr selector prev (Mods (I Nullable :* mods)) =
+      case primSelectExpr selector prev (Mods mods) of
+        SelectExprAtom type_ code ->
+          SelectExprAtom type_ \ i -> [sql|(#{dollar i} is null or #{code i})|]
+        expr -> expr
+
+instance (
+    PrimSelectExpr mods
+  ) => PrimSelectExpr (Newtype a w : mods) where
+    primSelectExpr = skipPrimMod
+
+type ToSelectExpr :: DdK -> Constraint
 class ToSelectExpr query where
   toSelectExpr :: ColumnPrefix -> Dd query -> SelectExpr
 
--- TODO this creates an invalid fragment, but it seems not to be used
 instance (
-    GetMod () SelectAtom ps,
-    MaybeMod Ignore ps
-  ) => ToSelectExpr ('DdK 'SelUnused ps q 'Prim) where
-  toSelectExpr _ (Dd _ p DdPrim) =
-    case maybeMod p of
-      Just Ignore -> SelectExprIgnore
-      Nothing -> SelectExprAtom type_ (code "")
-    where
-      SelectAtom type_ code = getMod @() whereEq p
+    PrimSelectExpr mods
+  ) => ToSelectExpr ('DdK ('SelSymbol n) mods q 'Prim) where
+    toSelectExpr pre (Dd (SelWSymbol Proxy) mods DdPrim) =
+      primSelectExpr (Just selector) Nothing mods
+      where
+        selector = Selector (Sql (prefixed (dbSymbol @n) pre))
 
 instance (
-    KnownSymbol n,
-    GetMod () SelectAtom ps
-  ) => ToSelectExpr ('DdK ('SelSymbol n) ps q 'Prim) where
-  toSelectExpr pre (Dd _ p DdPrim) =
-    SelectExprAtom type_ (code (Selector (Sql (prefixed (dbSymbol @n) pre))))
-    where
-      SelectAtom type_ code = getMod @() whereEq p
+    PrimSelectExpr mods
+  ) => ToSelectExpr ('DdK 'SelUnused mods q 'Prim) where
+    toSelectExpr _ (Dd _ mods DdPrim) =
+      primSelectExpr Nothing Nothing mods
 
 prodSelectExpr ::
   ∀ sel s .
@@ -86,14 +123,14 @@ sumSelectExpr sel pre =
 instance (
     All ToSelectExpr sub,
     QFragmentPrefix sel
-  ) => ToSelectExpr ('DdK sel p q ('Comp tsel ('Prod con) 'Nest sub)) where
+  ) => ToSelectExpr ('DdK sel mods q ('Comp tsel ('Prod con) 'Nest sub)) where
   toSelectExpr pre = \case
     Dd sel _ (DdComp _ _ DdNest sub) ->
       prodSelectExpr sel pre QAnd sub
 
 instance (
     All ToSelectExpr sub
-  ) => ToSelectExpr ('DdK sel p q ('Comp tsel ('Prod con) 'Merge sub)) where
+  ) => ToSelectExpr ('DdK sel mods q ('Comp tsel ('Prod con) 'Merge sub)) where
   toSelectExpr pre = \case
     Dd _ _ (DdComp _ _ DdMerge sub) ->
       prodSelectExpr SelWAuto pre QAnd sub
@@ -101,7 +138,7 @@ instance (
 instance (
     All ToSelectExpr sub,
     QFragmentPrefix sel
-  ) => ToSelectExpr ('DdK sel p q ('Comp tsel 'Sum 'Nest (IndexColumn name : sub))) where
+  ) => ToSelectExpr ('DdK sel mods q ('Comp tsel 'Sum 'Nest (IndexColumn name : sub))) where
   toSelectExpr pre = \case
     Dd sel _ (DdComp _ DdSum DdNest (_ :* sub)) ->
       guardSum (sumSelectExpr sel pre sub)

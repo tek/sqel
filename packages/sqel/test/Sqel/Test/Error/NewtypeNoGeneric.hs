@@ -1,4 +1,4 @@
-{-# options_ghc -fdefer-type-errors -Wno-deferred-type-errors -Wno-partial-type-signatures #-}
+{-# options_ghc -fdefer-type-errors -Wno-deferred-type-errors #-}
 
 module Sqel.Test.Error.NewtypeNoGeneric where
 

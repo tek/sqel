@@ -44,6 +44,14 @@ newtype Update a =
   Update { unUpdate :: a }
   deriving stock (Eq, Show, Generic)
 
+newtype Set a =
+  Set { unSet :: a }
+  deriving stock (Eq, Show, Generic)
+
+newtype UpdateSet a =
+  UpdateSet { unUpdateSet :: a }
+  deriving stock (Eq, Show, Generic)
+
 newtype Create a =
   Create { unSelect :: a }
   deriving stock (Eq, Show, Generic)

@@ -7,12 +7,14 @@ import Sqel.Test.MigrationTest (test_migrationStatements)
 import Sqel.Test.QueryProjectionTest (test_queryProjection)
 import Sqel.Test.SqlCodeTest (test_sqlCodeNoInterpolation)
 import Sqel.Test.StatementTest (test_statement)
+import Sqel.Test.TypeTest (test_prodGen)
 import Test (unitTest)
 import Test.Tasty (TestTree, defaultMain, testGroup)
 
 tests :: TestTree
 tests =
   testGroup "all" [
+    unitTest "generic newtype product kind" test_prodGen,
     unitTest "migration statements" test_migrationStatements,
     test_migrations,
     test_errors,

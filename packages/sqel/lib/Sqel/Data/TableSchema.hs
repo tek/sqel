@@ -7,7 +7,7 @@ import Lens.Micro ((^.))
 
 import Sqel.Data.PgType (PgTable)
 import Sqel.Data.Sql (ToSql (toSql))
-import Sqel.Data.SqlFragment (Create (Create), Select (Select))
+import Sqel.Data.SqlFragment (Create (Create), Select (Select), Update (Update))
 
 data TableSchema a =
   TableSchema {
@@ -28,3 +28,7 @@ instance ToSql (Select (TableSchema a)) where
 instance ToSql (Create (TableSchema a)) where
   toSql (Create ts) =
     toSql (Create (ts ^. #pg))
+
+instance ToSql (Update (TableSchema a)) where
+  toSql (Update ts) =
+    toSql (Update (ts ^. #pg))

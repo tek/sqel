@@ -101,8 +101,10 @@ instance CMapMod' c p0 p1 p1 '[] '[p0] where
   cmapMod' p _ (Mods Nil) =
     Mods (I p :* Nil)
 
+-- | Get the first mod of type @p@ with a fallback using the constraint @c@.
 type GetMod :: Constraint -> Type -> [Type] -> Constraint
 class GetMod c p ps where
+  -- | Get the first mod of type @p@, using the first argument if none is present.
   getMod :: (c => p) -> Mods ps -> p
 
 instance c => GetMod c p '[] where

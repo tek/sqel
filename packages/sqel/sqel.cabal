@@ -172,7 +172,7 @@ library
       UndecidableInstances
       UnicodeSyntax
       ViewPatterns
-  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages
+  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages -Wno-partial-type-signatures
   build-depends:
       aeson ==2.0.*
     , base >=4.12 && <5
@@ -212,7 +212,6 @@ test-suite sqel-unit
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Sqel.Test.Bug
       Sqel.Test.Error.CantInferCheckQuery
       Sqel.Test.Error.CompArgs
       Sqel.Test.Error.HigherOrderColumn
@@ -226,7 +225,19 @@ test-suite sqel-unit
       Sqel.Test.MigrationTest
       Sqel.Test.QueryProjectionTest
       Sqel.Test.SqlCodeTest
+      Sqel.Test.Statement.Common
+      Sqel.Test.Statement.Con1Test
+      Sqel.Test.Statement.HigherOrderTest
+      Sqel.Test.Statement.MergeProdTest
+      Sqel.Test.Statement.MergeSumTest
+      Sqel.Test.Statement.MultiTest
+      Sqel.Test.Statement.NamedCompQuery
+      Sqel.Test.Statement.NewtypeArrayTest
+      Sqel.Test.Statement.NullableQueryTest
+      Sqel.Test.Statement.OrderTest
+      Sqel.Test.Statement.UpsertTest
       Sqel.Test.StatementTest
+      Sqel.Test.TypeTest
       Test
   hs-source-dirs:
       test
@@ -294,7 +305,7 @@ test-suite sqel-unit
       UndecidableInstances
       UnicodeSyntax
       ViewPatterns
-  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages -Wno-partial-type-signatures -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.12 && <5
     , exon ==1.4.*
