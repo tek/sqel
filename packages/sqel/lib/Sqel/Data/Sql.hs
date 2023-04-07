@@ -15,6 +15,7 @@ import Exon (
   )
 import Language.Haskell.TH.Quote (QuasiQuoter)
 import Prettyprinter (Pretty (pretty))
+
 import Sqel.Text.Quote (dquote)
 
 newtype Sql = Sql { unSql :: Text }
@@ -22,7 +23,7 @@ newtype Sql = Sql { unSql :: Text }
   deriving newtype (IsString, Semigroup, Monoid, ToJSON, FromJSON)
 
 instance ConvertUtf8 Text bs => ConvertUtf8 Sql bs where
-  encodeUtf8 = encodeUtf8 . unSql
+  encodeUtf8 = encodeUtf8 . (.unSql)
 
   decodeUtf8 = Sql . decodeUtf8
 

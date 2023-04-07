@@ -114,7 +114,7 @@ schema =
 targetLogs :: [Text]
 targetLogs =
   [
-    unSql tableColumnsSql,
+    tableColumnsSql.unSql,
     [exon|create table "dat" ("num" bigint, "name" text not null)|]
   ]
 
@@ -133,10 +133,10 @@ migrationsExtraColumn =
 targetLogsExtraColumn :: [Text]
 targetLogsExtraColumn =
   [
-    unSql tableColumnsSql,
-    unSql tableColumnsSql,
+    tableColumnsSql.unSql,
+    tableColumnsSql.unSql,
     [exon|alter table "dat" add column num bigint|],
-    unSql tableColumnsSql
+    tableColumnsSql.unSql
   ]
 
 test_migrationExtraColumn :: TestT IO ()
@@ -199,12 +199,12 @@ migrationsTransform =
 targetLogsTransform :: [Text]
 targetLogsTransform =
   [
-    unSql tableColumnsSql,
-    unSql tableColumnsSql,
+    tableColumnsSql.unSql,
+    tableColumnsSql.unSql,
     [exon|select "name", "status", "cats" from "new"|],
     [exon|alter table "new" rename to "new-migration-temp"|],
     [exon|create table "new" ("name" text not null, "status" text not null, "dogs" text[] not null)|],
-    unSql tableColumnsSql
+    tableColumnsSql.unSql
   ]
 
 test_migrationTransform :: TestT IO ()
@@ -261,25 +261,25 @@ migrationsSumKey =
 targetLogsSumKey1 :: [Text]
 targetLogsSumKey1 =
   [
-    unSql tableColumnsSql,
-    unSql typeColumnsSql,
-    unSql tableColumnsSql,
-    unSql typeColumnsSql,
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql,
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql,
     [exon|alter type "old_type__sk" rename to sqel_type__sk|],
     [exon|alter table "sum_key" rename column old_sum_index__sum_key to sqel_sum_index__sum_key|],
-    unSql tableColumnsSql,
-    unSql typeColumnsSql
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql
   ]
 
 targetLogsSumKey2 :: [Text]
 targetLogsSumKey2 =
   [
-    unSql tableColumnsSql,
-    unSql typeColumnsSql,
-    unSql tableColumnsSql,
-    unSql typeColumnsSql,
-    unSql tableColumnsSql,
-    unSql typeColumnsSql
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql,
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql,
+    tableColumnsSql.unSql,
+    typeColumnsSql.unSql
   ]
 
 test_migrationSumKey :: TestT IO ()

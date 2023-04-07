@@ -21,4 +21,4 @@ assign (Selector name) value =
   [sql|#{name} = #{value}|]
 
 instance ToSql Selector where
-  toSql = unSelector
+  toSql = (.unSelector)

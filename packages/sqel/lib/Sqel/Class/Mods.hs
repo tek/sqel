@@ -42,7 +42,7 @@ instance {-# overlappable #-} (
     MapMod' p ps0 ps1
   ) => MapMod' p (a' : ps0) (a' : ps1) where
     mapMod' p f (Mods (a' :* ps)) =
-      Mods (a' :* unMods (mapMod' p f (Mods ps)))
+      Mods (a' :* (.unMods) (mapMod' p f (Mods ps)))
 
 instance MapMod' p '[] '[p] where
   mapMod' p f (Mods Nil) =
@@ -76,7 +76,7 @@ instance (
     OverMod' p ps
   ) => OverMod' p (a' : ps) where
     overMod' f (Mods (a' :* ps)) =
-      Mods (a' :* unMods (overMod' f (Mods ps)))
+      Mods (a' :* (.unMods) (overMod' f (Mods ps)))
 
 instance OverMod' p '[] where
   overMod' _ (Mods Nil) =
@@ -95,7 +95,7 @@ instance (
     CMapMod' c p0 p p1 ps0 ps1
   ) => CMapMod' c p0 p p1 (a' : ps0) (a' : ps1) where
     cmapMod' p f (Mods (a' :* ps)) =
-      Mods (a' :* unMods (cmapMod' @c @p0 @p @p1 @ps0 @ps1 p f (Mods ps)))
+      Mods (a' :* (.unMods) (cmapMod' @c @p0 @p @p1 @ps0 @ps1 p f (Mods ps)))
 
 instance CMapMod' c p0 p1 p1 '[] '[p0] where
   cmapMod' p _ (Mods Nil) =

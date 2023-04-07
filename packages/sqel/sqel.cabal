@@ -109,73 +109,44 @@ library
   hs-source-dirs:
       lib
   default-extensions:
-      StandaloneKindSignatures
-      OverloadedRecordDot
       AllowAmbiguousTypes
       ApplicativeDo
-      BangPatterns
-      BinaryLiterals
       BlockArguments
-      ConstraintKinds
       DataKinds
       DefaultSignatures
       DeriveAnyClass
-      DeriveDataTypeable
-      DeriveFoldable
-      DeriveFunctor
-      DeriveGeneric
-      DeriveLift
-      DeriveTraversable
       DerivingStrategies
       DerivingVia
       DisambiguateRecordFields
-      DoAndIfThenElse
       DuplicateRecordFields
-      EmptyCase
-      EmptyDataDecls
-      ExistentialQuantification
-      FlexibleContexts
-      FlexibleInstances
       FunctionalDependencies
       GADTs
-      GeneralizedNewtypeDeriving
-      InstanceSigs
-      KindSignatures
       LambdaCase
       LiberalTypeSynonyms
-      MultiParamTypeClasses
       MultiWayIf
-      NamedFieldPuns
       OverloadedLabels
       OverloadedLists
       OverloadedStrings
       PackageImports
       PartialTypeSignatures
-      PatternGuards
       PatternSynonyms
-      PolyKinds
       QuantifiedConstraints
       QuasiQuotes
-      RankNTypes
       RecordWildCards
       RecursiveDo
       RoleAnnotations
-      ScopedTypeVariables
-      StandaloneDeriving
       TemplateHaskell
-      TupleSections
-      TypeApplications
       TypeFamilies
       TypeFamilyDependencies
-      TypeOperators
-      TypeSynonymInstances
       UndecidableInstances
       UnicodeSyntax
       ViewPatterns
-  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages -Wno-partial-type-signatures
+      OverloadedRecordDot
+      NoFieldSelectors
+  ghc-options: -Wall -Widentities -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wredundant-constraints -Wunused-type-patterns -Wunused-packages -Wno-partial-type-signatures
   build-depends:
       aeson ==2.0.*
-    , base >=4.12 && <5
+    , base ==4.*
     , chronos ==1.1.*
     , composition ==1.0.*
     , containers
@@ -206,9 +177,9 @@ library
       base hiding (Prelude)
     , incipit-base (IncipitBase as Prelude)
     , incipit-base hiding (IncipitBase)
-  default-language: Haskell2010
+  default-language: GHC2021
 
-test-suite sqel-unit
+test-suite sqel-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
@@ -242,72 +213,43 @@ test-suite sqel-unit
   hs-source-dirs:
       test
   default-extensions:
-      StandaloneKindSignatures
-      OverloadedRecordDot
       AllowAmbiguousTypes
       ApplicativeDo
-      BangPatterns
-      BinaryLiterals
       BlockArguments
-      ConstraintKinds
       DataKinds
       DefaultSignatures
       DeriveAnyClass
-      DeriveDataTypeable
-      DeriveFoldable
-      DeriveFunctor
-      DeriveGeneric
-      DeriveLift
-      DeriveTraversable
       DerivingStrategies
       DerivingVia
       DisambiguateRecordFields
-      DoAndIfThenElse
       DuplicateRecordFields
-      EmptyCase
-      EmptyDataDecls
-      ExistentialQuantification
-      FlexibleContexts
-      FlexibleInstances
       FunctionalDependencies
       GADTs
-      GeneralizedNewtypeDeriving
-      InstanceSigs
-      KindSignatures
       LambdaCase
       LiberalTypeSynonyms
-      MultiParamTypeClasses
       MultiWayIf
-      NamedFieldPuns
       OverloadedLabels
       OverloadedLists
       OverloadedStrings
       PackageImports
       PartialTypeSignatures
-      PatternGuards
       PatternSynonyms
-      PolyKinds
       QuantifiedConstraints
       QuasiQuotes
-      RankNTypes
       RecordWildCards
       RecursiveDo
       RoleAnnotations
-      ScopedTypeVariables
-      StandaloneDeriving
       TemplateHaskell
-      TupleSections
-      TypeApplications
       TypeFamilies
       TypeFamilyDependencies
-      TypeOperators
-      TypeSynonymInstances
       UndecidableInstances
       UnicodeSyntax
       ViewPatterns
-  ghc-options: -Wall -Wredundant-constraints -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Widentities -Wunused-packages -Wno-partial-type-signatures -threaded -rtsopts -with-rtsopts=-N
+      OverloadedRecordDot
+      NoFieldSelectors
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Widentities -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wredundant-constraints -Wunused-type-patterns -Wunused-packages -Wno-partial-type-signatures
   build-depends:
-      base >=4.12 && <5
+      base ==4.*
     , exon ==1.4.*
     , generics-sop ==0.5.*
     , hasql ==1.6.*
@@ -322,4 +264,4 @@ test-suite sqel-unit
       base hiding (Prelude)
     , incipit-base (IncipitBase as Prelude)
     , incipit-base hiding (IncipitBase)
-  default-language: Haskell2010
+  default-language: GHC2021

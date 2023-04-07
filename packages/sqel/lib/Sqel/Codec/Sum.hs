@@ -26,12 +26,12 @@ import qualified Hasql.Encoders as Encoder
 import Hasql.Encoders (Params)
 import Lens.Micro ((^.))
 import Lens.Micro.Extras (view)
+
+import Sqel.Codec.Product (prodParams)
 import qualified Sqel.Data.Codec as Codec
 import Sqel.Data.Codec (Codec (Codec), Decoder (Decoder), Encoder (Encoder), FullCodec)
 import Sqel.Data.Dd (ConCol (ConCol, unConCol))
 import Sqel.SOP.Constraint (ConstructSOP, ReifySOP)
-
-import Sqel.Codec.Product (prodParams)
 
 unconsNS ::
   NS (NP I) (ds : dss) ->
@@ -56,7 +56,7 @@ readNulls ::
   NP (ConB Decoder) ass ->
   Row ()
 readNulls cons =
-  hctraverse_ (Proxy @SListI) (readNull . unConB) cons
+  hctraverse_ (Proxy @SListI) (readNull . (.unConB)) cons
 
 sumRows ::
   All2 Top ass =>
@@ -98,7 +98,7 @@ sumParams = \case
   con :* cons ->
     choose unconsNS inhabited uninhabited
     where
-      inhabited = (unConB con) ^. #encodeValue <> writeNulls cons
+      inhabited = con.unConB.encodeValue <> writeNulls cons
       uninhabited = writeNull con <> sumParams cons
   Nil ->
     mempty
@@ -115,7 +115,7 @@ instance (
     WrapConB b ass as
   ) => WrapConB b (as' : ass) (ConCol name record fields as' : as) where
     wrapConB (b :* bs) =
-      ConB (invmap unConCol ConCol b) :* wrapConB bs
+      ConB (invmap (.unConCol) ConCol b) :* wrapConB bs
 
 encodeValue ::
   ConstructSOP a ass =>
@@ -140,13 +140,13 @@ instance (
     sumCodec (Codec index (Decoder indexRow _) :* conCodecs) =
       Codec {
         decoder = Decoder decodeValue unit,
-        encoder = Encoder (encodeValue index (hmap (ConB . view #encoder . unConB) wrapped)) mempty
+        encoder = Encoder (encodeValue index (hmap (ConB . view #encoder . (.unConB)) wrapped)) mempty
       }
       where
         decodeValue =
           gto . SOP <$> (sumRows decs =<< indexRow)
         decs =
-          hmap (ConB . view #decoder . unConB) wrapped
+          hmap (ConB . view #decoder . (.unConB)) wrapped
         wrapped =
           wrapConB conCodecs
 
@@ -167,8 +167,8 @@ instance SListI as => ConCodec FullCodec as where
   conCodec np =
     Codec {
       decoder = ConCol <$> hsequence (hmap (view #decoder) np),
-      encoder = unConCol >$< prodParams (hmap (view #encoder) np)
+      encoder = (.unConCol) >$< prodParams (hmap (view #encoder) np)
     }
 
 instance SListI as => ConCodec Encoder as where
-    conCodec np = unConCol >$< prodParams np
+    conCodec np = (.unConCol) >$< prodParams np

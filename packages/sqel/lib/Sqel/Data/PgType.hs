@@ -55,7 +55,7 @@ instance Pretty PgColumnName where
 
 instance ToSql PgColumnName where
   toSql =
-    sqlQuote . unPgColumnName
+    sqlQuote . (.unPgColumnName)
 
 pgColumnName ::
   Text ->
@@ -75,7 +75,7 @@ instance Pretty PgTypeRef where
   pretty (PgTypeRef n) = pretty n
 
 instance ToSql PgTypeRef where
-  toSql = sqlQuote . unPgTypeRef
+  toSql = sqlQuote . (.unPgTypeRef)
 
 pgTypeRef ::
   Text ->
@@ -178,7 +178,7 @@ newtype TableSelectors =
 
 instance ToSql (CommaSep TableSelectors) where
   toSql (CommaSep (TableSelectors s)) =
-    toSql (CommaSep (unSelector <$> s))
+    toSql (CommaSep ((.unSelector) <$> s))
 
 instance ToSql (Select TableSelectors) where
   toSql (Select s) =

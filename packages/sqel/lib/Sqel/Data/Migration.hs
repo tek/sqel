@@ -143,7 +143,7 @@ instance (
     HoistMigrations m n migs migs'
   ) => HoistMigrations m n ('Mig from to m ext : migs) ('Mig from to n ext' : migs') where
   hoistMigrations f (Migrations (Migration {..} :* migs)) =
-    Migrations (Migration {actions = hoistAction actions, ..} :* unMigrations (hoistMigrations f (Migrations migs)))
+    Migrations (Migration {actions = hoistAction actions, ..} :* (.unMigrations) (hoistMigrations f (Migrations migs)))
     where
       hoistAction = \case
         CustomActions ext -> CustomActions (hoistMigration f ext)

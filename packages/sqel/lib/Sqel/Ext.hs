@@ -15,6 +15,7 @@ module Sqel.Ext (
   module Sqel.ReifyCodec,
   module Sqel.ReifyDd,
   module Sqel.Prim,
+  module Sqel.ResultShape,
 ) where
 
 import Sqel.Class.Mods (
@@ -54,5 +55,6 @@ import Sqel.Prim (NewtypeWrap (newtypeWrap))
 import Sqel.Product
 import Sqel.ReifyCodec (ReifyCodec)
 import Sqel.ReifyDd (ReifyDd)
+import Sqel.ResultShape (ResultShape)
 import Sqel.Sum (Con1AsColumn (..), Con1Column (..), ConColumn (..), SetIndexPrefix (..), Sum (..), SumWith (..))
 import Sqel.Uid (UidColumn (..))

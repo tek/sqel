@@ -139,6 +139,6 @@ typeStatus ::
   DbCols ->
   TypeStatus
 typeStatus dbCols targetCols
-  | Map.null (unDbCols dbCols) = Absent
+  | Map.null ((.unDbCols) dbCols) = Absent
   | Just mismatches <- checkMismatch dbCols targetCols = Mismatch (toList mismatches)
   | otherwise = Match
