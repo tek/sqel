@@ -5,11 +5,11 @@
         "hix": "hix"
       },
       "locked": {
-        "lastModified": 1680813461,
-        "narHash": "sha256-Qvl3Bt48L1ogJxWczZGCdzUcosbDC4LqjCYz3qWamYc=",
+        "lastModified": 1681239051,
+        "narHash": "sha256-GkcBB9liwpNRRr6qlBb0o9DG3fcTXZ7S83MDcTKeqD4=",
         "ref": "refs/heads/main",
-        "rev": "bacaa70ffd35771b7eac00923f78ca4c3ebdd9dd",
-        "revCount": 55,
+        "rev": "5d4227920e3c88635f0c0fb1a91af8c1fadd0a4a",
+        "revCount": 56,
         "type": "git",
         "url": "https://git.tryp.io/tek/exon"
       },
@@ -56,11 +56,11 @@
         "thax": "thax"
       },
       "locked": {
-        "lastModified": 1680810397,
-        "narHash": "sha256-gY73M29024JtcW3tCVAojAKBM86GvKz3sSkUbTAXVXE=",
+        "lastModified": 1681208216,
+        "narHash": "sha256-ApDYa7i3QaW192+JLmKQY2hWYP4M4joGb04sWl3+l9w=",
         "ref": "refs/heads/main",
-        "rev": "89e504cad151c406aec2dfca3079379abf43abec",
-        "revCount": 312,
+        "rev": "ebd40954a5ad35852ede21aa3d15c8d5414c47cc",
+        "revCount": 380,
         "type": "git",
         "url": "https://git.tryp.io/tek/hix"
       },
@@ -77,11 +77,11 @@
         "thax": "thax_2"
       },
       "locked": {
-        "lastModified": 1680817876,
-        "narHash": "sha256-4V6eNGhCD56fEBQY8aOwfhy3Kio1Wu9WJ9crVbpj/ZY=",
+        "lastModified": 1681293326,
+        "narHash": "sha256-XkRtIXTBKKkLltIBgxpD9G8MMrTeZ+oss2CteOhySSg=",
         "ref": "refs/heads/main",
-        "rev": "808538609c3e4b6817efb2e2053faa73abd5ef2d",
-        "revCount": 314,
+        "rev": "85290ed977c030a4935d7437ebb9eed2d3aa106f",
+        "revCount": 384,
         "type": "git",
         "url": "https://git.tryp.io/tek/hix"
       },
