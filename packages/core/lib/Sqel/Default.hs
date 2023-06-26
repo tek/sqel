@@ -6,7 +6,7 @@ import Data.Some (Some)
 import Sqel.Data.Clause (ClauseParam)
 import Sqel.Data.ClauseConfig (ClauseConfig (ClauseConfig), ClauseConfigFor)
 import Sqel.Data.Constraints (Constraints)
-import Sqel.Data.Dd (Dd)
+import Sqel.Data.Dd (DdK)
 import Sqel.Data.Drop (Drop)
 import Sqel.Data.Field (CondField, Field, PrimField, RootField, TypeField)
 import Sqel.Data.Order (Order)
@@ -68,8 +68,7 @@ type instance CompFor Def = CompMeta
 
 type SpineDef = Spine Def
 
--- TODO try to make the Dd poly
-type Sqel :: Dd -> Type
+type Sqel :: DdK ext -> Type
 type Sqel = SqelFor Def
 
 -- TODO remove, this has no advantage really
