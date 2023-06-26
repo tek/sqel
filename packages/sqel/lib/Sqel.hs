@@ -1,109 +1,33 @@
 module Sqel (
-  module Sqel.Data.Dd,
-  module Sqel.Data.Sel,
-  module Sqel.Type,
-  module Sqel.Merge,
-  module Sqel.Prim,
-  module Sqel.Product,
-  module Sqel.Sum,
-  module Sqel.Migration.Dd,
-  module Sqel.Comp,
+  module Sqel.Default,
+  module Sqel.Class.ReifySqel,
+  module Sqel.Dd,
+  module Sqel.Clauses,
   module Sqel.Data.Uid,
-  module Sqel.Uid,
-  module Sqel.Names,
-  module Sqel.Column,
-  module Sqel.Data.Mods,
-  module Sqel.Query.Combinators,
-  module Sqel.Data.Order,
-  module Sqel.Data.Migration,
-  module Sqel.Migration.Table,
-  module Sqel.Sql,
+  module Sqel.Dsl,
   module Sqel.Data.Codec,
-  module Sqel.PgType,
-  module Sqel.Query,
-  module Sqel.Class.MatchView,
-  module Sqel.Data.TableSchema,
-  module Sqel.Data.Projection,
-  module Sqel.Data.QuerySchema,
+  module Sqel.Uid,
+  module Sqel.Data.Statement,
+  module Sqel.Data.Crud,
+  module Sqel.Statement,
+  module Sqel.Class.ResultShape,
+  module Sqel.Sqel,
+  module Sqel.Data.Sqel,
+  module Sqel.Data.Sql,
 ) where
 
-import Sqel.Class.MatchView (HasField, HasPath)
-import Sqel.Column (nullable, nullableAs, orNull, pgDefault, pk, tableName, unique)
-import Sqel.Comp (typePrefix)
+import Sqel.Class.ReifySqel (sqel)
+import Sqel.Clauses hiding (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Data.Codec (FullCodec)
-import Sqel.Data.Dd (Dd (Dd), Sqel, Sqel', (:>) ((:>)))
-import Sqel.Data.Migration (Migrations, migrate, noMigrations)
-import Sqel.Data.Mods (
-  ArrayColumn,
-  EnumColumn,
-  Ignore,
-  Newtype,
-  NoMods,
-  Nullable,
-  PgDefault,
-  PrimaryKey,
-  ReadShowColumn,
-  SetTableName,
-  Unique,
-  )
-import Sqel.Data.Order (Order (..))
-import Sqel.Data.Projection (Projection)
-import Sqel.Data.QuerySchema (QuerySchema, emptyQuerySchema)
-import Sqel.Data.Sel (Sel (..), TSel (..))
-import Sqel.Data.TableSchema (TableSchema)
+import Sqel.Data.Crud (Crud)
+import Sqel.Data.Sqel (SqelFor)
+import Sqel.Data.Sql (Sql)
+import Sqel.Data.Statement (Statement)
 import Sqel.Data.Uid (Uid (Uid), Uuid)
-import Sqel.Merge (merge)
-import Sqel.Migration.Dd
-import Sqel.Migration.Table (migrateAuto)
-import Sqel.Names (named, typeAs)
-import Sqel.PgType (CheckedProjection, MkTableSchema (tableSchema), fullProjection, projection, toFullProjection)
-import Sqel.Prim (
-  IndexColumn,
-  IndexColumnWith,
-  array,
-  column,
-  enum,
-  ignore,
-  json,
-  mods,
-  newtyped,
-  prim,
-  primAs,
-  primCoerce,
-  primIndex,
-  primMod,
-  primMods,
-  primNewtype,
-  primNewtypes,
-  primNullable,
-  prims,
-  readShow,
-  )
-import Sqel.Product (prod, prodAs, prodSel)
-import Sqel.Query (CheckQuery (checkQuery), EmptyQuery, emptyQuery, primIdQuery)
-import Sqel.Query.Combinators
-import Sqel.Sql
-import Sqel.Sum (con, con1, con1As, conAs, indexPrefix, mergeSum, sum, sumAs, sumWith)
-import Sqel.Type (
-  Array,
-  Enum,
-  MSelect,
-  Merge,
-  Mod,
-  Mods,
-  ModsR,
-  Name,
-  Newtyped,
-  Prim,
-  PrimArray,
-  PrimNewtype,
-  PrimSel,
-  PrimUnused,
-  Prod,
-  ProdPrims,
-  ProdPrimsNewtype,
-  TypeSel,
-  type (*>),
-  type (>),
-  )
-import Sqel.Uid (UidDd, uid, uidAs)
+import Sqel.Dd (DdType)
+import Sqel.Default
+import Sqel.Dsl
+import Sqel.Class.ResultShape (ResultShape)
+import Sqel.Sqel (emptyQuery)
+import Sqel.Statement (prepared, unprepared)
+import Sqel.Uid

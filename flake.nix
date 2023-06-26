@@ -1,19 +1,14 @@
 {
-  description = "Guided derivation for Hasql statements";
+  description = "Hasql statement typelevel DSL";
 
   inputs = {
     hix.url = "git+https://git.tryp.io/tek/hix";
     exon.url = "git+https://git.tryp.io/tek/exon";
   };
 
-  outputs = { hix, exon, ... }: hix.lib.pro {
-    hackage.versionFile = "ops/version.nix";
+  outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: {
     depsFull = [exon];
-
-    overrides = {unbreak, hackage, ...}: {
-      th-desugar = hackage "1.13.1" "0rfiznqlivb8zyykq49z3yz1jazy4g804h0vbmcab3fbmjfga6bz";
-      singletons-base = unbreak;
-    };
+    main = "sqel";
 
     cabal = {
       license = "BSD-2-Clause-Patent";
@@ -27,7 +22,7 @@
         };
         module = "IncipitBase";
       };
-      ghc-options = ["-Wno-partial-type-signatures"];
+      ghc-options = lib.mkAfter ["-Wno-partial-type-signatures"];
       paths = false;
       meta = {
         maintainer = "hackage@tryp.io";
@@ -35,18 +30,17 @@
         git = "https://git.tryp.io/tek/sqel";
         homepage = "https://git.tryp.io/tek/sqel";
         bug-reports = "https://github.com/tek/sqel/issues";
+        extra-source-files = ["changelog.md" "readme.md"];
       };
     };
 
     ghci.args = ["-fprint-potential-instances"];
 
-    packages.sqel = {
-      src = ./packages/sqel;
+    packages.sqel-core = {
+      src = ./packages/core;
+      versionFile = "ops/version-core.nix";
 
-      cabal = {
-        version = import ./ops/version.nix;
-        meta.synopsis = "Guided derivation for Hasql statements";
-      };
+      cabal.meta.synopsis = "Hasql statement typelevel DSL";
 
       library.enable = true;
       library.dependencies = [
@@ -55,6 +49,8 @@
         "composition ^>= 1.0"
         "containers"
         "contravariant ^>= 1.5"
+        "dependent-sum-template ^>= 0.1"
+        "dependent-sum-aeson-orphans ^>= 0.3"
         "exon ^>= 1.4"
         "extra ^>= 1.7"
         "first-class-families ^>= 0.8"
@@ -67,8 +63,6 @@
         "path-io ^>= 1.7"
         "prettyprinter ^>= 1.7"
         "scientific ^>= 0.3"
-        "singletons ^>= 3"
-        "singletons-base ^>= 3.1"
         "some ^>= 1.0"
         "template-haskell"
         "time"
@@ -80,16 +74,88 @@
 
       test.enable = true;
       test.dependencies = [
+        "aeson ^>= 2.0"
+        "exon ^>= 1.4"
+        "generics-sop ^>= 0.5"
+        "hasql ^>= 1.6"
+        "hedgehog ^>= 1.1"
+        "tasty ^>= 1.4"
+        "tasty-hedgehog ^>= 1.3"
+        "transformers"
+      ];
+      test.default-extensions = ["QualifiedDo"];
+
+      tests.sqel-integration = {
+        source-dirs = "integration";
+        env = "sqel-integration";
+        dependencies = [
           "exon ^>= 1.4"
-          "generics-sop ^>= 0.5"
           "hasql ^>= 1.6"
           "hedgehog ^>= 1.1"
-          "microlens ^>= 0.4"
+          "lifted-base ^>= 0.2"
           "tasty ^>= 1.4"
           "tasty-hedgehog ^>= 1.3"
-          "transformers"
         ];
+      };
 
     };
-  };
+
+    packages.sqel = {
+      src = ./packages/sqel;
+      versionFile = "ops/version-sqel.nix";
+      library = {
+        enable = true;
+        reexported-modules = [
+          "Sqel.Crud"
+          "Sqel.Statement"
+        ];
+      };
+      cabal = {
+        meta.synopsis = "Hasql statement typelevel DSL";
+        dependencies = [
+          config.packages.sqel-core.dep.minor
+        ];
+      };
+    };
+
+    envs.sqel-integration = {
+      basePort = 25000;
+      services.postgres = {
+        enable = true;
+        config = {
+          name = "sqel";
+          log = true;
+          creds = {
+            user = "sqel";
+            password = "sqel";
+          };
+        };
+      };
+
+      env = {
+        sqel_test_host = "localhost";
+        sqel_test_port = config.envs.sqel-integration.hostPorts.postgres;
+      };
+    };
+
+    envs.bench = {
+      overrides = {minimal, ...}: { sqel = minimal; };
+      haskellPackages = ["sqel" "sqel-core"];
+    };
+
+    commands.bench = {
+      env = "bench";
+      expose = true;
+      command = let
+        bench = import ./ops/bench.nix { inherit config; };
+      in ''
+      rm -f Bench.hs
+      cp ${bench.bench} Bench.hs
+      command time -a -o bench.stats -f 'user %Us | wall %es | kernel %S' ghc -Wall -H64m -O +RTS -A64M -RTS Bench.hs
+      cat bench.stats
+      rm -f Bench.* bench.stats bench
+      '';
+    };
+
+  });
 }
