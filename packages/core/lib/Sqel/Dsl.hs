@@ -1,15 +1,23 @@
-module Sqel.Dsl where
+module Sqel.Dsl (
+  Prim,
+  PrimAs,
+  PrimWith,
+  PrimAuto,
+  Param,
+  module Sqel.Dsl.Comp,
+  Mod,
+  Mods,
+  ModWith,
+  ModTrans,
+  module Sqel.Dsl,
+) where
 
 import Data.UUID (UUID)
 import Data.Vector (Vector)
 import Fcf (Eval, Exp, Pure, type (@@))
 import Generics.SOP.GGP (GCode, GDatatypeInfoOf)
 import qualified Generics.SOP.Type.Metadata as SOP
-import Generics.SOP.Type.Metadata (
-  ConstructorInfo (Constructor, Infix, Record),
-  DatatypeInfo (ADT),
-  FieldInfo (FieldInfo),
-  )
+import Generics.SOP.Type.Metadata (ConstructorInfo (Constructor, Infix, Record), DatatypeInfo (ADT))
 import Prelude hiding (Enum, Mod)
 import Type.Errors (DelayError, ErrorMessage, IfStuck)
 
@@ -43,108 +51,20 @@ import Sqel.Data.Name (AmendName, NamePrefix (DefaultPrefix, NamePrefix))
 import Sqel.Data.Sel (Path (PathSkip), Sel (Sel), SelAuto, TSel (TSel), TSelWithPrefix)
 import Sqel.Data.Uid (Uid)
 import Sqel.Dd (SetDdName)
-import Sqel.Kind.List (type (++))
-import Sqel.Kind.Nat (NatSymbol)
+import Sqel.Dsl.Comp
+import Sqel.Dsl.Error (TypeNamePrimError)
+import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
+import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, ApplyMod, Mod, ModTrans, ModWith, Mods)
+import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimWith)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeQueryDd)
 import Sqel.SOP.Error (Quoted, QuotedType)
-
-data Field = FieldNamed Symbol | FieldNum Nat
-
-type NamedFields :: [FieldInfo] -> [Field]
-type family NamedFields fields where
-  NamedFields '[] = '[]
-  NamedFields ('FieldInfo n : fields) = 'FieldNamed n : NamedFields fields
-
-type ReifyFieldNamesMulti :: Symbol -> [Field] -> [Symbol]
-type family ReifyFieldNamesMulti con fields where
-  ReifyFieldNamesMulti _ '[] = '[]
-  ReifyFieldNamesMulti con ('FieldNum num : fields) = (con ++ NatSymbol num) : ReifyFieldNames con fields
-  ReifyFieldNamesMulti con ('FieldNamed name : fields) = name : ReifyFieldNames con fields
-
-type ReifyFieldNames :: Symbol -> [Field] -> [Symbol]
-type family ReifyFieldNames con fields where
-  ReifyFieldNames con '[ 'FieldNum _ ] = '[con]
-  ReifyFieldNames con fields = ReifyFieldNamesMulti con fields
-
-------------------------------------------------------------------------------------------------------------------------
 
 type FromGenF k = DatatypeInfo -> [[Type]] -> Exp k
 
 type FromGen :: ∀ k . FromGenF k -> Type -> k
 type family FromGen f a where
   FromGen f a = f (GDatatypeInfoOf a) @@ GCode a
-
-------------------------------------------------------------------------------------------------------------------------
-
-type PrimAuto :: Type
-data PrimAuto
-
-type PrimAs :: Symbol -> Type
-data PrimAs name
-
-type PrimWith :: Symbol -> Type -> Type
-data PrimWith name a
-
-type Prim :: ∀ k . k
-type family Prim where
-  Prim @Type = PrimAuto
-  Prim @(Symbol -> Type) = PrimAs
-  Prim @(Symbol -> Type -> Type) = PrimWith
-
-type AllAuto :: [k] -> [Type]
-type family AllAuto as where
-  AllAuto '[] = '[]
-  AllAuto (_ : as) = PrimAuto : AllAuto as
-
-type Param :: Type -> Type
-data Param spec
-
-------------------------------------------------------------------------------------------------------------------------
-
-type Gen :: Type
-data Gen
-
-type Prod :: [Type] -> Type
-data Prod cols
-
-type ProdAs :: Symbol -> [Type] -> Type
-data ProdAs tname cols
-
-type UidProd :: Type -> Type -> Type
-data UidProd i a
-
-type Con :: [Type] -> Type
-data Con cols
-
-type Con1 :: Type -> Type
-data Con1 cols
-
-type Sum :: [Type] -> Type
-data Sum cons
-
-type Merge :: Type -> Type
-data Merge spec
-
-------------------------------------------------------------------------------------------------------------------------
-
-type AddMods :: [Type] -> Dd0 -> Dd0
-type family AddMods mods s where
-  AddMods new ('Dd ('Ext0 sel old) a s) = 'Dd ('Ext0 sel (new ++ old)) a s
-
-type AddMod :: Type -> Dd0 -> Dd0
-type family AddMod mod s where
-  AddMod mod ('Dd ('Ext0 sel old) a s) = 'Dd ('Ext0 sel (mod : old)) a s
-
-type AddModWith :: (Dd0 -> Exp Dd0) -> Type -> Dd0 -> Dd0
-type family AddModWith f mod s where
-  AddModWith f mod s = AddMod mod (Eval (f s))
-
-type ApplyMod :: (Type -> Type) -> Dd0 -> Dd0
-type family ApplyMod mod s where
-  ApplyMod (Mod mod) s = AddMod mod s
-  ApplyMod (ModTrans f) s = Eval (f s)
-  ApplyMod (ModWith f mod) s = AddModWith f mod s
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -158,6 +78,14 @@ type instance Eval (WrapType f ('Dd ext a s)) = 'Dd ext (f a) s
 data ApplyTypeName :: Symbol -> Dd0 -> Exp Dd0
 type instance Eval (ApplyTypeName name ('Dd ext a ('Comp ('TSel prefix _) c i s))) =
   'Dd ext a ('Comp ('TSel prefix name) c i s)
+type instance Eval (ApplyTypeName name ('Dd ext a ('Prim _))) =
+  TypeNamePrimError name ext a
+
+data ApplyTableName :: Symbol -> Dd0 -> Exp Dd0
+type instance Eval (ApplyTableName name ('Dd ext a ('Comp ('TSel prefix _) c i s))) =
+  'Dd ext a ('Comp ('TSel prefix name) c i s)
+type instance Eval (ApplyTableName name ('Dd ext a ('Prim prim))) =
+  AmendDdName name ('Dd ext a ('Prim prim))
 
 data ApplyTypePrefix :: Symbol -> Dd0 -> Exp Dd0
 type instance Eval (ApplyTypePrefix prefix ('Dd ext a ('Comp tsel c i s))) =
@@ -215,20 +143,6 @@ type family ReifyArray a f spec where
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type Mod :: Type -> Type -> Type
-data Mod mod spec
-
-type Mods :: [Type] -> Type -> Type
-data Mods mods spec
-
-type ModWith :: (Dd0 -> Exp Dd0) -> Type -> Type -> Type
-data ModWith f mod spec
-
-type ModTrans :: (Dd0 -> Exp Dd0) -> Type -> Type
-data ModTrans f spec
-
-------------------------------------------------------------------------------------------------------------------------
-
 type Ignore :: Type -> Type
 type Ignore spec = Param (Mod Mods.Ignore spec)
 
@@ -259,6 +173,9 @@ type Enum = Mods [SetPrimName "text", Mods.Enum]
 
 type TypeName :: Symbol -> Type -> Type
 type TypeName p = ModTrans (ApplyTypeName p)
+
+type TableName :: Symbol -> Type -> Type
+type TableName p = ModTrans (ApplyTableName p)
 
 type TypePrefix :: Symbol -> Type -> Type
 type TypePrefix p = ModTrans (ApplyTypePrefix p)
@@ -513,11 +430,11 @@ type family NoReify a spec where
 
 type ReifyE :: Type -> Type -> Dd0
 type family ReifyE a spec where
-  ReifyE a spec = IfStuck (Reify a spec) (DelayError ("Stuck: " <> a)) (Pure (Reify a spec))
+  ReifyE a spec = IfStuck (Reify a spec) (DelayError (NoReify a spec)) (Pure (Reify a spec))
 
 type Table :: Symbol -> Type -> Type -> Dd
 type family Table name a spec where
-  Table name a spec = NormalizeQueryDd (ReifyE a (TypeName name spec))
+  Table name a spec = NormalizeQueryDd (ReifyE a (TableName name spec))
 
 type MigrationTable :: Symbol -> Type -> Type -> Ddl
 type family MigrationTable name a spec where

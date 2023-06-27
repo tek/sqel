@@ -127,6 +127,11 @@ library
       Sqel.Dd
       Sqel.Default
       Sqel.Dsl
+      Sqel.Dsl.Comp
+      Sqel.Dsl.Error
+      Sqel.Dsl.Fields
+      Sqel.Dsl.Mod
+      Sqel.Dsl.Prim
       Sqel.Error.Clause
       Sqel.Error.Fragment
       Sqel.Error.PrimCodec
