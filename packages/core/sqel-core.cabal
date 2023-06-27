@@ -279,6 +279,7 @@ test-suite sqel-core-test
       Sqel.Test.Migration.SumTest
       Sqel.Test.Migration.SyntaxTest
       Sqel.Test.MigrationTest
+      Sqel.Test.PrimTableTest
       Sqel.Test.SqelTypesTest
       Sqel.Test.SqlCodeTest
       Sqel.Test.Statement.BuildTest

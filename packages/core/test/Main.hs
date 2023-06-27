@@ -6,6 +6,7 @@ import Sqel.Test.ErrorTest (test_errors)
 import Sqel.Test.HasGeneric (test_hasGeneric)
 import Sqel.Test.JsonTest (test_json)
 import Sqel.Test.MigrationTest (test_migration)
+import Sqel.Test.PrimTableTest (test_primTable)
 import Sqel.Test.SqelTypesTest (test_sqelTypes)
 import Sqel.Test.SqlCodeTest (test_sqlCodeNoInterpolation)
 import Sqel.Test.StatementTest (test_statement)
@@ -25,7 +26,8 @@ tests =
     unitTest "HasGeneric" test_hasGeneric,
     unitTest "Sqel types" test_sqelTypes,
     unitTest "json column" test_json,
-    unitTest "enum column" test_enum
+    unitTest "enum column" test_enum,
+    unitTest "prim table" test_primTable
   ]
 
 main :: IO ()
