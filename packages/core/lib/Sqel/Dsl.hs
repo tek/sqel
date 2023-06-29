@@ -1,6 +1,7 @@
 module Sqel.Dsl (
   Prim,
   PrimAs,
+  PrimUsing,
   PrimWith,
   PrimAuto,
   Param,
@@ -55,7 +56,7 @@ import Sqel.Dsl.Comp
 import Sqel.Dsl.Error (TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, ApplyMod, Mod, ModTrans, ModWith, Mods)
-import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimWith)
+import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeQueryDd)
 import Sqel.SOP.Error (Quoted, QuotedType)
@@ -164,12 +165,8 @@ data OrNull spec
 type Newtype :: Type -> Type
 data Newtype spec
 
--- TODO Enum is a primitive mod, it cannot be applied to specs other than Prim.
--- maybe it should not take an arg, but for something like @Maybe (Vector E)@ it would be nice to have a way to use
--- inference for Maybe and Vector, but specify Enum for E.
--- could be something like @Auto Enum@.
-type Enum :: Type -> Type
-type Enum = Mods [SetPrimName "text", Mods.Enum]
+type Enum :: Type
+type Enum = Prim PrimEnum
 
 type TypeName :: Symbol -> Type -> Type
 type TypeName p = ModTrans (ApplyTypeName p)
@@ -202,10 +199,10 @@ type Name :: Symbol -> Type -> Type
 type Name name = ModTrans (ApplyName name)
 
 type Json :: Type
-type Json = Mod Mods.Json Prim
+type Json = Prim PrimJson
 
 type Jsonb :: Type
-type Jsonb = Mod Mods.Jsonb Prim
+type Jsonb = Prim PrimJsonb
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -233,23 +230,22 @@ type family SetNoCond s where
       Quoted "where" <> ", which only applies to primitive columns."
     )
 
-type PrimBasic :: Type -> Dd0
-type family PrimBasic a where
-  PrimBasic a = 'Dd ('Ext0 SelAuto NoMods) a ('Prim 'Cond)
+type PrimBasic :: Type -> Type -> Dd0
+type family PrimBasic a prim where
+  PrimBasic a PrimAuto = 'Dd ('Ext0 SelAuto NoMods) a ('Prim 'Cond)
+  PrimBasic a PrimEnum = AddMods [SetPrimName "text", Mods.Enum] (PrimBasic a PrimAuto)
+  PrimBasic a PrimJson = AddMod Mods.Json (PrimBasic a PrimAuto)
+  PrimBasic a PrimJsonb = AddMod Mods.Jsonb (PrimBasic a PrimAuto)
 
-type PrimExplicit :: Symbol -> Type -> Dd0
-type family PrimExplicit name a where
-  PrimExplicit name a = AmendDdName name (PrimBasic a)
-
-type PrimInfer :: Type -> Dd0
-type family PrimInfer a where
-  PrimInfer (Maybe a) = ApplyNullable 'False (PrimInfer a)
-  PrimInfer [a] = ApplyArray [] (PrimInfer a)
-  PrimInfer (NonEmpty a) = ApplyArray NonEmpty (PrimInfer a)
-  PrimInfer (Seq a) = ApplyMod (Array Seq) (PrimInfer a)
-  PrimInfer (Vector a) = ApplyMod (Array Vector) (PrimInfer a)
-  PrimInfer (Set a) = ApplyMod (Array Set) (PrimInfer a)
-  PrimInfer a = PrimBasic a
+type PrimInfer :: Type -> Type -> Dd0
+type family PrimInfer a prim where
+  PrimInfer (Maybe a) prim = ApplyNullable 'False (PrimInfer a prim)
+  PrimInfer [a] prim = ApplyArray [] (PrimInfer a prim)
+  PrimInfer (NonEmpty a) prim = ApplyArray NonEmpty (PrimInfer a prim)
+  PrimInfer (Seq a) prim = ApplyMod (Array Seq) (PrimInfer a prim)
+  PrimInfer (Vector a) prim = ApplyMod (Array Vector) (PrimInfer a prim)
+  PrimInfer (Set a) prim = ApplyMod (Array Set) (PrimInfer a prim)
+  PrimInfer a prim = PrimBasic a prim
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -406,9 +402,10 @@ type instance Reify (ConMeta name '[a] '[field]) (Con1 cols) = SetMerge (ConFor 
 
 type instance Reify a (Merge spec) = SetMerge (Reify a spec)
 
-type instance Reify a PrimAuto = PrimInfer a
-type instance Reify a (PrimAs name) = AmendDdName name (PrimInfer a)
-type instance Reify _ (PrimWith name a) = PrimExplicit name a
+type instance Reify a PrimAuto = PrimInfer a PrimAuto
+type instance Reify a (PrimAs name) = AmendDdName name (PrimInfer a PrimAuto)
+type instance Reify a (PrimUsing prim) = PrimInfer a prim
+type instance Reify _ (PrimWith name a) = AmendDdName name (PrimBasic a Prim)
 type instance Reify a (Param spec) = SetNoCond (Reify a spec)
 
 type instance Reify a (Mod mod spec) = AddMod mod (Reify a spec)

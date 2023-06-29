@@ -37,12 +37,13 @@ data En =
 data E =
   E {
     f1 :: Int,
-    f2 :: En
+    f2 :: En,
+    f3 :: [En]
   }
   deriving stock (Generic)
 
 type Table_E =
-  Table "e" E (Prod [Prim, Enum Prim])
+  Table "e" E (Prod [Prim, Enum, Enum])
 
 table_E :: Sqel Table_E
 table_E = sqel
@@ -63,7 +64,7 @@ step =
   transform trans table_E
   where
     trans :: [Old] -> Identity [E]
-    trans old = pure (E 5 En1 <$ old)
+    trans old = pure (E 5 En1 [En2, En1] <$ old)
 
 decEn :: Decoder En
 decEn = reifyCodec @Decoder @(Table_E . "f2")
@@ -77,4 +78,4 @@ mig =
 
 test_enum :: TestT IO ()
 test_enum =
-  [sql|create table "e" ("f1" bigint not null, "f2" text not null)|] === sql_e
+  [sql|create table "e" ("f1" bigint not null, "f2" text not null, "f3" text[] not null)|] === sql_e
