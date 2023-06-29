@@ -3,21 +3,21 @@ module Sqel.Test.EnumTest where
 import Hedgehog (TestT, (===))
 import Prelude hiding (Enum)
 
+import Sqel.Class.ReifyCodec (reifyCodec)
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (createTable, from, select)
+import Sqel.Data.Codec (Decoder)
 import Sqel.Data.Migration (Migrate)
 import Sqel.Data.Sql (Sql, sql)
-import Sqel.Data.Statement (Statement)
+import Sqel.Data.Statement (Statement, statementSql)
 import Sqel.Default (Def, Sqel)
 import Sqel.Dsl (Enum, Prim, Prod, Table)
+import Sqel.Kind.HasFieldK (type (.))
 import Sqel.Migration.Class.Syntax ((-->))
 import Sqel.Migration.Data.TransformStep (TransformStep)
 import Sqel.Migration.Transform (transform)
 import Sqel.Syntax.Fragments (tableK, tableK_)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.Codec (Decoder)
-import Sqel.Class.ReifyCodec (reifyCodec)
-import Sqel.Kind.HasFieldK (type (.))
 
 data Old =
   Old {
@@ -48,7 +48,7 @@ table_E :: Sqel Table_E
 table_E = sqel
 
 sql_e :: Sql
-sql_e = S.do
+sql_e = statementSql @_ @() S.do
   t <- tableK @Table_E @Def
   createTable t
 

@@ -6,17 +6,19 @@ import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Clauses (doUpdateSet, insertInto, onConflict, values)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Syntax.Fragments (table)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Statement.Common (table_Cat)
 
 statement :: Sql
-statement = S.do
-  t <- table table_Cat
-  insertInto t
-  values t
-  onConflict t
-  doUpdateSet t
+statement =
+  statementSql @_ @() S.do
+    t <- table table_Cat
+    insertInto t
+    values t
+    onConflict t
+    doUpdateSet t
 
 target :: Sql
 target = [sql|

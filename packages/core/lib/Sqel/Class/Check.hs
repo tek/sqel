@@ -54,7 +54,7 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type Checked :: ∀ {ext} . [DdK ext] -> Type -> DdK ext -> Constraint
+type Checked :: ∀ {extt} {extq} . [DdK extt] -> Type -> DdK extq -> Constraint
 class Checked tables tag s where
   checked :: SqelFor tag s -> Fragment ('Frag ('Frag0 tag sort s root comp))
 

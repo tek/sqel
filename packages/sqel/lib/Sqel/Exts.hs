@@ -21,7 +21,7 @@ module Sqel.Exts (
 ) where
 
 import Sqel.Build.Sql (BuildClause, BuildClauses)
-import Sqel.Class.Check (Check, Check1, Checked)
+import Sqel.Class.Check (Check, Check1, Checked, Checked1)
 import Sqel.Class.DefaultFields (DefaultFields (..), DefaultMeta (..))
 import Sqel.Class.HasqlStatement (HasqlStatement)
 import Sqel.Class.Query (FragmentsSqel)

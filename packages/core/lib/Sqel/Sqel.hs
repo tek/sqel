@@ -23,7 +23,6 @@ sqelTypes ::
 sqelTypes =
   spineTypes . sqelSpine
 
--- TODO are these two still used? yes, in po-ha. think of something better
 emptyQuery ::
   ∀ tag .
   ReifySqel tag EmptyQuery =>

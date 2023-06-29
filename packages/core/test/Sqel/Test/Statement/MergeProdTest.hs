@@ -4,6 +4,7 @@ import Hedgehog (TestT, (===))
 
 import Sqel.Clauses (from, select)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Def)
 import Sqel.Dsl (Gen, Prim, Prod, Table)
 import Sqel.Syntax.Fragments (tableK)
@@ -23,7 +24,7 @@ target_merge_prod =
 
 test_statement_merge_prod :: TestT IO ()
 test_statement_merge_prod =
-  target_merge_prod === S.do
+  target_merge_prod === statementSql S.do
     t <- tableK @Table_MergeProd @Def
     select t
     from t

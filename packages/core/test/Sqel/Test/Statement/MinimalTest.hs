@@ -6,6 +6,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select)
 import Sqel.Data.Sql (Sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Table)
 import Sqel.Syntax.Fragments (table)
@@ -23,7 +24,7 @@ table_Dat :: Sqel Table_Dat
 table_Dat = sqel
 
 statement :: Sql
-statement = S.do
+statement = statementSql S.do
   t <- table table_Dat
   select t
   from t

@@ -3,19 +3,15 @@ module Sqel.Class.AcceptClause where
 import Generics.SOP (NP (Nil, (:*)))
 
 import Sqel.Class.AcceptFrag (AcceptFragment (acceptFragment), AcceptFragments (acceptFragments))
-import Sqel.Class.ClauseResult (ClauseResult (clauseResult), ClauseResultDds, FromResultDds)
-import qualified Sqel.Data.Clause as Data
-import Sqel.Data.Clause (
-  Clause (Clause, ResultClause, ResultsClause),
-  ClauseArgs (FragsOnly, FragsP),
-  ClauseK,
-  ClauseParam (ClauseParam),
-  )
-import Sqel.Data.ClauseConfig (ClauseFieldsFor)
-import Sqel.Data.Dd (DdK)
+import Sqel.Class.ClauseResult (ClauseDecoders, ClauseResult (clauseResult))
+import Sqel.Data.Clause (Clause (Clause), ClauseArgs (FragsOnly, FragsP), ClauseParam (ClauseParam))
+import Sqel.Data.ClauseConfig (ClauseFieldsFor, ClauseResultFor)
+import Sqel.Data.Codec (Decoder)
 import Sqel.Data.Fragment (Frag, Fragment)
 import Sqel.Error.Clause (CheckClauseError)
+import Sqel.Kind.Maybe (MaybeD)
 import Sqel.Kind.NormalizeFrags (InvalidFrags, NormalizeFrags (normalizeFrags))
+import Sqel.Kind.ResultDds (ResultTypes)
 import Sqel.SOP.Error (Quoted)
 
 data Mult = Unclear | Multi
@@ -48,20 +44,21 @@ instance (
 ------------------------------------------------------------------------------------------------------------------------
 
 -- TODO add fields to error message
-type AcceptClauseOrError :: ∀ {ext} . Type -> Type -> Type -> Type -> Maybe [DdK ext] -> Constraint
+type AcceptClauseOrError :: Type -> Type -> Type -> Type -> Maybe [Type] -> Constraint
 class AcceptClauseOrError tag clause expr fields result | clause expr -> result where
-  acceptClauseOrError :: expr -> (fields, Data.ClauseResult tag result)
+  acceptClauseOrError :: expr -> (fields, ClauseDecoders result)
 
 instance (
     NormalizeFrags InvalidFrags expr frags,
     error ~ CheckClauseError tag clause frags,
     mult ~ FragMultiplicity fields,
-    result ~ ClauseResultDds clause frags,
-    ClauseResult tag frags result,
+    isResult ~ ClauseResultFor clause,
+    result ~ ResultTypes clause frags,
+    ClauseResult isResult frags result,
     AcceptClause error tag clause mult frags fields
   ) => AcceptClauseOrError tag clause expr fields result where
     acceptClauseOrError expr =
-      (acceptClause @error @tag @clause @mult frags, clauseResult @tag @frags frags)
+      (acceptClause @error @tag @clause @mult frags, clauseResult @isResult @frags frags)
       where
         frags = normalizeFrags @InvalidFrags expr
 
@@ -80,9 +77,9 @@ type family ArgsError param fields where
   ArgsError ('Just _) _ =
     TypeError (ToErrorMessage ("A parameter was given, but the clause doesn't support it."))
 
-type AcceptClauseArgs :: ∀ {ext} . Void -> Type -> Type -> Type -> Maybe Type -> Type -> Maybe [DdK ext] -> Constraint
+type AcceptClauseArgs :: Void -> Type -> Type -> Type -> Maybe Type -> Type -> Maybe [Type] -> Constraint
 class AcceptClauseArgs error tag clause expr param fields result | clause expr -> result where
-  acceptClauseArgs :: ClauseArgs expr param -> (fields, Data.ClauseResult tag result)
+  acceptClauseArgs :: ClauseArgs expr param -> (fields, ClauseDecoders result)
 
 instance (
     AcceptClauseOrError tag clause expr fields result
@@ -100,22 +97,15 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type MkClause :: ∀ {ext} . Type -> Type -> Type -> Maybe Type -> ClauseK ext -> Constraint
-class MkClause tag clause expr param k | clause expr -> k, k -> clause where
-  mkClause :: ClauseArgs expr param -> Clause tag k
+type MkClause :: Type -> Type -> Type -> Maybe Type -> Maybe [Type] -> Constraint
+class MkClause tag clause expr param result | clause expr -> result where
+  mkClause :: ClauseArgs expr param -> (Clause tag clause, MaybeD (NP Decoder) result)
 
 instance (
     fields ~ ClauseFieldsFor tag clause,
     NormalizeFrags InvalidFrags expr frags,
     error ~ ArgsError param fields,
-    AcceptClauseArgs error tag clause expr param fields result,
-    k ~ FromResultDds clause result
-  ) => MkClause tag clause expr param k where
+    AcceptClauseArgs error tag clause expr param fields result
+  ) => MkClause tag clause expr param result where
     mkClause args =
-      case result of
-        Data.NoClauseResult -> Clause fields
-        Data.ClauseResult Nil -> Clause fields
-        Data.ClauseResult (res :* Nil) -> ResultClause fields res
-        Data.ClauseResult (res1 :* res2 :* res) -> ResultsClause fields (res1 :* res2 :* res)
-      where
-        (fields, result) = acceptClauseArgs @error @tag @clause @expr @param @fields args
+      first Clause (acceptClauseArgs @error @tag @clause args)

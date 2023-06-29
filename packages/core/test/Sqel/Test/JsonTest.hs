@@ -5,6 +5,7 @@ import Hedgehog (TestT, (===))
 
 import Sqel.Clauses (from, select)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Def)
 import Sqel.Dsl (Json, Prim, Prod, Table)
 import Sqel.Syntax.Fragments (tableK)
@@ -29,7 +30,7 @@ type Table_J =
   Table "j" J (Prod [Prim, Json])
 
 statement_j :: Sql
-statement_j = S.do
+statement_j = statementSql S.do
   t <- tableK @Table_J @Def
   select t
   from t

@@ -141,7 +141,7 @@ type EmptyProd ext =
   'Dd ext () ('Comp ('TSel 'DefaultPrefix "()") 'Prod 'Nest '[])
 
 type EmptyQuery =
-  EmptyProd ('Ext ('IxPaths 'PathsRoot ('Just 1)) NoMods)
+  EmptyProd ('Ext ('IxPaths 'PathsRoot 'Nothing) NoMods)
 
 type EmptyResult =
   EmptyProd ('Ext ('IxPaths 'PathsRoot 'Nothing) NoMods)

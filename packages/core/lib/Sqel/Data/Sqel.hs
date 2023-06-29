@@ -9,6 +9,7 @@ import Sqel.Data.Dd (DdK (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), StructWi
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Dd (DdSub, DdType)
 import Sqel.SOP.Error (Quoted)
+import Sqel.Data.Statement (Statement)
 
 type SqelFor :: ∀ {ext} . Type -> DdK ext -> Type
 data SqelFor tag s where
@@ -99,7 +100,7 @@ class Project name s where
   project :: SqelFor tag s -> SqelFor tag (Projected name s)
 
 instance DdKField name sub => Project name ('Dd ext a ('Comp tsel sort inc sub)) where
-    project (SqelComp _ _ _ sub _) = ddKField @name sub
+  project (SqelComp _ _ _ sub _) = ddKField @name sub
 
 instance (
     Project name s,
@@ -111,3 +112,5 @@ sqelSub :: SqelFor tag s -> NP (SqelFor tag) (DdSub s)
 sqelSub = \case
   SqelPrim _ _ -> Nil
   SqelComp _ _ _ sub _ -> sub
+
+type StatementDd query table = Statement (DdType query) (DdType table)

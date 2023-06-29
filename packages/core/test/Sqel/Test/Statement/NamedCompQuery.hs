@@ -6,8 +6,9 @@ import Hedgehog (TestT, (===))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Sqel)
-import Sqel.Dsl
+import Sqel.Dsl (Gen, Name, Prim, Prod, Query, Table)
 import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
 
@@ -41,7 +42,7 @@ sqel_Qn :: Sqel Query_Qn
 sqel_Qn = sqel
 
 stmt_namedCompQuery :: Sql
-stmt_namedCompQuery = S.do
+stmt_namedCompQuery = statementSql S.do
   fs <- query sqel_Qn (sqel_Nc :* Nil)
   select fs.table
   from fs.table

@@ -5,6 +5,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (createTable, from, select)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Data.Uid (Uid)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Merge, Pk, Prim, Sum, Table, UidProd)
@@ -44,13 +45,13 @@ mergeSum :: Sqel Table_MergeSum
 mergeSum = sqel
 
 statement1 :: Sql
-statement1 = S.do
+statement1 = statementSql S.do
   t <- table mergeSum
   select t
   from t
 
 statement2 :: Sql
-statement2 = S.do
+statement2 = statementSql @_ @() S.do
   t <- table mergeSum
   createTable t
 

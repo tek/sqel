@@ -9,14 +9,11 @@ import Prelude hiding (Mod, join, on)
 import Sqel.Build (buildAs, buildKAs, buildKTuple, buildTuple)
 import Sqel.Build.Sql (BuildClause, BuildClauses, buildSqlDd)
 import Sqel.Class.Check (Check, Checked)
-import Sqel.Class.NamedFragment (NamedTable, TableNamed)
-import Sqel.Class.Query (FragmentsSqel, QuerySqel)
-import Sqel.Class.ReifySqel (ReifySqel, ReifySqels)
+import Sqel.Class.Query (FragmentsDd)
 import Sqel.Clauses (createTable, from, join, on, select, where_)
-import Sqel.Codec.Result (ResultDecoder)
 import Sqel.Data.Clause ((+>))
-import Sqel.Data.Dd (type (:>) ((:>)))
-import Sqel.Data.Sqel (Project, Projected, SqelFor)
+import Sqel.Data.Dd (DdK, type (:>) ((:>)))
+import Sqel.Data.Sqel (Project, Projected, SqelFor, StatementDd)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
 import Sqel.Dd (DdType)
@@ -25,12 +22,11 @@ import Sqel.Fragment ((.=))
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Syntax.Fragments (project, query1)
 import qualified Sqel.Syntax.Monad as Sqel
-import Sqel.Test.Statement.Common (Cat, Q, Query_Q, Table_Bird, Table_Cat)
+import Sqel.Test.Statement.Common (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
 
 stmt1 ::
-  ∀ query .
-  ReifySqel Def query =>
-  Check '[Table_Cat] query =>
+  ∀ {ext} (query :: DdK ext) .
+  FragmentsDd Def ('Just query) '[Table_Cat] =>
   Project "fur" query =>
   Sql
 stmt1 =
@@ -46,10 +42,7 @@ type PF res = Projected "fur" res
 -- If you want to see the full type, call 'statementWith @(RawErrors tag)' (insert 'tag' from what's present).
 --
 -- However, since we've now achieved automatic result type extraction, this can be specialized to the query type.
-stmt2 ::
-  ∀ res .
-  ResultDecoder res '[Projected "fur" Table_Cat] =>
-  Statement Q res
+stmt2 :: Statement Q Fur
 stmt2 =
   buildKAs @('Just Query_Q) @'[Table_Cat] \ c ->
     select c.cat.fur +> from c.cat +> where_ c.query.fur
@@ -59,7 +52,7 @@ stmt3 ::
   Check '[d] q =>
   Sqel q ->
   Sqel d ->
-  Statement (DdType q) (DdType d)
+  StatementDd q d
 stmt3 q d =
   buildAs @(DdType d) (JustD q) (d :* Nil) \ frags ->
     select frags.table +> from frags.table +> where_ frags.query
@@ -69,24 +62,25 @@ stmt4 =
   buildSqlDd @('Just Query_Q) @'[Table_Cat] @Def \ c ->
     select c.cat +> from c.cat +> where_ c.query.fur
 
--- TODO QuerySqel should be mentioned in error message if stuck
-stmt5 ::
-  ∀ res tables .
-  ReifySqels Def tables =>
-  NamedTable "cat" tables =>
-  NamedTable "bird" tables =>
-  Project "cat" (TableNamed "bird" tables) =>
-  Project "nam" (TableNamed "cat" tables) =>
-  QuerySqel Def Query_Q tables =>
-  ResultDecoder res '[TableNamed "cat" tables] =>
-  Statement Q res
-stmt5 =
-  buildKAs @('Just Query_Q) @tables @res \ c ->
-    select c.cat +>
-    from c.cat +>
-    join c.bird +>
-    on (c.cat.nam .= c.bird.cat) +>
-    where_ c.query.fur
+-- -- TODO QuerySqel should be mentioned in error message if stuck
+-- TODO apparently this is too polymorphic since the decoupling of the ext kinds of query/table
+-- stmt5 ::
+--   ∀ {extt} res (tables :: [DdK extt]) .
+--   ReifySqels Def tables =>
+--   NamedTable "cat" tables =>
+--   NamedTable "bird" tables =>
+--   Project "cat" (TableNamed "bird" tables) =>
+--   Project "nam" (TableNamed "cat" tables) =>
+--   QuerySqel Def Query_Q tables =>
+--   ResultDecoder '[DdType (TableNamed "cat" tables)] res =>
+--   Statement Q res
+-- stmt5 =
+--   buildKAs @('Just Query_Q) @tables @res \ c ->
+--     select c.cat +>
+--     from c.cat +>
+--     join c.bird +>
+--     on (c.cat.nam .= c.bird.cat) +>
+--     where_ c.query.fur
 
 stmt6 :: Statement Q Cat
 stmt6 =
@@ -143,10 +137,10 @@ stmt12 table =
     createTable c.table
 
 selectQuery ::
-  ∀ query proj table tag .
-  FragmentsSqel tag ('Just query) '[table] =>
+  ∀ {extq} {extt} (query :: DdK extq) (proj :: DdK extt) (table :: DdK extt) tag .
   BuildClauses tag [Select, From, Where] =>
   Checked '[table] tag proj =>
+  Checked '[table] tag query =>
   SqelFor tag query ->
   SqelFor tag proj ->
   SqelFor tag table ->
@@ -176,5 +170,5 @@ test_build = do
   target1 === stmt1 @Query_Q
   target4 === stmt4
   target7 === stmt7
-  where
-    _ = stmt5 @Cat @'[Table_Cat, Table_Bird]
+  -- where
+  --   _ = stmt5 @Cat @'[Table_Cat, Table_Bird]

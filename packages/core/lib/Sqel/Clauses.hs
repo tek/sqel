@@ -3,7 +3,7 @@ module Sqel.Clauses where
 import Generics.SOP (NP (Nil, (:*)))
 
 import Sqel.Class.AcceptClause (MkClause (mkClause))
-import Sqel.Data.Clause (ClauseArgs (FragsOnly, FragsP), ClauseK, Clauses (Clauses))
+import Sqel.Data.Clause (ClauseArgs (FragsOnly, FragsP), Clauses (Clauses))
 import Sqel.Data.Drop (Drop)
 import Sqel.Data.Order (Order)
 import Sqel.Default (
@@ -28,26 +28,30 @@ import Sqel.Default (
 
 type ClauseCon :: Type -> Type
 type ClauseCon clause =
-  ∀ {ext} tag expr (k :: ClauseK ext) .
-  MkClause tag clause expr 'Nothing k =>
+  ∀ tag expr result .
+  MkClause tag clause expr 'Nothing result =>
   expr ->
-  Clauses tag '[k] ()
+  Clauses tag '[clause] result ()
 
 type ClausePCon :: Type -> Type -> Type
 type ClausePCon clause param =
-  ∀ tag expr ext (k :: ClauseK ext) .
-  MkClause tag clause expr ('Just param) k =>
+  ∀ tag expr result .
+  MkClause tag clause expr ('Just param) result =>
   expr ->
   param ->
-  Clauses tag '[k] ()
+  Clauses tag '[clause] result ()
 
 clause :: ClauseCon clause
 clause expr =
-  Clauses (mkClause (FragsOnly expr) :* Nil) ()
+  Clauses (c :* Nil) r ()
+  where
+    (c, r) = mkClause (FragsOnly expr)
 
 clauseP :: ClausePCon clause param
 clauseP expr param =
-  Clauses (mkClause (FragsP expr param) :* Nil) ()
+  Clauses (c :* Nil) r ()
+  where
+    (c, r) = mkClause (FragsP expr param)
 
 select :: ClauseCon Select
 select = clause

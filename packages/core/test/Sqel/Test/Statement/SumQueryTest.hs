@@ -5,6 +5,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Table)
 import Sqel.Syntax.Fragments (query1)
@@ -24,11 +25,12 @@ table_Dat :: Sqel Table_Dat
 table_Dat = sqel
 
 statement :: Sql
-statement = S.do
-  frags <- query1 query_NaNu table_Dat
-  select frags.table
-  from frags.table
-  where_ frags.query
+statement =
+  statementSql S.do
+    frags <- query1 query_NaNu table_Dat
+    select frags.table
+    from frags.table
+    where_ frags.query
 
 target :: Sql
 target = [sql|select "name", "number" from "dat" where ($1 = 0 and "name" = $2) or ($1 = 1 and "number" = $3)|]

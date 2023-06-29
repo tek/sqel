@@ -3,69 +3,67 @@ module Sqel.Data.Clause where
 import Generics.SOP (NP)
 
 import Sqel.Data.ClauseConfig (ClauseFieldsFor)
-import Sqel.Data.Dd (DdK)
-import Sqel.Data.Sqel (SqelFor)
+import Sqel.Data.Codec (Decoder)
 import Sqel.Kind.List (type (++))
+import Sqel.Kind.Maybe (MaybeD (NothingD))
 import Sqel.SOP.NP (appendNP)
 
--- TODO the result can be a list of types, rather than the Dds – we already have the derived codecs
--- this would probably require/allow Sqel to drop the Dd param in favor of the result type at some point
-type ClauseK :: Type -> Type
-data ClauseK ext =
-  ClauseK {
-    clause :: Type
-  }
-  |
-  ResultK {
-    clause :: Type,
-    result :: DdK ext
-  }
-  |
-  ResultsK {
-    clause :: Type,
-    results :: [DdK ext]
-  }
+type Clause :: Type -> Type -> Type
+data Clause tag clause where
+  Clause :: ClauseFieldsFor tag clause -> Clause tag clause
 
-type ClauseTag :: ∀ {ext} . ClauseK ext -> Type
-type family ClauseTag clause where
-  ClauseTag ('ClauseK clause) = clause
-  ClauseTag ('ResultK clause _) = clause
-  ClauseTag ('ResultsK clause _) = clause
-
-type ClauseResult :: ∀ {ext} . Type -> Maybe [DdK ext] -> Type
-data ClauseResult tag result where
-  ClauseResult :: NP (SqelFor tag) result -> ClauseResult tag ('Just result)
-  NoClauseResult :: ClauseResult tag 'Nothing
-
-type Clause :: ∀ {ext} . Type -> ClauseK ext -> Type
-data Clause tag k where
-  Clause :: ClauseFieldsFor tag clause -> Clause tag ('ClauseK clause)
-  ResultClause :: ClauseFieldsFor tag clause -> SqelFor tag result -> Clause tag ('ResultK clause result)
-  ResultsClause :: ClauseFieldsFor tag clause -> NP (SqelFor tag) results -> Clause tag ('ResultsK clause results)
-
-clauseFields :: Clause tag k -> ClauseFieldsFor tag (ClauseTag k)
+clauseFields :: Clause tag clause -> ClauseFieldsFor tag clause
 clauseFields = \case
   Clause fields -> fields
-  ResultClause fields _ -> fields
-  ResultsClause fields _ -> fields
 
 type ClauseList tag cs = NP (Clause tag) cs
 
-type Clauses :: Type -> [ClauseK ext] -> Type -> Type
-data Clauses tag cs a =
-  Clauses { clauses :: ClauseList tag cs, value :: a }
+type Clauses :: Type -> [Type] -> Maybe [Type] -> Type -> Type
+data Clauses tag cs result a where
+  Clauses :: ClauseList tag cs -> MaybeD (NP Decoder) result -> a -> Clauses tag cs result a
 
-instance Functor (Clauses tag cs) where
-  fmap f (Clauses cs a) = Clauses cs (f a)
+instance Functor (Clauses tag result cs) where
+  fmap f (Clauses cs res a) = Clauses cs res (f a)
 
-unClauses :: Clauses tag cs a -> ClauseList tag cs
-unClauses (Clauses cs _) = cs
+unClauses :: Clauses tag cs result a -> ClauseList tag cs
+unClauses = \case
+  Clauses cs _ _ -> cs
 
-appendClauses :: Clauses tag csl a -> Clauses tag csr b -> Clauses tag (csl ++ csr) b
-appendClauses (Clauses csl _) (Clauses csr b) =
-  Clauses (appendNP csl csr) b
+pattern UnClauses :: ClauseList tag cs -> Clauses tag cs result a
+pattern UnClauses cs <- (unClauses -> cs)
+{-# complete UnClauses #-}
 
-(+>) :: Clauses tag csl a -> Clauses tag csr b -> Clauses tag (csl ++ csr) b
+type AppendClauses :: Maybe [Type] -> Maybe [Type] -> Maybe [Type] -> Constraint
+class AppendClauses l r result | l r -> result where
+  appendResults :: MaybeD f l -> MaybeD f r -> MaybeD f result
+
+instance AppendClauses 'Nothing 'Nothing 'Nothing where
+  appendResults NothingD NothingD = NothingD
+
+instance AppendClauses ('Just l) 'Nothing ('Just l) where
+  appendResults res _ = res
+
+instance AppendClauses 'Nothing ('Just r) ('Just r) where
+  appendResults _ res = res
+
+instance (
+    TypeError (ToErrorMessage ("Cannot use two result producing clauses in a statement"))
+  ) => AppendClauses ('Just l) ('Just r) ('Just r) where
+    appendResults = error "unreachable"
+
+appendClauses ::
+  AppendClauses resl resr result =>
+  Clauses tag csl resl a ->
+  Clauses tag csr resr b ->
+  Clauses tag (csl ++ csr) result b
+appendClauses (Clauses csl resl _) (Clauses csr resr b) =
+  Clauses (appendNP csl csr) (appendResults resl resr) b
+
+(+>) ::
+  AppendClauses resl resr result =>
+  Clauses tag csl resl a ->
+  Clauses tag csr resr b ->
+  Clauses tag (csl ++ csr) result b
 (+>) = appendClauses
 
 infixr 5 +>

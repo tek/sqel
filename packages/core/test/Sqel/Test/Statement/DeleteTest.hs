@@ -7,12 +7,13 @@ import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Clauses (deleteFrom, returning, where_)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Syntax.Fragments (query1, table_)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Statement.Common (query_Q, table_Cat)
 
 statementAll :: Sql
-statementAll = S.do
+statementAll = statementSql @_ @() S.do
   f <- table_ table_Cat
   deleteFrom f.table
 
@@ -24,7 +25,7 @@ test_deleteAll = do
   targetAll === statementAll
 
 statementCond :: Sql
-statementCond = S.do
+statementCond = statementSql S.do
   f <- query1 query_Q table_Cat
   deleteFrom f.table
   where_ f.query

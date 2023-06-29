@@ -8,11 +8,9 @@ import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.DefaultFields (DefaultMeta (defaultCompMeta))
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect)
-import Sqel.Data.Clause (ClauseK (ClauseK))
 import Sqel.Data.Dd (DdK (Dd), StructWith (Comp, Prim))
 import Sqel.Data.PgTypeName (pattern PgOnlyTableName, getPgTypeName)
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest)
-import Sqel.Data.Statement (Statement)
 import Sqel.Dd (DdSub)
 import qualified Sqel.Default
 import Sqel.Default (CreateTable, CreateType)
@@ -20,7 +18,6 @@ import Sqel.Migration.Metadata (DbCols (DbCols), typeColumns)
 import Sqel.Sqel (sqelCompName, sqelTableName)
 import qualified Sqel.Statement.Common as Sqel
 import Sqel.Statement.PgSchema (typeColumnsSql)
-import Sqel.Syntax.Result (TableResult)
 
 compNeedsInit ::
   ∀ tag s m .
@@ -59,7 +56,8 @@ instance (
     Monad m,
     DefaultMeta tag,
     MigrationEffect m,
-    All (InitComp tag m) sub
+    All (InitComp tag m) sub,
+    BuildClause tag CreateType
   ) => InitComp tag m ('Dd ext a ('Comp tsel c i sub)) where
     initComp s =
       whenM (compNeedsInit s) do
@@ -89,7 +87,7 @@ instance (
     DefaultMeta tag,
     MigrationEffect m,
     All (InitComp tag m) (DdSub table),
-    TableResult (Statement () ()) tag table '[ 'ClauseK CreateTable]
+    BuildClause tag CreateTable
   ) => InitTable tag m table where
   initTable table = do
     MigrationEffect.log [exon|Initializing table '#{name}'|]

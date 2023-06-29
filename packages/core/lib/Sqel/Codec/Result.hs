@@ -1,69 +1,38 @@
 module Sqel.Codec.Result where
 
-import Generics.SOP (NP (Nil, (:*)), SListI, hmap)
+import Generics.SOP (NP (Nil, (:*)))
 
-import Sqel.Class.DdVal (DdVal (DdVal), UnDdVals (unDdVals))
 import Sqel.Codec.Product (ProdDecoder (prodDecoder))
-import Sqel.Data.Clause (Clause (ResultClause, ResultsClause), ClauseK (ClauseK, ResultK, ResultsK), ClauseList)
-import qualified Sqel.Data.Codec
 import Sqel.Data.Codec (Decoder)
-import Sqel.Data.Dd (DdK)
-import Sqel.Data.Sqel (sqelCodec)
-import Sqel.Dd (DdType, DdTypes)
+import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 
-type ClausesResult :: [ClauseK ext] -> [DdK ext]
-type family ClausesResult cs where
-  ClausesResult '[] = '[]
-  ClausesResult ('ResultK _ s : _) = '[s]
-  ClausesResult ('ResultsK _ s : _) = s
-  ClausesResult (_ : ss) = ClausesResult ss
+type ResultDecoder :: [Type] -> Type -> Constraint
+class ResultDecoder results result where
+  resultDecoder :: NP Decoder results -> Decoder result
 
-type FindResultDecoders :: ∀ {ext} . Type -> [DdK ext] -> [ClauseK ext] -> Constraint
-class FindResultDecoders tag results cs | cs -> results where
-  findResultDecoders :: ClauseList tag cs -> NP (DdVal Decoder) results
-
-instance FindResultDecoders tag '[] '[] where
-    findResultDecoders Nil = Nil
-
-instance (
-    FindResultDecoders tag results cs
-  ) => FindResultDecoders tag results ('ClauseK frags : cs) where
-    findResultDecoders (_ :* cs) = findResultDecoders cs
-
-instance FindResultDecoders tag '[result] ('ResultK frags result : cs) where
-    findResultDecoders (ResultClause _ s :* _) = DdVal (sqelCodec s).decoder :* Nil
-
-instance (
-    SListI results
-  ) => FindResultDecoders tag results ('ResultsK frags results : cs) where
-    findResultDecoders (ResultsClause _ ss :* _) = hmap (\ s -> DdVal (sqelCodec s).decoder) ss
-
-type ResultDecoder :: ∀ {ext} . Type -> [DdK ext] -> Constraint
-class ResultDecoder result sresults where
-  resultDecoder :: NP (DdVal Decoder) sresults -> Decoder result
-
-instance ResultDecoder () '[] where
+instance ResultDecoder '[] () where
   resultDecoder Nil = unit
 
-instance DdType s ~ result => ResultDecoder result '[s] where
-  resultDecoder (DdVal decoder :* Nil) = decoder
+instance a ~ result => ResultDecoder '[a] result where
+  resultDecoder (decoder :* Nil) = decoder
 
 instance (
-    sresults ~ s0 : s1 : ss,
-    results ~ DdTypes sresults,
-    UnDdVals sresults Decoder,
+    results ~ a0 : a1 : as,
     ProdDecoder Decoder result results
-  ) => ResultDecoder result (s0 : s1 : ss) where
+  ) => ResultDecoder (a0 : a1 : as) result where
     resultDecoder decoders =
-      prodDecoder @Decoder @result @results (unDdVals @sresults decoders)
+      prodDecoder @Decoder @result @results decoders
 
-type ClausesResultDecoder :: ∀ {ext} . Type -> Type -> [ClauseK ext] -> Constraint
-class ClausesResultDecoder tag result cs where
-  clausesResultDecoder :: ClauseList tag cs -> Decoder result
+-- TODO rename, maybe Results
+type ClausesResultDecoder :: Maybe [Type] -> Type -> Constraint
+class ClausesResultDecoder results result where
+  clausesResultDecoder :: MaybeD (NP Decoder) results -> Decoder result
 
 instance (
-    FindResultDecoders tag sresults cs,
-    ResultDecoder result sresults
-  ) => ClausesResultDecoder tag result cs where
-    clausesResultDecoder clauses =
-      resultDecoder (findResultDecoders @tag @sresults clauses)
+    ResultDecoder results result
+  ) => ClausesResultDecoder ('Just results) result where
+    clausesResultDecoder (JustD results) =
+      resultDecoder results
+
+instance ClausesResultDecoder 'Nothing () where
+  clausesResultDecoder NothingD = unit

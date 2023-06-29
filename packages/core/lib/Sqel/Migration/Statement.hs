@@ -33,7 +33,7 @@ import Sqel.Data.PgTypeName (
 import Sqel.Data.Spine (CompSort (CompSum))
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest)
 import Sqel.Data.Sql (Sql, sql)
-import Sqel.Data.Statement (Statement (Statement))
+import Sqel.Data.Statement (Statement (Statement), statementSql)
 import qualified Sqel.Default
 import Sqel.Default (CompMeta, CreateTable, CreateType, Def, PrimMeta)
 import Sqel.Migration.Fold (foldMigrations)
@@ -173,7 +173,7 @@ typeActionStatements typeName = \case
     alterStatement typeName \ alter _ -> [sql|#{alter} rename to "##{new}"|]
     traverse_ (columnStatements' newName) cols
   AddAction comp ->
-    tell [MigrationStatement () mempty (Statement.createType comp)]
+    tell [MigrationStatement () mempty (statementSql (Statement.createType comp))]
 
 typeStatements ::
   DefaultMeta tag =>
@@ -209,7 +209,7 @@ tableStatements ::
   SqelFor tag table ->
   [Sql]
 tableStatements s =
-  Statement.createTable s : foldTypes (pure . Statement.createType) s
+  statementSql (Statement.createTable s) : foldTypes (pure . statementSql . Statement.createType) s
 
 migrationsStatements ::
   DefaultMeta tag =>

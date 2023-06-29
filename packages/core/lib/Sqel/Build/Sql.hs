@@ -17,9 +17,9 @@ import Sqel.Build.Select (selectorsClause)
 import Sqel.Build.Table (bindClause)
 import Sqel.Build.Values (valuesClause)
 import Sqel.Class.ClauseKeyword (ClauseKeyword (clauseKeyword))
-import Sqel.Class.DefaultFields (DefaultFields (defaultFields))
+import Sqel.Class.DefaultFields (DefaultFields, defaultFields)
 import Sqel.Class.Query (FragmentsDd, withFragmentsDd)
-import Sqel.Data.Clause (Clause, ClauseK, ClauseTag, Clauses (Clauses), clauseFields)
+import Sqel.Data.Clause (Clause, Clauses, pattern UnClauses, clauseFields)
 import Sqel.Data.ClauseConfig (ClauseFieldsFor)
 import Sqel.Data.Fragments (Fragments)
 import Sqel.Data.Sql (Sql)
@@ -131,13 +131,18 @@ instance (
   ) => BuildClause Def clause where
     buildClause multi fields = withKeyword @clause (buildClauseDefMaybe @clause multi fields)
 
-instance {-# overlappable #-} (
+type BuildClauseViaDefault :: Type -> Type -> Constraint
+class BuildClauseViaDefault tag clause where
+  buildClauseViaDefault :: Bool -> ClauseFieldsFor tag clause -> Maybe Sql
+
+instance (
     fields ~ ClauseFieldsFor tag clause,
     fieldsDef ~ ClauseFieldsFor Def clause,
     BuildClause Def clause,
     DefaultFields fields fieldsDef
-  ) => BuildClause tag clause where
-    buildClause multi = buildClause @Def @clause multi . defaultFields @fields @fieldsDef
+  ) => BuildClauseViaDefault tag clause where
+  buildClauseViaDefault multi =
+    buildClause @Def @clause multi . defaultFields @fields @fieldsDef
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -146,31 +151,31 @@ type family BuildClauses tag clauses where
   BuildClauses _ '[] = ()
   BuildClauses tag (c : cs) = (BuildClause tag c, BuildClauses tag cs)
 
-type BuildClauseK :: Type -> ClauseK ext -> Constraint
+-- TODO remove
+type BuildClauseK :: Type -> Type -> Constraint
 class BuildClauseK tag clause where
   buildClauseK :: Bool -> Clause tag clause -> Maybe Sql
 
 instance (
-    ct ~ ClauseTag clause,
-    BuildClause tag ct
+    BuildClause tag clause
   ) => BuildClauseK tag clause where
-    buildClauseK multi clause = buildClause @tag @ct multi (clauseFields clause)
+    buildClauseK multi clause = buildClause @tag @clause multi (clauseFields clause)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type BuildSql :: ∀ {ext} . Type -> [ClauseK ext] -> Constraint
+type BuildSql :: Type -> [Type] -> Constraint
 class BuildSql tag cs where
-  buildSql :: Bool -> Clauses tag cs a -> Sql
+  buildSql :: Bool -> Clauses tag cs result a -> Sql
 
 instance All (BuildClauseK tag) cs => BuildSql tag cs where
-  buildSql multi (Clauses cs _) =
+  buildSql multi (UnClauses cs) =
     Exon.intercalate " " (catMaybes (hcollapse (hcmap (Proxy @(BuildClauseK tag)) (K . buildClauseK multi) cs)))
 
 buildSqlDd ::
-  ∀ query tables tag cs a .
+  ∀ query tables tag cs result a .
   FragmentsDd tag query tables =>
   BuildSql tag cs =>
-  (Fragments tag query tables '[] -> Clauses tag cs a) ->
+  (Fragments tag query tables '[] -> Clauses tag cs result a) ->
   Sql
 buildSqlDd f =
   withFragmentsDd @tag @query @tables \ frags -> buildSql frags.multi (f frags)

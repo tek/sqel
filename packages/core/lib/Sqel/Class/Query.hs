@@ -62,7 +62,7 @@ withQueryDd ::
 withQueryDd f =
   f (queryDd @tag @query @tables)
 
-type FragmentsDd :: ∀ {ext} . Type -> Maybe (DdK ext) -> [DdK ext] -> Constraint
+type FragmentsDd :: ∀ {extq} {extt} . Type -> Maybe (DdK extq) -> [DdK extt] -> Constraint
 class FragmentsDd tag query tables where
   fragmentsDd :: Fragments tag query tables '[]
 
@@ -100,7 +100,7 @@ instance (
         tableSpine :: SqelFor tag s -> TableFragment tag s
         tableSpine t = TableFragment (unchecked t)
 
-type QuerySqel :: Type -> DdK ext -> [DdK ext] -> Constraint
+type QuerySqel :: ∀ {extq} {extt} . Type -> DdK extq -> [DdK extt] -> Constraint
 class QuerySqel tag query tables where
   querySqel :: SqelFor tag query -> NP (SqelFor tag) tables -> Fragments tag ('Just query) tables '[]
 
@@ -113,7 +113,7 @@ instance (
       where
         Fragments NoQueryFragment tableSpines proj multi = noQuerySqel tables
 
-type FragmentsSqel :: ∀ {ext} . Type -> Maybe (DdK ext) -> [DdK ext] -> Constraint
+type FragmentsSqel :: ∀ {extq} {extt} . Type -> Maybe (DdK extq) -> [DdK extt] -> Constraint
 class FragmentsSqel tag query tables where
   fragmentsSqel :: MaybeD (SqelFor tag) query -> NP (SqelFor tag) tables -> Fragments tag query tables '[]
 

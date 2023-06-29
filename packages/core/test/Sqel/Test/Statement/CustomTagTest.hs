@@ -4,6 +4,7 @@ import Exon (exon)
 import Hedgehog (TestT, (===))
 import Prelude hiding (Mod)
 
+import Sqel.Build.Sql (BuildClause (buildClause), BuildClauseViaDefault (buildClauseViaDefault))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select)
 import Sqel.Data.Dd (Dd)
@@ -12,6 +13,7 @@ import Sqel.Data.Mods.MigrationRename (MigrationRename)
 import Sqel.Data.Spine (CompFor, PrimFor)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (CompMeta, PrimMeta)
 import Sqel.Dsl (Gen, MigrationTable, Mod, Prim, Prod, Table)
 import Sqel.Migration.Class.Syntax ((-->))
@@ -29,6 +31,9 @@ type SqelTag = SqelFor Tag
 
 type SqelTagDdl :: Ddl -> Type
 type SqelTagDdl = SqelFor Tag
+
+instance BuildClauseViaDefault Tag clause => BuildClause Tag clause where
+  buildClause = buildClauseViaDefault @Tag @clause
 
 data Dat0 =
   Dat0 {
@@ -59,7 +64,7 @@ migrations =
   table_Dat0 --> table_Dat
 
 statement :: Sql
-statement = S.do
+statement = statementSql S.do
   t <- table table_Dat
   select t
   from t

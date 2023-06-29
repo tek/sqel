@@ -8,7 +8,7 @@ import Sqel.Class.ReifyComp (DemoteSort (demoteSort), ReifyComp (reifyComp))
 import Sqel.Class.ReifyPrim (ReifyPrim (reifyPrim))
 import Sqel.Data.Class.Dd (SingInc (singInc))
 import Sqel.Data.Codec (FullCodec)
-import Sqel.Data.Dd (Dd, DdK (Dd), SInc (SMerge, SNest), StructWith (Comp, Prim))
+import Sqel.Data.Dd (DdK (Dd), SInc (SMerge, SNest), StructWith (Comp, Prim))
 import Sqel.Data.PgTypeName (PgTableName, pgTableName)
 import Sqel.Data.Sel (TSelName)
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest, sqelCodec)
@@ -77,7 +77,7 @@ sqel ::
   SqelFor tag s
 sqel = reifySqel
 
-type ReifySqels :: Type -> [Dd] -> Constraint
+type ReifySqels :: ∀ {ext} . Type -> [DdK ext] -> Constraint
 class ReifySqels tag ss where
   reifySqels :: NP (SqelFor tag) ss
 

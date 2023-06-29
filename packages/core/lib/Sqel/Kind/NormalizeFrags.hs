@@ -8,6 +8,7 @@ import Sqel.Kind.List (type (++))
 import Sqel.SOP.Error (Quoted)
 import Sqel.SOP.NP (appendNP)
 
+-- TODO more tuples
 type NormalizedFrags :: Type -> [Frag ext]
 type family NormalizedFrags expr where
   NormalizedFrags (l :> r) = NormalizedFrags l ++ NormalizedFrags r

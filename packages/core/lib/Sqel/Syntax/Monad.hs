@@ -2,49 +2,53 @@ module Sqel.Syntax.Monad where
 
 import Generics.SOP (NP (Nil))
 
-import Sqel.Data.Clause (Clauses (Clauses), appendClauses)
+import Sqel.Data.Clause (AppendClauses, Clauses (Clauses), appendClauses)
+import Sqel.Data.Statement (Statement)
 import Sqel.Kind.List (type (++))
-import Sqel.SOP.NP (appendNP)
+import Sqel.Kind.Maybe (MaybeD (NothingD))
 import Sqel.Syntax.Result (DoResult (doResult))
-
--- Monad
-
-return :: a -> Clauses tag '[] a
-return a = Clauses Nil a
-
-(>>=) ::
-  ∀ tag frags cs result a .
-  DoResult frags tag cs a result =>
-  Clauses tag '[] frags ->
-  (frags -> Clauses tag cs a) ->
-  result
-Clauses Nil frags >>= f =
-  doResult @frags frags (f frags)
-
-(>>) ::
-  Clauses tag csl a ->
-  Clauses tag csr b ->
-  Clauses tag (csl ++ csr) b
-(>>) = appendClauses
 
 -- Functor
 
-fmap :: (a -> b) -> Clauses tag cs a -> Clauses tag cs b
-fmap f (Clauses cs a) = Clauses cs (f a)
+fmap :: (a -> b) -> Clauses tag cs results a -> Clauses tag cs results b
+fmap = Prelude.fmap
 
 -- Applicative
 
-pure :: a -> Clauses tag '[] a
-pure a = Clauses Nil a
+pure :: a -> Clauses tag '[] 'Nothing a
+pure a = Clauses Nil NothingD a
 
 (<*>) ::
-  Clauses tag csl (a -> b) ->
-  Clauses tag csr a ->
-  Clauses tag (csl ++ csr) b
-Clauses csl f <*> Clauses csr a =
-  Clauses (appendNP csl csr) (f a)
+  AppendClauses resl resr results =>
+  Clauses tag csl resl (a -> b) ->
+  Clauses tag csr resr a ->
+  Clauses tag (csl ++ csr) results b
+l@(Clauses _ _ f) <*> r =
+  f <$> appendClauses l r
 
 join ::
-  Clauses tag csl (Clauses tag csr a) ->
-  Clauses tag (csl ++ csr) a
-join (Clauses csl (Clauses csr a)) = Clauses (appendNP csl csr) a
+  AppendClauses resl resr results =>
+  Clauses tag csl resl (Clauses tag csr resr a) ->
+  Clauses tag (csl ++ csr) results a
+join l@(Clauses _ _ r) = appendClauses l r
+
+-- Monad
+
+return :: a -> Clauses tag '[] 'Nothing a
+return a = Clauses Nil NothingD a
+
+(>>=) ::
+  ∀ tag frags cs results result q a .
+  DoResult frags tag cs results a q result =>
+  Clauses tag '[] 'Nothing frags ->
+  (frags -> Clauses tag cs results a) ->
+  Statement q result
+Clauses Nil NothingD frags >>= f =
+  doResult @frags frags (f frags)
+
+(>>) ::
+  AppendClauses resl resr results =>
+  Clauses tag csl resl a ->
+  Clauses tag csr resr b ->
+  Clauses tag (csl ++ csr) results b
+(>>) = appendClauses

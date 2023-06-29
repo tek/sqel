@@ -7,7 +7,6 @@ import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.DefaultFields (DefaultMeta)
 import Sqel.Class.MigrationEffect (MigrationEffect (runStatement, runStatement_))
 import Sqel.Class.ReifyCodec (ReifyCodec, reifyParams, reifyRow)
-import Sqel.Data.Clause (ClauseK (ClauseK))
 import Sqel.Data.Codec (Decoder, Encoder)
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.Migration (
@@ -30,7 +29,6 @@ import Sqel.Migration.Run (autoKeys, runTypesMigration)
 import Sqel.Migration.Table (TableTypeChanges (tableTypeChanges))
 import Sqel.Sqel (sqelTableName)
 import qualified Sqel.Statement.Common as Statement
-import Sqel.Syntax.Result (TableQResult, TableResult)
 
 data MigrateTransform tag m old new =
   MigrateTransform {
@@ -56,11 +54,12 @@ instance (
     Monad m,
     DefaultMeta tag,
     MigrationEffect m,
+    BuildClause tag CreateTable,
+    BuildClause tag InsertInto,
+    BuildClause tag Values,
     BuildClause tag CreateType,
     BuildClause tag Select,
-    BuildClause tag From,
-    TableResult (Statement () ()) tag new '[ 'ClauseK CreateTable],
-    TableQResult (Statement (DdType new) ()) tag new ['ClauseK InsertInto, 'ClauseK Values]
+    BuildClause tag From
   ) => TransformAndMigrate tag m old new where
     transformTypeKeys types = pure (autoKeys types)
 

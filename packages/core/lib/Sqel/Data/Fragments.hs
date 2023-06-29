@@ -3,12 +3,7 @@ module Sqel.Data.Fragments where
 import GHC.Records (HasField (getField))
 import Generics.SOP (NP (Nil, (:*)))
 
-import Sqel.Class.NamedFragment (
-  NamedProjection (namedProjection),
-  NamedTable (namedTable),
-  ProjectionNamed,
-  TableNamed,
-  )
+import Sqel.Class.NamedFragment (NamedProjection (namedProjection), NamedTable (namedTable))
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.Spine (SpineSort (SpineProj, SpineQuery, SpineTable))
@@ -30,10 +25,9 @@ newtype TableFragments tag tables =
   TableFragments (NP (TableFragment tag) tables)
 
 instance (
-    NamedTable name tables,
-    s ~ TableNamed name tables,
+    NamedTable name tables s,
     comp ~ IsComp s
-  ) => HasField name (TableFragments tag tables) (Fragment ('Frag ('Frag0 tag 'SpineTable s 'True comp))) where
+  ) => HasField name (TableFragments tag (tables :: [DdK ext])) (Fragment ('Frag ('Frag0 tag 'SpineTable (s :: DdK ext) 'True comp))) where
     getField (TableFragments ss) =
       coerce (namedTable @name ss)
 
@@ -46,19 +40,18 @@ newtype ProjectionFragments tag tables =
   ProjectionFragments (NP (ProjectionFragment tag) tables)
 
 instance (
-    NamedProjection name proj,
-    s ~ ProjectionNamed name proj,
+    NamedProjection name proj s,
     comp ~ IsComp s
-  ) => HasField name (ProjectionFragments tag proj) (Fragment ('Frag ('Frag0 tag 'SpineProj s 'False comp))) where
+  ) => HasField name (ProjectionFragments tag (proj :: [DdK ext])) (Fragment ('Frag ('Frag0 tag 'SpineProj (s :: DdK ext) 'False comp))) where
     getField (ProjectionFragments ss) =
       coerce (namedProjection @name ss)
 
 type Fragments ::
-  ∀ {ext} .
+  ∀ {extq} {extt} .
   Type ->
-  Maybe (DdK ext) ->
-  [DdK ext] ->
-  [DdK ext] ->
+  Maybe (DdK extq) ->
+  [DdK extt] ->
+  [DdK extt] ->
   Type
 data Fragments tag query tables proj where
   Fragments ::
@@ -88,12 +81,12 @@ type family SelectFragmentsField name where
   SelectFragmentsField name = 'FragmentsTable name
 
 type GetFragmentsField ::
-  ∀ {ext} .
+  ∀ {extq} {extt} .
   FragmentsField ->
   Type ->
-  Maybe (DdK ext) ->
-  [DdK ext] ->
-  [DdK ext] ->
+  Maybe (DdK extq) ->
+  [DdK extt] ->
+  [DdK extt] ->
   Type ->
   Constraint
 class GetFragmentsField field tag query tables proj r | field tag query tables proj -> r where

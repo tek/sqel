@@ -6,15 +6,16 @@ import Prelude hiding (Mod, join, on)
 
 import Sqel.Clauses (from, join, on, select, where_)
 import Sqel.Data.Sql (Sql)
+import Sqel.Data.Statement (statementSql)
+import Sqel.Default (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (queryK)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Statement.Common (Query_Q, Table_Bird, Table_Cat)
-import Sqel.Default (Def)
 
 tableForQuery :: Sql
 tableForQuery =
-  S.do
+  statementSql S.do
     c <- queryK @Query_Q @[Table_Cat, Table_Bird] @Def
     select c.bird.num
     from c.cat
@@ -24,7 +25,7 @@ tableForQuery =
 
 notAFragment :: Sql
 notAFragment =
-  S.do
+  statementSql S.do
     c <- queryK @Query_Q @[Table_Cat, Table_Bird] @Def
     select c.bird.num
     from c.cat
@@ -34,7 +35,7 @@ notAFragment =
 
 notRoot :: Sql
 notRoot =
-  S.do
+  statementSql S.do
     c <- queryK @Query_Q @[Table_Cat, Table_Bird] @Def
     select c.bird.num
     from c.cat.nam

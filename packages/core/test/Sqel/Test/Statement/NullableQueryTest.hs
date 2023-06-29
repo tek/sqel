@@ -5,6 +5,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Def, Sqel)
 import Sqel.Dsl (Gen, Newtype, Nullable, OrNull, Prim, Prod, Query, Table)
 import Sqel.Syntax.Fragments (query1)
@@ -44,7 +45,7 @@ target_nullable =
 
 test_statement_nullableQuery :: TestT IO ()
 test_statement_nullableQuery =
-  target_nullable === S.do
+  target_nullable === statementSql S.do
     fs <- query1 @Def (sqel @Query_Q) (sqel @Table_Dat)
     select fs.table
     from fs.table
@@ -56,7 +57,7 @@ target_orNull =
 
 test_statement_orNullQuery :: TestT IO ()
 test_statement_orNullQuery =
-  target_orNull === S.do
+  target_orNull === statementSql S.do
     fs <- query1 @Def (sqel @Query_Q_OrNull) (sqel @Table_Dat)
     select fs.table
     from fs.table

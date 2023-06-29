@@ -5,6 +5,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Clauses (from, orderBy, select)
 import Sqel.Data.Order (Order (Desc))
 import Sqel.Data.Sql (Sql, sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Def)
 import Sqel.Dsl
 import Sqel.Syntax.Fragments (tableK)
@@ -24,7 +25,7 @@ target_order =
 
 test_statement_order :: TestT IO ()
 test_statement_order =
-  target_order === S.do
+  target_order === statementSql S.do
     t <- tableK @Table_Dat @Def
     select t
     from t

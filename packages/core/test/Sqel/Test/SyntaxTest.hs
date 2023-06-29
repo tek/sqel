@@ -8,7 +8,7 @@ import Prelude hiding (join, on)
 import Sqel.Build.Sql (buildSqlDd)
 import Sqel.Clauses (from, join, on, select, where_)
 import Sqel.Data.Sql (Sql)
-import Sqel.Data.Statement (Statement)
+import Sqel.Data.Statement (Statement, statementSql)
 import Sqel.Default (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (query1, query1K, queryK)
@@ -23,11 +23,12 @@ stmt1 =
     where_ c.query.fur
 
 stmt2 :: Sql
-stmt2 = S.do
-  c <- query1 query_Q table_Cat
-  select (c.cat.fur.color, c.cat.fur.density)
-  from c.cat
-  where_ c.query.fur
+stmt2 =
+  statementSql @Q @Fur S.do
+    c <- query1 query_Q table_Cat
+    select (c.cat.fur.color, c.cat.fur.density)
+    from c.cat
+    where_ c.query.fur
 
 stmt14 :: Statement Q Fur
 stmt14 = S.do
@@ -37,13 +38,14 @@ stmt14 = S.do
   where_ c.query.fur
 
 stmt3 :: Sql
-stmt3 = S.do
-  c <- queryK @Query_Q @'[Table_Cat, Table_Bird] @Def
-  select c.cat.fur
-  from c.cat
-  join c.bird
-  on (c.cat.nam .= c.bird.cat)
-  where_ c.query
+stmt3 =
+  statementSql S.do
+    c <- queryK @Query_Q @'[Table_Cat, Table_Bird] @Def
+    select c.cat.fur
+    from c.cat
+    join c.bird
+    on (c.cat.nam .= c.bird.cat)
+    where_ c.query
 
 target1 :: Sql
 target1 = [exon|select ("fur")."color", ("fur")."density" from "cat" where ("fur")."color" = $2|]

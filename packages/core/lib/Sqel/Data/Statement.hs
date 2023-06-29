@@ -17,3 +17,9 @@ data Statement query proj =
 
 instance Show (Statement query result) where
   showsPrec d s = showParen (d > 10) [exon|Statement #{showsPrec 11 s.sql}|]
+
+statementSql ::
+  ∀ query proj .
+  Statement query proj ->
+  Sql
+statementSql Statement {sql} = sql
