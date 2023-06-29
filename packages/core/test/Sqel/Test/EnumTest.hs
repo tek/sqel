@@ -32,13 +32,13 @@ table_Old = sqel
 
 data En =
   En1 | En2
-  deriving stock (Show, Generic)
+  deriving stock (Eq, Show, Generic, Ord)
 
 data E =
   E {
     f1 :: Int,
     f2 :: En,
-    f3 :: [En]
+    f3 :: Set En
   }
   deriving stock (Generic)
 

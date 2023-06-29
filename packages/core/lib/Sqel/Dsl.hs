@@ -242,9 +242,9 @@ type family PrimInfer a prim where
   PrimInfer (Maybe a) prim = ApplyNullable 'False (PrimInfer a prim)
   PrimInfer [a] prim = ApplyArray [] (PrimInfer a prim)
   PrimInfer (NonEmpty a) prim = ApplyArray NonEmpty (PrimInfer a prim)
-  PrimInfer (Seq a) prim = ApplyMod (Array Seq) (PrimInfer a prim)
-  PrimInfer (Vector a) prim = ApplyMod (Array Vector) (PrimInfer a prim)
-  PrimInfer (Set a) prim = ApplyMod (Array Set) (PrimInfer a prim)
+  PrimInfer (Seq a) prim = ApplyArray Seq (PrimInfer a prim)
+  PrimInfer (Vector a) prim = ApplyArray Vector (PrimInfer a prim)
+  PrimInfer (Set a) prim = ApplyArray Set (PrimInfer a prim)
   PrimInfer a prim = PrimBasic a prim
 
 ------------------------------------------------------------------------------------------------------------------------
