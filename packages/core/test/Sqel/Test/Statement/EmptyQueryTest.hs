@@ -4,7 +4,7 @@ import Hedgehog (TestT, (===))
 
 import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.Check (Checked1)
-import Sqel.Class.ReifySqel (ReifySqel)
+import Sqel.Class.ReifySqel (ReifySqelFor)
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql, sql)
@@ -18,7 +18,7 @@ import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Statement.Common (table_Cat)
 
 statement ::
-  ReifySqel tag EmptyQuery =>
+  ReifySqelFor tag EmptyQuery =>
   Checked1 table tag EmptyQuery =>
   BuildClause tag Select =>
   BuildClause tag From =>

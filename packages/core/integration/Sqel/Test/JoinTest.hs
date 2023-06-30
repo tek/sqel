@@ -7,7 +7,7 @@ import Hedgehog (TestT, (===))
 import Prelude hiding (Mod, join, on)
 
 import Sqel.Class.Query (QueryDd)
-import Sqel.Class.ReifySqel (ReifySqel)
+import Sqel.Class.ReifySqel (ReifySqelFor)
 import Sqel.Clauses (createTable, createType, from, insertInto, join, on, select, values, where_)
 import Sqel.Data.Dd (Dd)
 import Sqel.Data.Statement (Statement)
@@ -71,7 +71,7 @@ create = S.do
 
 ins ::
   ∀ (table :: Dd) .
-  ReifySqel Def table =>
+  ReifySqelFor Def table =>
   Statement (DdType table) ()
 ins = S.do
   t <- tableK @table @Def

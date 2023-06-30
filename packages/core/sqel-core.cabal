@@ -265,6 +265,7 @@ test-suite sqel-core-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      Sqel.Test.AbstractTest
       Sqel.Test.Dsl.BasicTest
       Sqel.Test.Dsl.SumTest
       Sqel.Test.DslTest

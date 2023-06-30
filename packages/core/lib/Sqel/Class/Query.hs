@@ -3,7 +3,7 @@ module Sqel.Class.Query where
 import Generics.SOP (All, NP (Nil, (:*)), SListI, hcpure, hmap)
 
 import Sqel.Class.Check (Checked (checked), unchecked)
-import Sqel.Class.ReifySqel (ReifySqel, sqel)
+import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.Fragment (Fragment (Fragment))
 import Sqel.Data.Fragments (
@@ -28,7 +28,7 @@ class NoQueryDd tag tables where
   noQueryDd :: Fragments tag 'Nothing tables '[]
 
 instance (
-    All (ReifySqel tag) tables,
+    All (ReifySqelFor tag) tables,
     multi ~ IsMulti tables,
     BoolVal multi
   ) => NoQueryDd tag tables where
@@ -36,8 +36,8 @@ instance (
       Fragments NoQueryFragment (TableFragments tables) (ProjectionFragments Nil) multi
       where
         multi = boolVal @multi
-        tables = hcpure (Proxy @(ReifySqel tag)) tableSpine
-        tableSpine :: ReifySqel tag s => TableFragment tag s
+        tables = hcpure (Proxy @(ReifySqelFor tag)) tableSpine
+        tableSpine :: ReifySqelFor tag s => TableFragment tag s
         tableSpine = TableFragment (Fragment sqel)
 
 type QueryDd :: ∀ {ext} . Type -> DdK ext -> [DdK ext] -> Constraint
@@ -45,7 +45,7 @@ class QueryDd tag query tables where
   queryDd :: Fragments tag ('Just query) tables '[]
 
 instance (
-    ReifySqel tag query,
+    ReifySqelFor tag query,
     Checked tables tag query,
     NoQueryDd tag tables
   ) => QueryDd tag query tables where

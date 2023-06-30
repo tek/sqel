@@ -4,7 +4,7 @@ import Data.Some (Some (Some))
 import Generics.SOP (NP, SListI)
 
 import Sqel.Class.DefaultFields (DefaultMeta (defaultCompMeta, defaultPrimMeta))
-import Sqel.Class.ReifySqel (ReifySqel, sqel)
+import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.PgType (PgColumnName (PgColumnName))
 import Sqel.Data.PgTypeName (PgCompName, PgTableName, pattern PgTypeName, pgCompName, pgTableName)
@@ -25,13 +25,13 @@ sqelTypes =
 
 emptyQuery ::
   ∀ tag .
-  ReifySqel tag EmptyQuery =>
+  ReifySqelFor tag EmptyQuery =>
   SqelFor tag EmptyQuery
 emptyQuery = sqel
 
 emptyResult ::
   ∀ tag .
-  ReifySqel tag EmptyResult =>
+  ReifySqelFor tag EmptyResult =>
   SqelFor tag EmptyResult
 emptyResult = sqel
 

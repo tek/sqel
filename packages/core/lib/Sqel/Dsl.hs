@@ -55,7 +55,7 @@ import Sqel.Dd (SetDdName)
 import Sqel.Dsl.Comp
 import Sqel.Dsl.Error (TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
-import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, ApplyMod, Mod, ModTrans, ModWith, Mods)
+import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeQueryDd)
@@ -423,7 +423,7 @@ type family NoReify a spec where
   NoReify a spec =
     "The spec " <> Quoted spec % "given for a column of type " <> Quoted a <> " is not supported." %
     "If you intend to use it as a custom spec, you need to define:" %
-    "type instance Reify a " <> spec <> " = <impl>"
+    "type instance Reify a (" <> spec <> ") = <impl>"
 
 type ReifyE :: Type -> Type -> Dd0
 type family ReifyE a spec where

@@ -56,8 +56,8 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type ReifySqel :: ∀ {ext} . Type -> DdK ext -> Constraint
-class ReifySqel tag s where
+type ReifySqelFor :: ∀ {ext} . Type -> DdK ext -> Constraint
+class ReifySqelFor tag s where
   reifySqel :: SqelFor tag s
 
 instance (
@@ -65,15 +65,15 @@ instance (
     table ~ DdTableName s,
     KnownSymbol table,
     Node 'True tag s
-  ) => ReifySqel tag ('Dd ext a sub) where
+  ) => ReifySqelFor tag ('Dd ext a sub) where
     reifySqel =
       node @'True (pgTableName (symbolText @table))
 
-type ReifySqelDef = ReifySqel Def
+type ReifySqel = ReifySqelFor Def
 
 sqel ::
   ∀ s tag .
-  ReifySqel tag s =>
+  ReifySqelFor tag s =>
   SqelFor tag s
 sqel = reifySqel
 
@@ -85,9 +85,9 @@ instance ReifySqels tag '[] where
   reifySqels = Nil
 
 instance (
-    All (ReifySqel tag) (s : ss)
+    All (ReifySqelFor tag) (s : ss)
   ) => ReifySqels tag (s : ss) where
-  reifySqels = hcpure (Proxy @(ReifySqel tag)) reifySqel
+  reifySqels = hcpure (Proxy @(ReifySqelFor tag)) reifySqel
 
 sqels ::
   ∀ s tag .

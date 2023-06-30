@@ -1,6 +1,6 @@
 module Sqel (
   module Sqel.Default,
-  module Sqel.Class.ReifySqel,
+  module Sqel.Class.ReifySqelFor,
   module Sqel.Dd,
   module Sqel.Clauses,
   module Sqel.Data.Uid,

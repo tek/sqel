@@ -4,7 +4,7 @@ import Generics.SOP (NP)
 
 import Sqel.Build.Statement (BuildStatement (buildStatement))
 import Sqel.Class.Query (FragmentsSqel (fragmentsSqel))
-import Sqel.Class.ReifySqel (ReifySqel, ReifySqels, sqel, sqels)
+import Sqel.Class.ReifySqel (ReifySqelFor, ReifySqels, sqel, sqels)
 import Sqel.Data.Clause (Clauses)
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.Fragments (Fragments)
@@ -46,7 +46,7 @@ class BuildK tag query tables result cs results where
     Statement (MaybeDdType query) result
 
 instance (
-    ReifySqel tag query,
+    ReifySqelFor tag query,
     ReifySqels tag tables,
     Build tag result ('Just query) tables cs results
   ) => BuildK tag ('Just query) tables result cs results where

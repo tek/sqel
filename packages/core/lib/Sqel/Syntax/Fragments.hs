@@ -11,7 +11,7 @@ import Sqel.Class.Query (
   QuerySqel,
   withProjection,
   )
-import Sqel.Class.ReifySqel (ReifySqel, sqel)
+import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
 import Sqel.Data.Clause (Clauses (Clauses))
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.Fragments (Fragments)
@@ -91,7 +91,7 @@ table_ t =
 
 tableK ::
   ∀ table tag .
-  ReifySqel tag table =>
+  ReifySqelFor tag table =>
   Clauses tag '[] 'Nothing (Fragment ('Frag ('Frag0 tag 'SpineTable table 'True (IsComp table))))
 tableK =
   Clauses Nil NothingD (Fragment sqel)
