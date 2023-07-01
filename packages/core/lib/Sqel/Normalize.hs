@@ -78,7 +78,7 @@ type family SetQueryIndexExt index ext where
 
 type SetQueryIndex :: Nat -> Bool -> Dd -> (Dd, Nat)
 type family SetQueryIndex index ignore s where
-  SetQueryIndex index 'False ('Dd ext t s) = '( 'Dd (SetQueryIndexExt index ext) t s, index + 1)
+  SetQueryIndex index 'False ('Dd ext a s) = '( 'Dd (SetQueryIndexExt index ext) a s, index + 1)
   SetQueryIndex index 'True s = '(s, index)
 
 type QueryIndexesRec :: ([Dd], Nat) -> Dd -> (Dd, Nat)
@@ -87,12 +87,12 @@ type family QueryIndexesRec acc query where
 
 type QueryIndexes :: Nat -> Dd -> (Dd, Nat)
 type family QueryIndexes acc query where
-  QueryIndexes cur ('Dd ext t ('Prim p)) =
-    SetQueryIndex cur (HasMod Mods.Ignore (ExtMods ext)) ('Dd ext t ('Prim p))
-  QueryIndexes cur ('Dd ext t ('Comp tsel ('Sum index) i sub)) =
-    QueryIndexesRec (QueryIndexesComp (cur + 1) sub) ('Dd (SetQueryIndexExt cur ext) t ('Comp tsel ('Sum index) i sub))
-  QueryIndexes cur ('Dd ext t ('Comp tsel c i sub)) =
-    QueryIndexesRec (QueryIndexesComp cur sub) ('Dd ext t ('Comp tsel c i sub))
+  QueryIndexes cur ('Dd ext a ('Prim p)) =
+    SetQueryIndex cur (HasMod Mods.Ignore (ExtMods ext)) ('Dd ext a ('Prim p))
+  QueryIndexes cur ('Dd ext a ('Comp tsel ('Sum index) i sub)) =
+    QueryIndexesRec (QueryIndexesComp (cur + 1) sub) ('Dd (SetQueryIndexExt cur ext) a ('Comp tsel ('Sum index) i sub))
+  QueryIndexes cur ('Dd ext a ('Comp tsel c i sub)) =
+    QueryIndexesRec (QueryIndexesComp cur sub) ('Dd ext a ('Comp tsel c i sub))
 
 type QueryIndexesRoot :: Dd -> Dd
 type family QueryIndexesRoot query where
