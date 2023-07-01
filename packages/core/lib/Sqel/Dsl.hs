@@ -47,8 +47,9 @@ import Sqel.Data.Mods.Name (SetPrimName)
 import qualified Sqel.Data.Mods.Newtype as Mods (Newtype)
 import qualified Sqel.Data.Mods.Nullable as Mods (Nullable)
 import qualified Sqel.Data.Mods.PrimaryKey as Mods (PrimaryKey)
+import qualified Sqel.Data.Mods.TableName as Mods
 import qualified Sqel.Data.Mods.Unique as Mods (Unique)
-import Sqel.Data.Name (AmendName, NamePrefix (DefaultPrefix, NamePrefix))
+import Sqel.Data.Name (AmendName, Name (Name, NameAuto), NamePrefix (DefaultPrefix, NamePrefix))
 import Sqel.Data.Sel (Path (PathSkip), Sel (Sel), SelAuto, TSel (TSel), TSelWithPrefix)
 import Sqel.Data.Uid (Uid)
 import Sqel.Dd (SetDdName)
@@ -69,6 +70,11 @@ type family FromGen f a where
 
 ------------------------------------------------------------------------------------------------------------------------
 
+type AmendDdName :: Symbol -> Dd0 -> Dd0
+type family AmendDdName name s where
+  AmendDdName name ('Dd ('Ext0 ('Sel old path) mods) a s) =
+    'Dd ('Ext0 ('Sel (AmendName name old) path) mods) a s
+
 type SetType :: Type -> Dd0 -> Dd0
 type family SetType a s where
   SetType a ('Dd ext _ s) = 'Dd ext a s
@@ -82,11 +88,17 @@ type instance Eval (ApplyTypeName name ('Dd ext a ('Comp ('TSel prefix _) c i s)
 type instance Eval (ApplyTypeName name ('Dd ext a ('Prim _))) =
   TypeNamePrimError name ext a
 
+type family ApplyTableName' name s :: Dd0 where
+  ApplyTableName' name ('Dd ext a ('Comp ('TSel prefix _) c i s)) =
+    'Dd ext a ('Comp ('TSel prefix name) c i s)
+  ApplyTableName' name ('Dd ('Ext0 ('Sel 'NameAuto path) mods) a s) =
+    'Dd ('Ext0 ('Sel ('Name name) path) mods) a s
+  ApplyTableName' name prim =
+    AddMod (Mods.TableName name) prim
+
 data ApplyTableName :: Symbol -> Dd0 -> Exp Dd0
-type instance Eval (ApplyTableName name ('Dd ext a ('Comp ('TSel prefix _) c i s))) =
-  'Dd ext a ('Comp ('TSel prefix name) c i s)
-type instance Eval (ApplyTableName name ('Dd ext a ('Prim prim))) =
-  AmendDdName name ('Dd ext a ('Prim prim))
+type instance Eval (ApplyTableName name s) =
+  ApplyTableName' name s
 
 data ApplyTypePrefix :: Symbol -> Dd0 -> Exp Dd0
 type instance Eval (ApplyTypePrefix prefix ('Dd ext a ('Comp tsel c i s))) =
@@ -169,10 +181,10 @@ type Enum :: Type
 type Enum = Prim PrimEnum
 
 type TypeName :: Symbol -> Type -> Type
-type TypeName p = ModTrans (ApplyTypeName p)
+type TypeName name = ModTrans (ApplyTypeName name)
 
 type TableName :: Symbol -> Type -> Type
-type TableName p = ModTrans (ApplyTableName p)
+type TableName name = ModTrans (ApplyTableName name)
 
 type TypePrefix :: Symbol -> Type -> Type
 type TypePrefix p = ModTrans (ApplyTypePrefix p)
@@ -205,20 +217,6 @@ type Jsonb :: Type
 type Jsonb = Prim PrimJsonb
 
 ------------------------------------------------------------------------------------------------------------------------
-
-type AmendDdName :: Symbol -> Dd0 -> Dd0
-type family AmendDdName name s where
-  AmendDdName name ('Dd ('Ext0 ('Sel old path) mods) a s) =
-    'Dd ('Ext0 ('Sel (AmendName name old) path) mods) a s
-
-type TypeSel :: TSel -> Dd0 -> Dd0
-type family TypeSel tsel s where
-  TypeSel tsel ('Dd ext a ('Comp _ c i sub)) =
-    'Dd ext a ('Comp tsel c i sub)
-
-type SetTypeName :: Symbol -> Dd0 -> Dd0
-type family SetTypeName name s where
-  SetTypeName name s = TypeSel ('TSel 'DefaultPrefix name) s
 
 type SetNoCond :: Dd0 -> Dd0
 type family SetNoCond s where

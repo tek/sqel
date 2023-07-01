@@ -6,6 +6,7 @@ import Fcf.Data.List (Concat)
 import Prelude hiding (Compose)
 import Type.Errors (ErrorMessage (Text))
 
+import Sqel.Class.Mods (FindMod)
 import Sqel.Data.Dd (
   Dd,
   Dd0,
@@ -17,6 +18,7 @@ import Sqel.Data.Dd (
   StructWith (Comp, Prim),
   )
 import Sqel.Data.Mods (NoMods)
+import Sqel.Data.Mods.TableName (TableName)
 import Sqel.Data.Name (Name (Name), NamePrefix (DefaultPrefix), SetName)
 import Sqel.Data.Sel (Paths (Paths, PathsRoot), PathsName, PathsNameOr, Sel (Sel), ShowSel, TSel (TSel), TSelName)
 import Sqel.SOP.Error (QuotedType, ShowPath, Unlines)
@@ -105,29 +107,6 @@ type family DdInc s where
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type DdTypeName :: DdK ext -> Symbol
-type family DdTypeName s where
-  DdTypeName ('Dd _ _ ('Comp tsel _ _ _)) = TSelName tsel
-  DdTypeName ('Dd _ a _) = TypeError ("This Dd for type " <> a <> " has no type name")
-
-type DdTypeNames :: [DdK ext] -> [Symbol]
-type family DdTypeNames s where
-  DdTypeNames '[] = '[]
-  DdTypeNames (s : ss) = DdTypeName s : DdTypeNames ss
-
-type DdTableName :: ∀ ext . DdK ext -> Symbol
-type family DdTableName s where
-  DdTableName ('Dd _ _ ('Comp tsel _ _ _)) = TSelName tsel
-  DdTableName @Ext0 ('Dd ('Ext0 ('Sel ('Name name) _) _) _ ('Prim _)) = name
-  DdTableName @Ext ('Dd ('Ext path _) _ ('Prim _)) = PathsName path
-
-type SetDdName :: Symbol -> Dd0 -> Dd0
-type family SetDdName name s where
-  SetDdName name ('Dd ('Ext0 ('Sel old path) mods) a s) =
-    'Dd ('Ext0 ('Sel (SetName name old) path) mods) a s
-
-------------------------------------------------------------------------------------------------------------------------
-
 type EmptyProd ext =
   'Dd ext () ('Comp ('TSel 'DefaultPrefix "()") 'Prod 'Nest '[])
 
@@ -191,3 +170,36 @@ type family ExtMods ext
 
 type instance ExtMods @Ext0 ('Ext0 _ mods) = mods
 type instance ExtMods @Ext ('Ext _ mods) = mods
+type instance ExtMods @(DdK _) ('Dd ext _ _) = ExtMods ext
+
+------------------------------------------------------------------------------------------------------------------------
+
+type DdTypeName :: DdK ext -> Symbol
+type family DdTypeName s where
+  DdTypeName ('Dd _ _ ('Comp tsel _ _ _)) = TSelName tsel
+  DdTypeName ('Dd _ a _) = TypeError ("This Dd for type " <> a <> " has no type name")
+
+type DdTypeNames :: [DdK ext] -> [Symbol]
+type family DdTypeNames s where
+  DdTypeNames '[] = '[]
+  DdTypeNames (s : ss) = DdTypeName s : DdTypeNames ss
+
+type ExtTableName :: ∀ ext . DdK ext -> Symbol
+type family ExtTableName s where
+  ExtTableName ('Dd _ _ ('Comp tsel _ _ _)) = TSelName tsel
+  ExtTableName @Ext0 ('Dd ('Ext0 ('Sel ('Name name) _) _) _ ('Prim _)) = name
+  ExtTableName @Ext ('Dd ('Ext path _) _ ('Prim _)) = PathsName path
+
+type EffectiveTableName :: ∀ ext . Maybe Symbol -> DdK ext -> Symbol
+type family EffectiveTableName mod s where
+  EffectiveTableName 'Nothing s = ExtTableName s
+  EffectiveTableName ('Just name) _ = name
+
+type DdTableName :: DdK ext -> Symbol
+type family DdTableName s where
+  DdTableName s = EffectiveTableName (FindMod TableName (ExtMods s)) s
+
+type SetDdName :: Symbol -> Dd0 -> Dd0
+type family SetDdName name s where
+  SetDdName name ('Dd ('Ext0 ('Sel old path) mods) a s) =
+    'Dd ('Ext0 ('Sel (SetName name old) path) mods) a s
