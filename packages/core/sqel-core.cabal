@@ -272,6 +272,7 @@ test-suite sqel-core-test
       Sqel.Test.DslTest
       Sqel.Test.EnumTest
       Sqel.Test.Error.FragmentMismatch
+      Sqel.Test.Error.UndeterminedParam
       Sqel.Test.ErrorTest
       Sqel.Test.HasGeneric
       Sqel.Test.JsonTest

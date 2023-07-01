@@ -50,10 +50,18 @@ notRootMessage =
     "\8226 A \8216from\8217 clause does not accept projections."
   ]
 
+undeterminedParamMessage :: [Text]
+undeterminedParamMessage =
+  [
+    "TODO"
+  ]
+
 test_errors :: TestTree
 test_errors =
   testGroup "type errors" [
     unitTest "table fragment for query clause" (typeError tableForQueryMessage tableForQuery),
     unitTest "not a fragment" (typeError notAFragmentMessage notAFragment),
     unitTest "not a root fragment" (typeError notRootMessage notRoot)
+    -- ,
+    -- unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam)
   ]
