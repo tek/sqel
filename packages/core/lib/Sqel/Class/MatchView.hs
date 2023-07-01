@@ -1,7 +1,7 @@
 module Sqel.Class.MatchView where
 
 import Fcf (If)
-import Type.Errors (ErrorMessage, IfStuck, Pure)
+import Type.Errors (DelayError, ErrorMessage, IfStuck, Pure)
 
 import Sqel.Data.Dd (Dd)
 import Sqel.Data.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
@@ -48,13 +48,13 @@ type family PathConstraint path where
   PathConstraint '[field] = "HasColumn " <> 'ShowType field
   PathConstraint path = "HasPath " <> path
 
-type AvailStuckMsg :: Symbol -> Dd -> FieldPath -> ErrorMessage
-type family AvailStuckMsg viewType table field where
-  AvailStuckMsg viewType table ('FieldPath path tpe) =
+type AvailStuckMsg :: Symbol -> FieldPath -> ErrorMessage
+type family AvailStuckMsg viewType field where
+  AvailStuckMsg viewType ('FieldPath path tpe) =
     UnknownMsg viewType ('FieldPath path tpe) %
-    "This is likely due to the structure type " <> QuotedType table <> " being polymorphic or not in scope." %
+    "This is likely due to the structure type being polymorphic or not in scope." %
     "Try adding the constraint:" %
-    "  " <> QuotedError (PathConstraint path <> " " <> tpe <> " " <> table)
+    "  " <> QuotedError (PathConstraint path <> " " <> tpe <> " <" <> viewType <> " type>")
 
 type MatchStuckMsg :: Symbol -> [FieldPath] -> FieldPath -> ErrorMessage
 type family MatchStuckMsg viewType avail path where
@@ -67,15 +67,10 @@ type family MatchStuck viewType field avail where
   MatchStuck viewType field avail =
     TypeError (MatchStuckMsg viewType avail field)
 
-type AvailStuck :: Symbol -> Dd -> FieldPath -> k
-type family AvailStuck viewType table field where
-  AvailStuck viewType table field =
-    TypeError (AvailStuckMsg viewType table field)
-
-type CheckMatch :: Symbol -> Dd -> FieldPath -> [FieldPath] -> Bool -> Bool
-type family CheckMatch viewType table vfield avail match where
-  CheckMatch viewType table vfield avail match =
-    IfStuck match (IfStuck (CheckAvail avail) (AvailStuck viewType table vfield) (Pure (MatchStuck viewType vfield avail))) (Pure match)
+type CheckMatch :: Symbol -> FieldPath -> [FieldPath] -> Bool -> Bool
+type family CheckMatch viewType vfield avail match where
+  CheckMatch viewType vfield avail match =
+    IfStuck match (IfStuck (CheckAvail avail) (DelayError (AvailStuckMsg viewType vfield)) (Pure (MatchStuck viewType vfield avail))) (Pure match)
 
 type CheckPathMatch :: FieldPath -> [FieldPath] -> Bool -> Bool
 type family CheckPathMatch vfield avail match where
@@ -94,7 +89,7 @@ type family MatchViewPath vfield avail where
 type MatchViewPathError :: Symbol -> Dd -> FieldPath -> [FieldPath] -> Maybe ErrorMessage
 type family MatchViewPathError viewType table vfield avail where
   MatchViewPathError viewType table vfield avail =
-    If (CheckMatch viewType table vfield avail (MatchViewPath vfield avail))
+    If (CheckMatch viewType vfield avail (MatchViewPath vfield avail))
     'Nothing
     ('Just (NoViewMatchTable table avail))
 
@@ -109,7 +104,7 @@ type MatchViewPaths :: Symbol -> Dd -> [FieldPath] -> [FieldPath] -> Maybe Error
 type family MatchViewPaths viewType table view avail where
   MatchViewPaths viewType table (vfield : vfields) avail =
     CheckViewPathError viewType table vfield vfields avail
-    (CheckMatch viewType table vfield avail (MatchViewPath vfield avail))
+    (CheckMatch viewType vfield avail (MatchViewPath vfield avail))
   MatchViewPaths _ _ '[] _ =
     'Nothing
 
