@@ -2,7 +2,23 @@ module Sqel.SOP.NP where
 
 import Data.Some (Some (Some))
 import qualified Fcf.Class.Monoid as Fcf
-import Generics.SOP (AllN, HTraverse_, K (K), NP (Nil, (:*)), SListI, Top, hcfoldMap, hcollapse, hmap)
+import Generics.SOP (
+  AllN,
+  HPure,
+  HSequence,
+  HTraverse_,
+  K (K),
+  NP (Nil, (:*)),
+  SListI,
+  Top,
+  hcfoldMap,
+  hcollapse,
+  hcpure,
+  hmap,
+  hsequence',
+  type (:.:) (Comp),
+  )
+import Generics.SOP.Constraint (SListIN)
 
 import Sqel.Kind.List (type (++))
 
@@ -75,3 +91,15 @@ hmapList ::
   h f xs ->
   [a]
 hmapList f = hcmapList @Top f
+
+hcpureA ::
+  ∀ c f g h as .
+  HPure h =>
+  AllN h c as =>
+  HSequence h =>
+  SListIN h as =>
+  Applicative f =>
+  (∀ x . c x => f (g x)) ->
+  f (h g as)
+hcpureA f =
+  hsequence' (hcpure (Proxy @c) (Comp f))

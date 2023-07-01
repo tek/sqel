@@ -11,7 +11,7 @@ module Sqel.Exts (
   module Sqel.Data.Sqel,
   module Sqel.Data.Sql,
   module Sqel.Class.Query,
-  module Sqel.Class.ReifySqelFor,
+  module Sqel.Class.ReifySqel,
   module Sqel.Data.Migration,
   module Sqel.Class.DefaultFields,
   module Sqel.Data.PgTypeName,
@@ -25,7 +25,7 @@ import Sqel.Class.Check (Check, Check1, Checked, Checked1)
 import Sqel.Class.DefaultFields (DefaultFields (..), DefaultMeta (..))
 import Sqel.Class.HasqlStatement (HasqlStatement)
 import Sqel.Class.Query (FragmentsSqel)
-import Sqel.Class.ReifySqel (ReifySqel)
+import Sqel.Class.ReifySqel (ReifySqel, ReifySqelFor)
 import Sqel.Class.ResultShape (ResultShape (..))
 import Sqel.Clauses (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Codec (PrimColumn (..))

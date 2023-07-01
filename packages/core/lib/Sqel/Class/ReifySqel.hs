@@ -1,5 +1,6 @@
 module Sqel.Class.ReifySqel where
 
+import Control.Monad.Trans.State.Strict (evalState)
 import Generics.SOP (All, NP (Nil), hcpure)
 
 import Sqel.Class.DdVal (DdMap (ddmap))
@@ -8,28 +9,28 @@ import Sqel.Class.ReifyComp (DemoteSort (demoteSort), ReifyComp (reifyComp))
 import Sqel.Class.ReifyPrim (ReifyPrim (reifyPrim))
 import Sqel.Data.Class.Dd (SingInc (singInc))
 import Sqel.Data.Codec (FullCodec)
-import Sqel.Data.Dd (DdK (Dd), SInc (SMerge, SNest), StructWith (Comp, Prim))
+import Sqel.Data.Dd (DdK (Dd), StructWith (Comp, Prim))
+import Sqel.Data.IndexState (IndexState)
 import Sqel.Data.PgTypeName (PgTableName, pgTableName)
 import Sqel.Data.Sel (TSelName)
-import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest, sqelCodec)
+import Sqel.Data.Sqel (SqelFor (SqelComp, SqelPrim), sqelCodec)
 import Sqel.Dd (DdTableName, DdTypes, ExtMods)
 import Sqel.Default (Def)
 import Sqel.SOP.Constraint (symbolText)
+import Sqel.SOP.NP (hcpureA)
 
 type Node :: ∀ {ext} . Bool -> Type -> DdK ext -> Constraint
 class Node root tag s where
-  node :: PgTableName -> SqelFor tag s
+  node :: PgTableName -> IndexState (SqelFor tag s)
 
 instance (
     s ~ 'Dd ext a ('Prim prim),
     ReifyPrim tag ext a prim,
     ReifyCodec FullCodec s
   ) => Node root tag ('Dd ext a ('Prim prim)) where
-    node table =
-      SqelPrim meta codec
-      where
-        meta = reifyPrim @tag @ext @a @prim table
-        codec = reifyCodec @_ @s
+    node table = do
+      meta <- reifyPrim @tag @ext @a @prim table
+      pure (SqelPrim meta (reifyCodec @_ @s))
 
 instance (
     s ~ 'Dd ext a ('Comp tsel c i sub),
@@ -42,17 +43,13 @@ instance (
     All (Node 'False tag) sub,
     DemoteSort tag c tname ext
   ) => Node root tag ('Dd ext a ('Comp tsel c i sub)) where
-    node table =
-      case singInc @i of
-        SNest -> SqelNest meta compSort sub codec
-        SMerge -> SqelMerge meta compSort sub codec
+    node table = do
+      compSort <- demoteSort @tag @c @tname @ext table
+      sub <- hcpureA @(Node 'False tag) (node @'False table)
+      let codec = compCodec @c (ddmap sqelCodec sub)
+      pure (SqelComp (singInc @i) meta compSort sub codec)
       where
         meta = reifyComp @tag @root @ext @a @tsel @c @i table
-        codec :: FullCodec a
-        codec = compCodec @c (ddmap sqelCodec sub)
-        sub :: NP (SqelFor tag) sub
-        sub = hcpure (Proxy @(Node 'False tag)) (node @'False table)
-        compSort = demoteSort @tag @c @tname @ext table
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +64,7 @@ instance (
     Node 'True tag s
   ) => ReifySqelFor tag ('Dd ext a sub) where
     reifySqel =
-      node @'True (pgTableName (symbolText @table))
+      evalState (node @'True (pgTableName (symbolText @table))) 1
 
 type ReifySqel = ReifySqelFor Def
 

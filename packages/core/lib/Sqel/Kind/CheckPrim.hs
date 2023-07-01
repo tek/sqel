@@ -5,7 +5,7 @@ import Type.Errors (ErrorMessage)
 import Sqel.Class.MatchView (ColumnMessage, MatchViewPathError)
 import Sqel.Data.Dd (Dd)
 import Sqel.Data.FieldPath (FieldPath (FieldPath), FieldPaths)
-import Sqel.Data.Sel (IxPaths (IxPaths), Paths (Paths))
+import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Dd (DdTypeName)
 import Sqel.SOP.Error (Unlines)
 
@@ -36,7 +36,7 @@ type family CheckPrimFP errors tables s where
   CheckPrimFP errors '[] path = TypeError (ColumnMessage "query" path % Unlines errors)
   CheckPrimFP errors (table : tables) s = CheckPrimCont errors (CheckAgainst table s) table tables s
 
-type CheckPrim :: [TableFPaths] -> Type -> IxPaths -> Symbol
+type CheckPrim :: [TableFPaths] -> Type -> Paths -> Symbol
 type family CheckPrim tables a path where
-  CheckPrim tables a ('IxPaths ('Paths _ _ path) _) =
+  CheckPrim tables a ('Paths _ _ path) =
     CheckPrimFP '[] tables ('FieldPath path a)

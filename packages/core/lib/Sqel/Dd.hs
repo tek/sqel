@@ -18,16 +18,7 @@ import Sqel.Data.Dd (
   )
 import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Name (Name (Name), NamePrefix (DefaultPrefix), SetName)
-import Sqel.Data.Sel (
-  IxPaths (IxPaths),
-  IxPathsName,
-  IxPathsNameOr,
-  Paths (Paths, PathsRoot),
-  Sel (Sel),
-  ShowSel,
-  TSel (TSel),
-  TSelName,
-  )
+import Sqel.Data.Sel (Paths (Paths, PathsRoot), PathsName, PathsNameOr, Sel (Sel), ShowSel, TSel (TSel), TSelName)
 import Sqel.SOP.Error (QuotedType, ShowPath, Unlines)
 
 type MapSub :: (o -> Exp ext) -> [DdK o] -> [DdK ext]
@@ -52,7 +43,7 @@ type family MapDdK f s where
 type DdKName :: DdK ext -> Symbol
 type family DdKName s
 
-type instance DdKName ('Dd ('Ext ('IxPaths ('Paths name _ _) _) _) _ _) = name
+type instance DdKName ('Dd ('Ext ('Paths name _ _) _) _ _) = name
 type instance DdKName ('Dd ('Ext0 ('Sel ('Name name) _) _) _ _) = name
 
 type DdKNames :: [DdK ext] -> [Symbol]
@@ -62,7 +53,7 @@ type family DdKNames s where
 
 type DdName :: Dd -> Symbol
 type family DdName s where
-  DdName ('Dd ('Ext ('IxPaths ('Paths name _ _) _) _) _ _) = name
+  DdName ('Dd ('Ext ('Paths name _ _) _) _ _) = name
 
 data DdNameF :: DdK ext -> Exp Symbol
 type instance Eval (DdNameF s) = DdName s
@@ -128,7 +119,7 @@ type DdTableName :: ∀ ext . DdK ext -> Symbol
 type family DdTableName s where
   DdTableName ('Dd _ _ ('Comp tsel _ _ _)) = TSelName tsel
   DdTableName @Ext0 ('Dd ('Ext0 ('Sel ('Name name) _) _) _ ('Prim _)) = name
-  DdTableName @Ext ('Dd ('Ext path _) _ ('Prim _)) = IxPathsName path
+  DdTableName @Ext ('Dd ('Ext path _) _ ('Prim _)) = PathsName path
 
 type SetDdName :: Symbol -> Dd0 -> Dd0
 type family SetDdName name s where
@@ -141,10 +132,10 @@ type EmptyProd ext =
   'Dd ext () ('Comp ('TSel 'DefaultPrefix "()") 'Prod 'Nest '[])
 
 type EmptyQuery =
-  EmptyProd ('Ext ('IxPaths 'PathsRoot 'Nothing) NoMods)
+  EmptyProd ('Ext 'PathsRoot NoMods)
 
 type EmptyResult =
-  EmptyProd ('Ext ('IxPaths 'PathsRoot 'Nothing) NoMods)
+  EmptyProd ('Ext 'PathsRoot NoMods)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -152,7 +143,6 @@ type ShowPathShort :: ∀ k . k -> ErrorMessage
 type family ShowPathShort path where
   ShowPathShort @Paths ('Paths _ path _) = " " <> ShowPath path
   ShowPathShort @Paths 'PathsRoot = 'Text ""
-  ShowPathShort @IxPaths ('IxPaths path _) = ShowPathShort path
   ShowPathShort @Ext0 ('Ext0 sel _) = ShowPathShort sel
   ShowPathShort @Ext ('Ext sel _) = ShowPathShort sel
   ShowPathShort path = " (" <> path <> ")"
@@ -189,9 +179,9 @@ type ExtName :: ∀ k . k -> Symbol
 type family ExtName ext
 
 type instance ExtName @Ext0 ('Ext0 sel _) = ShowSel sel
-type instance ExtName @Ext ('Ext path _) = IxPathsNameOr "<root>" path
+type instance ExtName @Ext ('Ext path _) = PathsNameOr "<root>" path
 
-type ExtPath :: ∀ k . k -> IxPaths
+type ExtPath :: ∀ k . k -> Paths
 type family ExtPath ext
 
 type instance ExtPath @Ext ('Ext path _) = path

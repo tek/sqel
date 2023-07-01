@@ -58,7 +58,7 @@ import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
-import Sqel.Normalize (NormalizeQueryDd)
+import Sqel.Normalize (NormalizeDd)
 import Sqel.SOP.Error (Quoted, QuotedType)
 
 type FromGenF k = DatatypeInfo -> [[Type]] -> Exp k
@@ -431,7 +431,7 @@ type family ReifyE a spec where
 
 type Table :: Symbol -> Type -> Type -> Dd
 type family Table name a spec where
-  Table name a spec = NormalizeQueryDd (ReifyE a (TableName name spec))
+  Table name a spec = NormalizeDd (ReifyE a (TableName name spec))
 
 type MigrationTable :: Symbol -> Type -> Type -> Ddl
 type family MigrationTable name a spec where
@@ -449,4 +449,4 @@ type UuidTable name a sa = UidTable name UUID a Prim sa
 
 type Query :: Type -> Type -> Dd
 type family Query a spec where
-  Query a spec = NormalizeQueryDd (ReifyE a spec)
+  Query a spec = NormalizeDd (ReifyE a spec)

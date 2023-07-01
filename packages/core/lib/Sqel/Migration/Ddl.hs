@@ -13,7 +13,7 @@ import Sqel.Data.Mods.MigrationDelete (MigrationDelete)
 import Sqel.Data.Mods.MigrationRename (MigrationRename)
 import Sqel.Data.Mods.MigrationRenameType (MigrationRenameType)
 import Sqel.Data.Name (NamePrefix)
-import Sqel.Data.Sel (IxPaths, IxPathsNameOr, RenderTSel, TSelName)
+import Sqel.Data.Sel (Paths, PathsNameOr, RenderTSel, TSelName)
 import Sqel.Dd (ExtMods, ExtName, ExtPath)
 import Sqel.Default (Def)
 import Sqel.Reify.PrimName (PrimName)
@@ -45,12 +45,12 @@ data DdlConf =
 
 data ExtDdl =
   ExtDdl {
-    path :: IxPaths,
+    path :: Paths,
     conf :: DdlConf,
     mods :: [Type]
   }
 
-type instance ExtName @ExtDdl ('ExtDdl path _ _) = IxPathsNameOr "<root>" path
+type instance ExtName @ExtDdl ('ExtDdl path _ _) = PathsNameOr "<root>" path
 
 type instance ExtMods @ExtDdl ('ExtDdl _ _ mods) = mods
 
@@ -92,10 +92,10 @@ type family StructConf table mods a s where
     'DdlComp table (TSelName tsel) (RenderTSel table tsel) (FindMod MigrationRenameType mods) (MaybeIndexPrefix sort) inc
 
 -- TODO strip ddl mods
-type ColumnConf :: IxPaths -> Bool -> [Type] -> Type -> Struct -> ExtDdl
+type ColumnConf :: Paths -> Bool -> [Type] -> Type -> Struct -> ExtDdl
 type family ColumnConf path table mods a s where
   ColumnConf path table mods a s =
-    'ExtDdl path ('DdlConf (IxPathsNameOr "<root>" path) (FindMod MigrationRename mods) (HasMod MigrationDelete mods) (ConstraintsFor mods) (StructConf table mods a s)) mods
+    'ExtDdl path ('DdlConf (PathsNameOr "<root>" path) (FindMod MigrationRename mods) (HasMod MigrationDelete mods) (ConstraintsFor mods) (StructConf table mods a s)) mods
 
 type MkStruct :: Struct -> StructDdl
 type family MkStruct s where

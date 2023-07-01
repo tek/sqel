@@ -3,7 +3,7 @@ module Sqel.Data.FieldPath where
 import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (Dd, DdK (Dd), Ext (Ext), PrimType (Cond, NoCond), StructWith (Comp, Prim))
-import Sqel.Data.Sel (IxPaths (IxPaths), Paths (Paths))
+import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Kind.List (type (++))
 import Sqel.SOP.Error (QuotedType, ShowPath, Unlines)
 
@@ -13,9 +13,9 @@ data FieldPath =
     tpe :: Type
   }
 
-type FieldPathPrim :: IxPaths -> Type -> [FieldPath]
+type FieldPathPrim :: Paths -> Type -> [FieldPath]
 type family FieldPathPrim sel t where
-  FieldPathPrim ('IxPaths ('Paths _ _ path) _) t = '[ 'FieldPath path t]
+  FieldPathPrim ('Paths _ _ path) t = '[ 'FieldPath path t]
 
 type FieldPathsProd :: [Dd] -> [FieldPath]
 type family FieldPathsProd s where

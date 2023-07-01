@@ -5,7 +5,7 @@ import Generics.SOP (All, hcmap)
 import Sqel.Data.Dd (DdK (Dd), PrimType (Cond, NoCond), StructWith (Comp, Prim))
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.PgTypeName (pgTableName)
-import Sqel.Data.Sel (IxPaths)
+import Sqel.Data.Sel (Paths)
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest)
 import Sqel.Dd (DdTableName, ExtPath, IsComp)
 import Sqel.Default (Def)
@@ -14,7 +14,7 @@ import Sqel.Kind.CheckPrim (CheckPrim)
 import Sqel.Kind.TableInfo (MkTableInfo, TableInfo (AvailTables, IsTable))
 import Sqel.SOP.Constraint (symbolText)
 
-type PrimTable :: TableInfo -> IxPaths -> Type -> Constraint
+type PrimTable :: TableInfo -> Paths -> Type -> Constraint
 class PrimTable table path a where
   primTable :: Text
 

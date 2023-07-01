@@ -94,6 +94,7 @@ library
       Sqel.Data.FieldPath
       Sqel.Data.Fragment
       Sqel.Data.Fragments
+      Sqel.Data.IndexState
       Sqel.Data.Migration
       Sqel.Data.Mods
       Sqel.Data.Mods.Array

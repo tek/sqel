@@ -77,21 +77,6 @@ type family PathsName path where
   PathsName 'PathsRoot = TypeError ('Text "PathsName of root")
   PathsName ('Paths name _ _) = name
 
-data IxPaths =
-  IxPaths Paths (Maybe Nat)
-
-type IxPathsNameOr :: Symbol -> IxPaths -> Symbol
-type family IxPathsNameOr root path where
-  IxPathsNameOr root ('IxPaths path _) = PathsNameOr root path
-
-type IxPathsPathOr :: [Symbol] -> IxPaths -> [Symbol]
-type family IxPathsPathOr root path where
-  IxPathsPathOr root ('IxPaths path _) = PathsOr root path
-
-type IxPathsName :: IxPaths -> Symbol
-type family IxPathsName path where
-  IxPathsName ('IxPaths path _) = PathsName path
-
 data Sel =
   Sel {
     name :: Name,

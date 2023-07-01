@@ -1,19 +1,21 @@
 module Sqel.Class.ReifyPrim where
 
 import Sqel.Class.DemoteConstraints (DemoteConstraints (demoteConstraints))
-import Sqel.Class.Mods (FindMod)
+import Sqel.Class.Mods (FindMod, HasMod)
 import Sqel.Constraints (ConstraintsFor)
 import Sqel.Data.Dd (PrimType (Cond, NoCond))
+import Sqel.Data.IndexState (IndexState, withNewIndex)
+import Sqel.Data.Mods.Ignore (Ignore)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (pgColumnNameSym)
 import Sqel.Data.PgTypeName (PgTableName)
-import Sqel.Data.Sel (IxPaths (IxPaths), Paths (Paths))
+import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Data.Spine (PrimFor, spinePath)
 import Sqel.Dd (ExtMods, ExtPath)
 import qualified Sqel.Default
 import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta, QuerySynthetic))
 import Sqel.Reify.PrimName (PrimName, reifyPrimName)
-import Sqel.SOP.Constraint (KnownSymbols, natInt)
+import Sqel.SOP.Constraint (KnownSymbols)
 import Sqel.SOP.HasGeneric (BoolVal (boolVal))
 
 type DemoteNullable :: Maybe Bool -> Constraint
@@ -28,47 +30,49 @@ instance (
 instance DemoteNullable 'Nothing where
   demoteNullable = Nothing
 
--- TODO 'Nothing 'Cond – error?
-type MkQueryMeta :: [Type] -> Maybe Nat -> PrimType -> Constraint
-class MkQueryMeta mods ix prim where
-  queryMeta :: QueryMeta
+-- TODO 'False 'Cond – error?
+type MkQueryMeta :: [Type] -> Bool -> PrimType -> Constraint
+class MkQueryMeta mods ignore prim where
+  queryMeta :: IndexState QueryMeta
 
-instance MkQueryMeta mods 'Nothing 'NoCond where
-  queryMeta = QuerySynthetic
+instance MkQueryMeta mods 'True 'NoCond where
+  queryMeta = pure QuerySynthetic
 
-instance KnownNat index => MkQueryMeta mods ('Just index) 'NoCond where
-  queryMeta = QueryMeta (natInt @index) Nothing
+instance MkQueryMeta mods 'False 'NoCond where
+  queryMeta =
+    withNewIndex \ index -> QueryMeta index Nothing
 
 instance (
-    KnownNat index,
     nullable ~ FindMod Nullable mods,
     DemoteNullable nullable
-  ) => MkQueryMeta mods ('Just index) 'Cond where
-    queryMeta = QueryMeta (natInt @index) (Just (CondMeta "=" (demoteNullable @nullable)))
+  ) => MkQueryMeta mods 'False 'Cond where
+    queryMeta =
+      withNewIndex \ index -> QueryMeta index (Just (CondMeta "=" (demoteNullable @nullable)))
 
 type ReifyPrim :: ∀ {ext} . Type -> ext -> Type -> PrimType -> Constraint
 class ReifyPrim tag ext a prim where
-  reifyPrim :: PgTableName -> PrimFor tag
+  reifyPrim :: PgTableName -> IndexState (PrimFor tag)
 
 instance (
-    path ~ ExtPath ext,
+    'Paths name dd tablePath ~ ExtPath ext,
     mods ~ ExtMods ext,
-    'IxPaths ('Paths name dd tablePath) index ~ path,
     KnownSymbols tablePath,
     KnownSymbol name,
     KnownSymbol (PrimName Def a mods),
     constr ~ ConstraintsFor mods,
     DemoteConstraints constr,
-    MkQueryMeta mods index prim
+    ignore ~ HasMod Ignore mods,
+    MkQueryMeta mods ignore prim
   ) => ReifyPrim Def ext a prim where
-  reifyPrim table =
-    PrimMeta {
+  reifyPrim table = do
+    query <- queryMeta @mods @ignore @prim
+    pure PrimMeta {
       name = pgColumnNameSym @name,
       path = spinePath @tablePath,
       colType = reifyPrimName @Def @a @mods,
       table,
       constr = demoteConstraints @constr,
-      query = queryMeta @mods @index @prim
+      query
     }
 
 instance {-# overlappable #-} (

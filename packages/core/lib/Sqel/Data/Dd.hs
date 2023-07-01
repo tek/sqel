@@ -4,7 +4,7 @@ import Generics.SOP (I, NP)
 import qualified Text.Show
 
 import Sqel.Data.Name (NamePrefix)
-import Sqel.Data.Sel (IxPaths, Sel, TSel)
+import Sqel.Data.Sel (Paths, Sel, TSel)
 
 type ConCol :: [Type] -> Type
 newtype ConCol as = ConCol (NP I as)
@@ -17,7 +17,7 @@ data Ext0 =
 
 data Ext =
   Ext {
-    sel :: IxPaths,
+    sel :: Paths,
     mods :: [Type]
   }
 

@@ -1,6 +1,6 @@
 module Sqel (
   module Sqel.Default,
-  module Sqel.Class.ReifySqelFor,
+  module Sqel.Class.ReifySqel,
   module Sqel.Dd,
   module Sqel.Clauses,
   module Sqel.Data.Uid,
@@ -17,6 +17,7 @@ module Sqel (
 ) where
 
 import Sqel.Class.ReifySqel (sqel)
+import Sqel.Class.ResultShape (ResultShape)
 import Sqel.Clauses hiding (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Crud (Crud)
@@ -27,7 +28,6 @@ import Sqel.Data.Uid (Uid (Uid), Uuid)
 import Sqel.Dd (DdType)
 import Sqel.Default
 import Sqel.Dsl
-import Sqel.Class.ResultShape (ResultShape)
 import Sqel.Sqel (emptyQuery)
 import Sqel.Statement (prepared, unprepared)
 import Sqel.Uid
