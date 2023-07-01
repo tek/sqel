@@ -21,6 +21,11 @@ data Dat a =
 type Table_Dat a sa =
   Table "dat" (Dat a) (Prod [Prim, sa])
 
+abstractReifySqel ::
+  ∀ sa a .
+  Sqel (Table_Dat a sa)
+abstractReifySqel = sqel
+
 table_Dat ::
   ∀ sa a .
   ReifySqel (Table_Dat a sa) =>

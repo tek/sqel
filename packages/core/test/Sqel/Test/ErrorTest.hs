@@ -50,6 +50,12 @@ notRootMessage =
     "\8226 A \8216from\8217 clause does not accept projections."
   ]
 
+abstractReifySqelMessage :: [Text]
+abstractReifySqelMessage =
+  [
+    "TODO"
+  ]
+
 undeterminedParamMessage :: [Text]
 undeterminedParamMessage =
   [
@@ -64,4 +70,6 @@ test_errors =
     unitTest "not a root fragment" (typeError notRootMessage notRoot)
     -- ,
     -- unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam)
+    -- ,
+    -- unitTest "missing ReifySqel with abstract Dd" (typeError abstractReifySqelMessage abstractReifySqel)
   ]
