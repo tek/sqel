@@ -48,47 +48,44 @@ createType = \case
     MigrationEffect.runStatement_ () (Sqel.createType s)
   SqelMerge _ _ _ _ -> unit
 
-type InitComp :: ∀ {ext} . Type -> (Type -> Type) -> DdK ext -> Constraint
-class InitComp tag m s where
-  initComp :: SqelFor tag s -> m ()
+type InitComp :: ∀ {ext} . Type -> DdK ext -> Constraint
+class InitComp tag s where
+  initComp :: Monad m => MigrationEffect m => SqelFor tag s -> m ()
 
 instance (
-    Monad m,
     DefaultMeta tag,
-    MigrationEffect m,
-    All (InitComp tag m) sub,
+    All (InitComp tag) sub,
     BuildClause tag CreateType
-  ) => InitComp tag m ('Dd ext a ('Comp tsel c i sub)) where
+  ) => InitComp tag ('Dd ext a ('Comp tsel c i sub)) where
     initComp s =
       whenM (compNeedsInit s) do
         initStructure s
         createType s
 
-instance Applicative m => InitComp tag m ('Dd ext a ('Prim prim)) where
+instance InitComp tag ('Dd ext a ('Prim prim)) where
   initComp _ = unit
 
 initStructure ::
   ∀ tag m s .
   Monad m =>
-  All (InitComp tag m) (DdSub s) =>
+  MigrationEffect m =>
+  All (InitComp tag) (DdSub s) =>
   SqelFor tag s ->
   m ()
 initStructure = \case
-  SqelNest _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag m)) initComp cols
-  SqelMerge _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag m)) initComp cols
+  SqelNest _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag)) initComp cols
+  SqelMerge _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag)) initComp cols
   SqelPrim _ _ -> unit
 
-type InitTable :: ∀ {ext} . Type -> (Type -> Type) -> DdK ext -> Constraint
-class InitTable tag m table where
-  initTable :: SqelFor tag table -> m ()
+type InitTable :: ∀ {ext} . Type -> DdK ext -> Constraint
+class InitTable tag table where
+  initTable :: Monad m => MigrationEffect m => SqelFor tag table -> m ()
 
 instance (
-    Monad m,
     DefaultMeta tag,
-    MigrationEffect m,
-    All (InitComp tag m) (DdSub table),
+    All (InitComp tag) (DdSub table),
     BuildClause tag CreateTable
-  ) => InitTable tag m table where
+  ) => InitTable tag table where
   initTable table = do
     MigrationEffect.log [exon|Initializing table '#{name}'|]
     initStructure table

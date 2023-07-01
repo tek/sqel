@@ -42,7 +42,7 @@ import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent, Match, Mismatch))
 import Sqel.Migration.Init (InitTable, initTable)
 import Sqel.Migration.Metadata (columnMap, logType, typeColumns, typeStatus)
 import Sqel.Migration.Statement (typeStatements)
-import Sqel.Spine (spineTypeCols, spineTableName, spineTypes)
+import Sqel.Spine (spineTableName, spineTypeCols, spineTypes)
 import Sqel.Sqel (sqelTableName, sqelTypes)
 import Sqel.Statement.PgSchema (tableColumnsSql, typeColumnsSql)
 
@@ -277,7 +277,7 @@ conclusion ::
   Monad m =>
   DefaultMeta tag =>
   MigrationEffect m =>
-  InitTable tag m table =>
+  InitTable tag table =>
   SqelFor tag table ->
   Types tag ->
   TypeStatus ->
@@ -303,7 +303,7 @@ runMigrations ::
   DefaultMeta tag =>
   MigrationEffect m =>
   BuildClause tag CreateType =>
-  InitTable tag m table =>
+  InitTable tag table =>
   TableDdl tag m table migs ->
   m TypeStatus
 runMigrations (TableMigrations table steps) = do
