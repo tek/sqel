@@ -5,7 +5,7 @@ import Exon (exon)
 
 import Sqel.Data.Field (RootField (RootField))
 import Sqel.Data.PgType (PgColumnName (PgColumnName))
-import Sqel.Data.PgTypeName (pattern PgTypeName)
+import Sqel.Data.PgTypeName (pattern PgTableName, pattern PgTypeName)
 import Sqel.Data.Spine (Spine (SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql, sqlQuote, toSql)
 import qualified Sqel.Default
@@ -18,7 +18,9 @@ typeNameText = \case
   SpinePrim PrimMeta {name = PgColumnName name} -> name
 
 tableNameText :: RootField Def -> Text
-tableNameText (RootField s) = typeNameText s
+tableNameText (RootField s) = case s of
+  SpineComp CompMeta {typeName = Some (PgTypeName name)} _ _ -> name
+  SpinePrim PrimMeta {table = PgTableName name} -> name
 
 typeName :: Spine Def -> Sql
 typeName = \case
@@ -26,7 +28,9 @@ typeName = \case
   SpinePrim PrimMeta {name} -> toSql name
 
 tableName :: RootField Def -> Sql
-tableName (RootField s) = typeName s
+tableName (RootField s) = case s of
+  SpineComp CompMeta {typeName = Some name} _ _ -> toSql name
+  SpinePrim PrimMeta {table = name} -> toSql name
 
 bindClause :: Bool -> RootField Def -> Sql
 bindClause multi (tableNameText -> name) =

@@ -5,15 +5,16 @@ import Hedgehog (TestT)
 import Prelude hiding (Enum, Mod)
 
 import qualified Sqel.Data.Dd as Kind
-import Sqel.Data.Dd (DdK (Dd), Ext0 (Ext0), PrimType (Cond), StructWith (Comp))
+import Sqel.Data.Dd (DdK (Dd), Ext (Ext), Ext0 (Ext0), PrimType (Cond), StructWith (Comp))
 import Sqel.Data.Mods (NoMods)
 import qualified Sqel.Data.Mods.Array as Mods (Array)
 import qualified Sqel.Data.Mods.Nullable as Mods (Nullable)
+import qualified Sqel.Data.Mods.TableName as Mods
 import qualified Sqel.Data.Mods.Unique as Mods (Unique)
 import Sqel.Data.Name (NamePrefix (DefaultPrefix))
-import Sqel.Data.Sel (SelAuto, SelName, TSel (TSel))
-import Sqel.Dd (SetDdName)
-import Sqel.Dsl (Gen, Prim, ProdGen, Reify, Unique)
+import Sqel.Data.Sel (Paths (Paths), SelAuto, SelName, TSel (TSel))
+import Sqel.Dd (DdTableName, SetDdName)
+import Sqel.Dsl (Gen, Name, Prim, ProdGen, Reify, Table, Unique)
 
 data Sub =
   Sub {
@@ -45,6 +46,7 @@ data Dat2 =
 
 type Table1 = ProdGen Dat1 [Unique Prim, Prim "two" Text, Gen]
 type Table2 = Reify Dat2 Gen
+type Table3 = Table "tab" Int64 (Name "col" Prim)
 
 type Target1 =
   'Dd ('Ext0 SelAuto NoMods) Dat1 ('Comp ('TSel 'DefaultPrefix "Dat1") 'Kind.Prod 'Kind.Nest [
@@ -59,9 +61,16 @@ type Target2 =
     'Dd ('Ext0 (SelName "two") NoMods) Text ('Kind.Prim 'Cond)
   ])
 
+type Target3 =
+  'Dd ('Ext ('Paths "col" '["col"] '["col"]) '[Mods.TableName "tab"]) Int64 ('Kind.Prim 'Cond)
+
 test_dsl_basic :: TestT IO ()
 test_dsl_basic = do
   case Refl :: Table1 :~: Target1 of
     Refl -> unit
   case Refl :: Table2 :~: Target2 of
+    Refl -> unit
+  case Refl :: Table3 :~: Target3 of
+    Refl -> unit
+  case Refl :: "tab" :~: DdTableName Target3 of
     Refl -> unit
