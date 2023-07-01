@@ -24,7 +24,7 @@ import Sqel.Data.Crud (Crud)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
-import Sqel.Data.Uid (Uid (Uid), Uuid)
+import Sqel.Data.Uid (Uid (..), Uuid)
 import Sqel.Dd (DdType)
 import Sqel.Default
 import Sqel.Dsl
