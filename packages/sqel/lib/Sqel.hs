@@ -3,6 +3,7 @@ module Sqel (
   module Sqel.Class.ReifySqel,
   module Sqel.Dd,
   module Sqel.Clauses,
+  module Sqel.Fragment,
   module Sqel.Data.Uid,
   module Sqel.Dsl,
   module Sqel.Data.Codec,
@@ -28,6 +29,7 @@ import Sqel.Data.Uid (Uid (..), Uuid)
 import Sqel.Dd (DdType)
 import Sqel.Default
 import Sqel.Dsl
+import Sqel.Fragment hiding (getFragment)
 import Sqel.Sqel (emptyQuery)
 import Sqel.Statement (prepared, unprepared)
 import Sqel.Uid

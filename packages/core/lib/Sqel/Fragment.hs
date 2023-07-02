@@ -11,6 +11,41 @@ import Sqel.Kind.Fragment (Frag0Dd, Frag0Tag)
 (.=) l r =
   FragmentOp "=" l r
 
+(.!=) ::
+  Fragment ('Frag l) ->
+  Fragment ('Frag r) ->
+  Fragment ('FragOp l r)
+(.!=) l r =
+  FragmentOp "!=" l r
+
+(.<) ::
+  Fragment ('Frag l) ->
+  Fragment ('Frag r) ->
+  Fragment ('FragOp l r)
+(.<) l r =
+  FragmentOp "<" l r
+
+(.<=) ::
+  Fragment ('Frag l) ->
+  Fragment ('Frag r) ->
+  Fragment ('FragOp l r)
+(.<=) l r =
+  FragmentOp "<=" l r
+
+(.>) ::
+  Fragment ('Frag l) ->
+  Fragment ('Frag r) ->
+  Fragment ('FragOp l r)
+(.>) l r =
+  FragmentOp ">" l r
+
+(.>=) ::
+  Fragment ('Frag l) ->
+  Fragment ('Frag r) ->
+  Fragment ('FragOp l r)
+(.>=) l r =
+  FragmentOp ">=" l r
+
 getFragment ::
   ∀ frag .
   Fragment ('Frag frag) ->
