@@ -1,5 +1,6 @@
 module Main where
 
+import Sqel.Test.AbstractTest (test_abstract)
 import Sqel.Test.DslTest (test_dsl)
 import Sqel.Test.EnumTest (test_enum)
 import Sqel.Test.ErrorTest (test_errors)
@@ -9,6 +10,7 @@ import Sqel.Test.MigrationTest (test_migration)
 import Sqel.Test.PrimTableTest (test_primTable)
 import Sqel.Test.SqelTypesTest (test_sqelTypes)
 import Sqel.Test.SqlCodeTest (test_sqlCodeNoInterpolation)
+import Sqel.Test.Statement.CondOpTest (test_condOp)
 import Sqel.Test.StatementTest (test_statement)
 import Sqel.Test.SyntaxTest (test_syntax)
 import Test (unitTest)
@@ -27,7 +29,9 @@ tests =
     unitTest "Sqel types" test_sqelTypes,
     unitTest "json column" test_json,
     unitTest "enum column" test_enum,
-    unitTest "prim table" test_primTable
+    unitTest "prim table" test_primTable,
+    unitTest "abstract column" test_abstract,
+    unitTest "condition operator as mod" test_condOp
   ]
 
 main :: IO ()

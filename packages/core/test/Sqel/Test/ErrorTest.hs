@@ -69,6 +69,14 @@ invalidSpecMessage =
       "If you intend to use it as a custom spec, you need to define:",
       "type instance Reify a (Int) = <impl>"
   ]
+  
+
+countMismatchMessage :: [Text]
+countMismatchMessage =
+  [
+    "• The number of specified columns does not match the data type.",
+    "The type Foo has three fields, but the sqel type specifies two."
+  ]
 
 test_errors :: TestTree
 test_errors =
@@ -78,4 +86,6 @@ test_errors =
     unitTest "not a root fragment" (typeError notRootMessage notRoot),
     unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam),
     unitTest "invalid spec" (typeError invalidSpecMessage invalidSpec)
+    -- TODO
+    -- unitTest "count mismatch" (typeError countMismatchMessage countMismatch)
   ]

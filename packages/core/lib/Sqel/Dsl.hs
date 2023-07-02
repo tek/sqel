@@ -35,6 +35,7 @@ import Sqel.Data.Dd (
   )
 import Sqel.Data.Mods (NoMods)
 import qualified Sqel.Data.Mods.Array as Mods (Array)
+import qualified Sqel.Data.Mods.CondOp as Mods
 import qualified Sqel.Data.Mods.Enum as Mods (Enum)
 import qualified Sqel.Data.Mods.Ignore as Mods
 import qualified Sqel.Data.Mods.Json as Mods
@@ -215,6 +216,24 @@ type Json = Prim PrimJson
 
 type Jsonb :: Type
 type Jsonb = Prim PrimJsonb
+
+type CondOp :: Symbol -> Type -> Type
+type CondOp op = Mod (Mods.CondOp op)
+
+type Equal :: Type -> Type
+type Equal = CondOp "="
+
+type Lt :: Type -> Type
+type Lt = CondOp "<"
+
+type LEq :: Type -> Type
+type LEq = CondOp "<="
+
+type Gt :: Type -> Type
+type Gt = CondOp ">"
+
+type GEq :: Type -> Type
+type GEq = CondOp ">="
 
 ------------------------------------------------------------------------------------------------------------------------
 

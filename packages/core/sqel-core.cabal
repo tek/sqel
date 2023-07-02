@@ -98,6 +98,7 @@ library
       Sqel.Data.Migration
       Sqel.Data.Mods
       Sqel.Data.Mods.Array
+      Sqel.Data.Mods.CondOp
       Sqel.Data.Mods.CustomCodec
       Sqel.Data.Mods.Enum
       Sqel.Data.Mods.Ignore
@@ -289,6 +290,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.BuildTest
       Sqel.Test.Statement.Common
       Sqel.Test.Statement.Con1Test
+      Sqel.Test.Statement.CondOpTest
       Sqel.Test.Statement.CustomTagTest
       Sqel.Test.Statement.DeleteTest
       Sqel.Test.Statement.DropTableTest

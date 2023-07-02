@@ -5,17 +5,19 @@ import Sqel.Class.Mods (FindMod, HasMod)
 import Sqel.Constraints (ConstraintsFor)
 import Sqel.Data.Dd (PrimType (Cond, NoCond))
 import Sqel.Data.IndexState (IndexState, withNewIndex)
+import Sqel.Data.Mods.CondOp (CondOp)
 import Sqel.Data.Mods.Ignore (Ignore)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (pgColumnNameSym)
 import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Data.Spine (PrimFor, spinePath)
+import Sqel.Data.Sql (Sql (Sql))
 import Sqel.Dd (ExtMods, ExtPath)
 import qualified Sqel.Default
 import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta, QuerySynthetic))
 import Sqel.Reify.PrimName (PrimName, reifyPrimName)
-import Sqel.SOP.Constraint (KnownSymbols)
+import Sqel.SOP.Constraint (KnownSymbols, symbolText)
 import Sqel.SOP.HasGeneric (BoolVal (boolVal))
 
 type DemoteNullable :: Maybe Bool -> Constraint
@@ -29,6 +31,16 @@ instance (
 
 instance DemoteNullable 'Nothing where
   demoteNullable = Nothing
+
+type DemoteOp :: Maybe Symbol -> Constraint
+class DemoteOp mod where
+  demoteOp :: Sql
+
+instance DemoteOp 'Nothing where
+  demoteOp = "="
+
+instance KnownSymbol op => DemoteOp ('Just op) where
+  demoteOp = Sql (symbolText @op)
 
 -- TODO 'False 'Cond – error?
 type MkQueryMeta :: [Type] -> Bool -> PrimType -> Constraint
@@ -44,10 +56,12 @@ instance MkQueryMeta mods 'False 'NoCond where
 
 instance (
     nullable ~ FindMod Nullable mods,
-    DemoteNullable nullable
+    op ~ FindMod CondOp mods,
+    DemoteNullable nullable,
+    DemoteOp op
   ) => MkQueryMeta mods 'False 'Cond where
     queryMeta =
-      withNewIndex \ index -> QueryMeta index (Just (CondMeta "=" (demoteNullable @nullable)))
+      withNewIndex \ index -> QueryMeta index (Just (CondMeta (demoteOp @op) (demoteNullable @nullable)))
 
 type ReifyPrim :: ∀ {ext} . Type -> ext -> Type -> PrimType -> Constraint
 class ReifyPrim tag ext a prim where
