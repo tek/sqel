@@ -84,7 +84,7 @@ instance ReifySqels tag '[] where
 instance (
     All (ReifySqelFor tag) (s : ss)
   ) => ReifySqels tag (s : ss) where
-  reifySqels = hcpure (Proxy @(ReifySqelFor tag)) reifySqel
+    reifySqels = hcpure (Proxy @(ReifySqelFor tag)) reifySqel
 
 sqels ::
   ∀ s tag .

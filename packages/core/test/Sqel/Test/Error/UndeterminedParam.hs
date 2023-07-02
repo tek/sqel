@@ -1,15 +1,11 @@
-{-# options_ghc -fdefer-type-errors -Wno-deferred-type-errors #-}
+{-# options_ghc -Wno-unused-foralls -fdefer-type-errors -Wno-deferred-type-errors #-}
 
 module Sqel.Test.Error.UndeterminedParam where
 
-import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.ReifySqel (ReifySqel, sqel)
-import Sqel.Data.Sqel (SqelFor)
-import Sqel.Data.Statement (Statement)
-import Sqel.Dd (DdType)
-import Sqel.Default (From, Select, Sqel)
+import Sqel.Data.Sqel (SqelFor (SqelComp, SqelPrim))
+import Sqel.Default (Sqel)
 import Sqel.Dsl (Prim, Prod, Table)
-import Sqel.Statement.Common (selectAll)
 
 data Dat a =
   Dat {
@@ -21,23 +17,20 @@ data Dat a =
 type Table_Dat a sa =
   Table "dat" (Dat a) (Prod [Prim, sa])
 
-abstractReifySqel ::
-  ∀ sa a .
-  Sqel (Table_Dat a sa)
-abstractReifySqel = sqel
-
 table_Dat ::
   ∀ sa a .
   ReifySqel (Table_Dat a sa) =>
   Sqel (Table_Dat a sa)
 table_Dat = sqel
 
-use ::
-  BuildClause tag Select =>
-  BuildClause tag From =>
-  SqelFor tag table ->
-  Statement () (DdType table)
-use table = selectAll table
+use :: SqelFor tag table -> ()
+use (SqelComp _ _ _ _ _) = ()
+use (SqelPrim _ _) = ()
 
-undeterminedParam :: Statement () (Dat Int64)
-undeterminedParam = use (table_Dat @_ @Int64)
+undeterminedParam ::
+  ∀ (sa :: Type) .
+  ()
+undeterminedParam = use (table_Dat @sa @Int64)
+
+invalidSpec :: ()
+invalidSpec = use (table_Dat @Int @Int64)

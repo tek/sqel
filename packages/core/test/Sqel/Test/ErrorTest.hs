@@ -8,6 +8,7 @@ import Test (unitTest)
 import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Test.Error.FragmentMismatch (notAFragment, notRoot, tableForQuery)
+import Sqel.Test.Error.UndeterminedParam (invalidSpec, undeterminedParam)
 
 typeError ::
   Show a =>
@@ -31,35 +32,42 @@ typeError msg t =
 tableForQueryMessage :: [Text]
 tableForQueryMessage =
     [
-      "\8226 Cannot use a table fragment for a \8216where\8217 clause."
+      "• Cannot use a table fragment for a ‘where’ clause."
     ]
 
 notAFragmentMessage :: [Text]
 notAFragmentMessage =
     [
-      "\8226 The argument of this clause has an invalid type.",
-      "It should be one of the fields of the fragments bound by \8216frags <- query\8217,",
-      "like \8216frags.tables.users\8217 or \8216frags.query\8217, or combinations of fields like",
-      "\8216(frags.users.name, frags.users.address)\8217."
+      "• The argument of this clause has an invalid type.",
+      "It should be one of the fields of the fragments bound by ‘frags <- query’,",
+      "like ‘frags.tables.users’ or ‘frags.query’, or combinations of fields like",
+      "‘(frags.users.name, frags.users.address)’."
 
     ]
 
 notRootMessage :: [Text]
 notRootMessage =
   [
-    "\8226 A \8216from\8217 clause does not accept projections."
-  ]
-
-abstractReifySqelMessage :: [Text]
-abstractReifySqelMessage =
-  [
-    "TODO"
+    "• A ‘from’ clause does not accept projections."
   ]
 
 undeterminedParamMessage :: [Text]
 undeterminedParamMessage =
   [
-    "TODO"
+    "• The type (variable) ‘sa’ specifying a column of type ‘Int64’ is undetermined.",
+    "If you are calling a polymorphic function that has a constraint like ‘ReifySqel’,",
+    "you probably need to use a type application to specify the spec, like ‘Prim’.",
+    "If the variable is supposed to be polymorphic, you need to add ‘ReifySqel’ to its function's context",
+    "and use ‘sa’ in the type application."
+  ]
+
+invalidSpecMessage :: [Text]
+invalidSpecMessage =
+  [
+      "• The spec ‘Int’",
+      "given for a column of type ‘Int64’ is not supported.",
+      "If you intend to use it as a custom spec, you need to define:",
+      "type instance Reify a (Int) = <impl>"
   ]
 
 test_errors :: TestTree
@@ -67,9 +75,7 @@ test_errors =
   testGroup "type errors" [
     unitTest "table fragment for query clause" (typeError tableForQueryMessage tableForQuery),
     unitTest "not a fragment" (typeError notAFragmentMessage notAFragment),
-    unitTest "not a root fragment" (typeError notRootMessage notRoot)
-    -- ,
-    -- unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam)
-    -- ,
-    -- unitTest "missing ReifySqel with abstract Dd" (typeError abstractReifySqelMessage abstractReifySqel)
+    unitTest "not a root fragment" (typeError notRootMessage notRoot),
+    unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam),
+    unitTest "invalid spec" (typeError invalidSpecMessage invalidSpec)
   ]

@@ -37,6 +37,7 @@ instance (
     ddPure cons =
       unDdVals @ss (hcpure (Proxy @c) cons)
 
+type DdMap :: ∀ {ext} . (DdK ext -> Type) -> (Type -> Type) -> [DdK ext] -> Constraint
 class DdMap f g ss where
   ddmap :: (∀ s . f s -> g (DdType s)) -> NP f ss -> NP g (DdTypes ss)
 
