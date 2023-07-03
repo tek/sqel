@@ -292,6 +292,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.BuildTest
       Sqel.Test.Statement.Common
       Sqel.Test.Statement.Con1Test
+      Sqel.Test.Statement.CondExprTest
       Sqel.Test.Statement.CondOpTest
       Sqel.Test.Statement.CustomTagTest
       Sqel.Test.Statement.DeleteTest
@@ -301,7 +302,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.MergeProdTest
       Sqel.Test.Statement.MergeSumTest
       Sqel.Test.Statement.MinimalTest
-      Sqel.Test.Statement.NamedCompQuery
+      Sqel.Test.Statement.NamedCompQueryTest
       Sqel.Test.Statement.NullableQueryTest
       Sqel.Test.Statement.OrderTest
       Sqel.Test.Statement.ParamsTest

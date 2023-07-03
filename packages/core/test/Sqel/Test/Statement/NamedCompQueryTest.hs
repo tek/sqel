@@ -1,4 +1,4 @@
-module Sqel.Test.Statement.NamedCompQuery where
+module Sqel.Test.Statement.NamedCompQueryTest where
 
 import Generics.SOP (NP (Nil, (:*)))
 import Hedgehog (TestT, (===))
