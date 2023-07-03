@@ -69,7 +69,17 @@ invalidSpecMessage =
       "If you intend to use it as a custom spec, you need to define:",
       "type instance Reify a (Int) = <impl>"
   ]
-  
+
+modOrderMessage :: [Text]
+modOrderMessage =
+  [
+    "• While handling a column mod for a encoder:",
+    "‘Sqel.Data.Mods.Nullable.Nullable’",
+    "It is declared as creating a ‘Params’, but there is a ‘Value’ mod applied after it.",
+    "Try changing the order of mods for this column.",
+    "Note that ‘Prim’ might automatically add mods like ‘Nullable’",
+    "before your explicit mod, in which case you'll have to make all mods explicit."
+  ]
 
 countMismatchMessage :: [Text]
 countMismatchMessage =

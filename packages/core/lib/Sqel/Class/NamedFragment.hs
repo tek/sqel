@@ -6,7 +6,7 @@ import Generics.SOP (NP)
 import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (DdK)
-import Sqel.Dd (DdName, DdNames, DdTypeName, DdTypeNames)
+import Sqel.Dd (DdKNames, DdName, DdTypeName, DdTypeNames)
 import Sqel.Kind.List (type (++))
 import Sqel.SOP.Error (BulletedLines, Quoted, QuotedError, StuckError)
 import Sqel.SOP.HFind (HFind (HFindT, hfind))
@@ -50,7 +50,7 @@ class NamedProjection name projs proj | name projs -> proj where
 
 instance (
     ss ~ s0 : sn,
-    err ~ NoField "projection" name (DdNames ss) ss,
+    err ~ NoField "projection" name (DdKNames ss) ss,
     pred ~ MatchName name,
     HFind err pred ss,
     proj ~ HFindT (MatchName name) (s0 : sn)

@@ -1,12 +1,10 @@
 module Sqel.Data.Mods.PrimaryKey where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 data PrimaryKey
 
-instance ReifyDecoder mods a => ReifyDecoder (PrimaryKey : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (PrimaryKey : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod PrimaryKey = 'Skip
+type instance EncoderMod PrimaryKey = 'Skip

@@ -2,10 +2,11 @@ module Sqel.Test.Statement.ParamsTest where
 
 import Hedgehog (TestT, (===))
 
+import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, limit, offset, select, where_)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
-import Sqel.Default (Def)
+import Sqel.Default (Def, Sqel)
 import Sqel.Dsl (OrNull, Param, Prim, Prod, Query)
 import Sqel.Syntax.Fragments (query1K)
 import qualified Sqel.Syntax.Monad as S
@@ -20,6 +21,9 @@ data Q =
   deriving stock (Eq, Show, Generic)
 
 type Query_Q = Query Q (Prod [Prim, Param Prim, Param (OrNull Prim)])
+
+query_Q :: Sqel Query_Q
+query_Q = sqel
 
 target_params :: Sql
 target_params =

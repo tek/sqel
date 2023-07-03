@@ -10,7 +10,7 @@ import Sqel.SOP.HasGeneric (HasGeneric)
 
 type ErrHead :: Type -> ErrorMessage
 type ErrHead a =
-  "A field of type " <> Quoted a <> "was declared as a newtype column,"
+  "A field of type " <> Quoted a <> " was declared as a newtype column,"
 
 type NoGenericError :: Type -> ErrorMessage
 type NoGenericError a =

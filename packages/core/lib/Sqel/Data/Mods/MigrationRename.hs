@@ -1,13 +1,11 @@
 module Sqel.Data.Mods.MigrationRename where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 type MigrationRename :: Symbol -> Type
 data MigrationRename name
 
-instance ReifyDecoder mods a => ReifyDecoder (MigrationRename name : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (MigrationRename name : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod (MigrationRename _) = 'Skip
+type instance EncoderMod (MigrationRename _) = 'Skip

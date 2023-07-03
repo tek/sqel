@@ -1,13 +1,11 @@
 module Sqel.Data.Mods.MigrationDefault where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 type MigrationDefault :: Symbol -> Type
 data MigrationDefault value
 
-instance ReifyDecoder mods a => ReifyDecoder (MigrationDefault value : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (MigrationDefault value : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod (MigrationDefault _) = 'Skip
+type instance EncoderMod (MigrationDefault _) = 'Skip

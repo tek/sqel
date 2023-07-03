@@ -12,6 +12,12 @@ type CompleteCodec :: (Type -> Type) -> (Type -> Type) -> Constraint
 class CompleteCodec b b' where
   completeCodec :: b' a -> b a
 
+instance CompleteCodec Decoder Row where
+  completeCodec decoder = Decoder decoder (void ignoreDecoder)
+
+instance CompleteCodec Encoder Params where
+  completeCodec encoder = Encoder encoder (columnEncoderIgnore Encoders.unknown)
+
 instance CompleteCodec Decoder Decoders.Value where
   completeCodec decoder = Decoder (columnDecoder decoder) (void ignoreDecoder)
 

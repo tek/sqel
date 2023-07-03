@@ -1,22 +1,18 @@
 module Sqel.Data.Mods.Newtype where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod, TransformDecoder (transformDecoder))
+import Sqel.Class.ReifyEncoder (EncoderMod, TransformEncoder (transformEncoder))
+import Sqel.Data.Mods.Sort (ModSort (Transform))
 import Sqel.SOP.Newtype (UnwrapNewtype (unwrapNewtype, wrapNewtype))
 
 type Newtype :: Type -> Type -> Type
 data Newtype a w
 
-instance (
-    UnwrapNewtype a w,
-    ReifyEncoder mods w
-  ) => ReifyEncoder (Newtype a w : mods) a where
-    reifyEncoder =
-      unwrapNewtype >$< reifyEncoder @mods
+type instance DecoderMod (Newtype _ _) = 'Transform
+type instance EncoderMod (Newtype _ _) = 'Transform
 
-instance (
-    UnwrapNewtype a w,
-    ReifyDecoder mods w
-  ) => ReifyDecoder (Newtype a w : mods) a where
-    reifyDecoder =
-      wrapNewtype <$> reifyDecoder @mods
+instance UnwrapNewtype a w => TransformEncoder error (Newtype a w) a w where
+  transformEncoder = contramap unwrapNewtype
+
+instance UnwrapNewtype a w => TransformDecoder error (Newtype a w) a w where
+  transformDecoder = fmap wrapNewtype

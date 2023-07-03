@@ -1,12 +1,10 @@
 module Sqel.Data.Mods.Unique where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 data Unique
 
-instance ReifyDecoder mods a => ReifyDecoder (Unique : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (Unique : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod Unique = 'Skip
+type instance EncoderMod Unique = 'Skip

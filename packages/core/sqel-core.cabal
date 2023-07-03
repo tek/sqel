@@ -113,6 +113,7 @@ library
       Sqel.Data.Mods.Nullable
       Sqel.Data.Mods.PrimaryKey
       Sqel.Data.Mods.ReadShow
+      Sqel.Data.Mods.Sort
       Sqel.Data.Mods.TableName
       Sqel.Data.Mods.Unique
       Sqel.Data.Name
@@ -274,6 +275,7 @@ test-suite sqel-core-test
       Sqel.Test.DslTest
       Sqel.Test.EnumTest
       Sqel.Test.Error.FragmentMismatch
+      Sqel.Test.Error.ModOrder
       Sqel.Test.Error.UndeterminedParam
       Sqel.Test.ErrorTest
       Sqel.Test.HasGeneric
@@ -373,9 +375,11 @@ test-suite sqel-integration
       Sqel.Test.InitTest
       Sqel.Test.JoinTest
       Sqel.Test.Run
+      Sqel.Test.SumTest
   hs-source-dirs:
       integration
   default-extensions:
+      QualifiedDo
       AllowAmbiguousTypes
       ApplicativeDo
       BlockArguments

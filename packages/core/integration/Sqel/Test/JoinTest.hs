@@ -4,7 +4,7 @@ module Sqel.Test.JoinTest where
 
 import Hasql.Session (Session)
 import Hedgehog (TestT, (===))
-import Prelude hiding (Mod, join, on)
+import Prelude hiding (join, on)
 
 import Sqel.Class.Query (QueryDd)
 import Sqel.Class.ReifySqel (ReifySqelFor)

@@ -6,8 +6,8 @@ import qualified Hasql.Encoders as Encoders
 import Hasql.Encoders (Params)
 
 import Sqel.Class.CompleteCodec (CompleteCodec (completeCodec))
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder, reifyEncoder)
+import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder), ReifyDecoderValue (reifyDecoderValue))
+import Sqel.Class.ReifyEncoder (ReifyEncoder, ReifyEncoderValue (reifyEncoderValue), reifyEncoder)
 import Sqel.Data.Codec (Codec (Codec), Decoder, Encoder, FullCodec)
 
 type ReifyPrimCodec :: [Type] -> (Type -> Type) -> Type -> Constraint
@@ -15,24 +15,24 @@ class ReifyPrimCodec mods b a where
   reifyPrimCodec :: b a
 
 instance {-# overlappable #-} (
-    ReifyDecoder mods a
+    ReifyDecoderValue mods a
   ) => ReifyPrimCodec mods Decoders.Value a where
-    reifyPrimCodec = reifyDecoder @mods
+    reifyPrimCodec = reifyDecoderValue @mods
 
 instance {-# overlappable #-} (
-    ReifyEncoder mods a
+    ReifyEncoderValue mods a
   ) => ReifyPrimCodec mods Encoders.Value a where
-    reifyPrimCodec = reifyEncoder @mods
+    reifyPrimCodec = reifyEncoderValue @mods
 
 instance {-# overlappable #-} (
     ReifyDecoder mods a
   ) => ReifyPrimCodec mods Row a where
-    reifyPrimCodec = completeCodec (reifyDecoder @mods)
+    reifyPrimCodec = reifyDecoder @mods
 
 instance {-# overlappable #-} (
     ReifyEncoder mods a
   ) => ReifyPrimCodec mods Params a where
-    reifyPrimCodec = completeCodec (reifyEncoder @mods)
+    reifyPrimCodec = reifyEncoder @mods
 
 instance {-# overlappable #-} (
     ReifyDecoder mods a

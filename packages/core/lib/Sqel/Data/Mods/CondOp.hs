@@ -1,13 +1,11 @@
 module Sqel.Data.Mods.CondOp where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 type CondOp :: Symbol -> Type
 data CondOp op
 
-instance ReifyDecoder mods a => ReifyDecoder (CondOp op : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (CondOp op : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod (CondOp _) = 'Skip
+type instance EncoderMod (CondOp _) = 'Skip

@@ -84,6 +84,7 @@ instance (
 
 type Checked1 table tag = Checked '[table] tag
 
+-- TODO proxy Checked with a class that triages the tag to get the error to say Check instead of Checked Def
 type Check tables = Checked tables Def
 
 type Check1 table = Check '[table]

@@ -5,8 +5,9 @@ import Data.Aeson (FromJSON, ToJSON)
 import qualified Hasql.Decoders as Decoders
 import qualified Hasql.Encoders as Encoders
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (CreateDecoder (createDecoder), DecoderMod)
+import Sqel.Class.ReifyEncoder (CreateEncoder (createEncoder), EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Create))
 
 data Json
 
@@ -24,14 +25,11 @@ jsonDecoder ::
 jsonDecoder =
   Decoders.jsonBytes (first toText . Aeson.eitherDecodeStrict')
 
-instance ToJSON a => ReifyEncoder (Json : mods) a where
-  reifyEncoder = jsonEncoder
+type instance DecoderMod Json = 'Create
+type instance EncoderMod Json = 'Create
 
-instance FromJSON a => ReifyDecoder (Json : mods) a where
-  reifyDecoder = jsonDecoder
+instance ToJSON a => CreateEncoder error Json a where
+  createEncoder = jsonEncoder
 
-instance ToJSON a => ReifyEncoder (Jsonb : mods) a where
-  reifyEncoder = jsonEncoder
-
-instance FromJSON a => ReifyDecoder (Jsonb : mods) a where
-  reifyDecoder = jsonDecoder
+instance FromJSON a => CreateDecoder error Json a where
+  createDecoder = jsonDecoder

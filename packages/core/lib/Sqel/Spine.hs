@@ -11,7 +11,7 @@ import Sqel.Data.Spine (
   Spine (SpineMerge, SpineNest, SpinePrim),
   pattern SpineComp,
   TypeSpine (TypeSpine),
-  Types (Types),
+  Types (Types), CompSort (CompSum),
   )
 import qualified Sqel.Default
 import Sqel.Default (CompMeta (CompMeta), PrimMeta (PrimMeta))
@@ -70,3 +70,8 @@ spineColumnName ::
 spineColumnName = \case
   SpinePrim (defaultPrimMeta @tag -> meta) -> meta.name
   SpineComp (defaultCompMeta @tag -> meta) _ _ -> meta.name
+
+isSum :: CompSort tag -> Bool
+isSum = \case
+  CompSum _ -> True
+  _ -> False

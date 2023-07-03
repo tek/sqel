@@ -72,22 +72,25 @@
         "vector ^>= 0.12"
       ];
 
-      test.enable = true;
-      test.dependencies = [
-        "aeson ^>= 2.0"
-        "exon ^>= 1.4"
-        "generics-sop ^>= 0.5"
-        "hasql ^>= 1.6"
-        "hedgehog ^>= 1.1"
-        "tasty ^>= 1.4"
-        "tasty-hedgehog ^>= 1.3"
-        "transformers"
-      ];
-      test.default-extensions = ["QualifiedDo"];
+      test = {
+        enable = true;
+        default-extensions = ["QualifiedDo"];
+        dependencies = [
+          "aeson ^>= 2.0"
+          "exon ^>= 1.4"
+          "generics-sop ^>= 0.5"
+          "hasql ^>= 1.6"
+          "hedgehog ^>= 1.1"
+          "tasty ^>= 1.4"
+          "tasty-hedgehog ^>= 1.3"
+          "transformers"
+        ];
+      };
 
       tests.sqel-integration = {
         source-dirs = "integration";
         env = "sqel-integration";
+        default-extensions = ["QualifiedDo"];
         dependencies = [
           "exon ^>= 1.4"
           "hasql ^>= 1.6"

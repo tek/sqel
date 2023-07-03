@@ -1,22 +1,17 @@
 module Sqel.Data.Mods.Name where
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (DecoderMod)
+import Sqel.Class.ReifyEncoder (EncoderMod)
+import Sqel.Data.Mods.Sort (ModSort (Skip))
 
 type SetPrimName :: Symbol -> Type
 data SetPrimName name
 
-instance ReifyDecoder mods a => ReifyDecoder (SetPrimName n : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (SetPrimName n : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod (SetPrimName _) = 'Skip
+type instance EncoderMod (SetPrimName _) = 'Skip
 
 type SetTableName :: Symbol -> Type
 data SetTableName name
 
-instance ReifyDecoder mods a => ReifyDecoder (SetTableName n : mods) a where
-  reifyDecoder = reifyDecoder @mods
-
-instance ReifyEncoder mods a => ReifyEncoder (SetTableName n : mods) a where
-  reifyEncoder = reifyEncoder @mods
+type instance DecoderMod (SetTableName _) = 'Skip
+type instance EncoderMod (SetTableName _) = 'Skip

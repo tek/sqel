@@ -3,15 +3,19 @@ module Sqel.Data.Mods.Enum where
 import qualified Hasql.Encoders as Encoders
 import Prelude hiding (Enum)
 
-import Sqel.Class.ReifyDecoder (ReifyDecoder (reifyDecoder))
-import Sqel.Class.ReifyEncoder (ReifyEncoder (reifyEncoder))
+import Sqel.Class.ReifyDecoder (CreateDecoder (createDecoder), DecoderMod)
+import Sqel.Class.ReifyEncoder (CreateEncoder (createEncoder), EncoderMod)
 import Sqel.Codec.PrimDecoder (enumDecoder)
+import Sqel.Data.Mods.Sort (ModSort (Create))
 import Sqel.SOP.Enum (EnumTable)
 
 data Enum = Enum
 
-instance Show a => ReifyEncoder (Enum : mods) a where
-  reifyEncoder = Encoders.enum show
+type instance DecoderMod Enum = 'Create
+type instance EncoderMod Enum = 'Create
 
-instance EnumTable a => ReifyDecoder (Enum : mods) a where
-  reifyDecoder = enumDecoder
+instance Show a => CreateEncoder error Enum a where
+  createEncoder = Encoders.enum show
+
+instance EnumTable a => CreateDecoder error Enum a where
+  createDecoder = enumDecoder
