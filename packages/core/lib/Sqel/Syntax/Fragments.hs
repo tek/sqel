@@ -64,6 +64,7 @@ query1K ::
 query1K =
   queryKWith
 
+-- TODO rename this to query, and query to queryMulti or something
 query1 ::
   ∀ tag query table .
   QuerySqel tag query '[table] =>

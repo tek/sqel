@@ -1,5 +1,6 @@
 module Sqel.CondExpr where
 
+import qualified Exon as Exon
 import Exon (exon)
 
 import Sqel.Data.CondExpr (CondExpr (..))
@@ -21,4 +22,5 @@ renderCondExpr path index =
       CondField -> pathSql
       CondParam -> [exon|#{dollar index}|]
       CondOp op l r -> [exon|#{render l} #{op} #{render r}|]
+      CondCall fun args -> [exon|#{fun}(#{Exon.intercalate ", " (render <$> args)})|]
     pathSql = renderPrimPath path

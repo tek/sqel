@@ -12,5 +12,7 @@ data CondExpr =
   CondParam
   |
   CondOp Sql CondExpr CondExpr
+  |
+  CondCall Sql [CondExpr]
   deriving stock (Eq, Show, Generic)
   deriving anyclass (ToJSON, FromJSON)

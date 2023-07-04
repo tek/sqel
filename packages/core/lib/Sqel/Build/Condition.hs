@@ -2,7 +2,7 @@ module Sqel.Build.Condition where
 
 import Data.List.NonEmpty ((<|))
 import Exon (exon)
-import qualified Exon.Combinators as Exon
+import qualified Exon as Exon
 
 import Sqel.CondExpr (renderCondExpr)
 import Sqel.Data.Field (CondField (CondField, CondOp))
