@@ -1,47 +1,16 @@
 module Sqel.Build.PrimPath where
 
 import Sqel.Build.Index (prependIndexWith)
-import Sqel.Data.PgTypeName (PgTableName)
-import qualified Sqel.Data.SelectorP
-import Sqel.Data.SelectorP (SelectorP (SelectorP))
-import Sqel.Data.Spine (Spine (SpinePrim), pattern SpineComp, SpinePath (SpinePath))
+import Sqel.Data.Path (PrimPath)
+import Sqel.Data.Spine (Spine (SpinePrim), pattern SpineComp)
+import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default
 import Sqel.Default (CompMeta, PrimMeta, SpineDef)
-
-data PrimPath =
-  PrimPath {
-    table :: Maybe PgTableName,
-    path :: SpinePath
-  }
-  deriving stock (Eq, Show, Generic)
-
-primPathWith ::
-  Bool ->
-  PgTableName ->
-  SpinePath ->
-  PrimPath
-primPathWith multi mtable path =
-  PrimPath table path
-  where
-    table | multi = Just mtable
-          | otherwise = Nothing
-
-primPath ::
-  Bool ->
-  PrimMeta ->
-  PrimPath
-primPath multi meta =
-  primPathWith multi meta.table meta.path
-
-primPathSelector ::
-  PrimPath ->
-  SelectorP
-primPathSelector (PrimPath table (SpinePath (root :| sub))) =
-  SelectorP {..}
+import Sqel.Path (primMetaPath, primPath, renderPrimPath)
 
 indexPath :: Bool -> CompMeta -> PrimMeta -> PrimPath
 indexPath multi meta index =
-  primPathWith multi meta.table index.path
+  primPath multi meta.table index.path
 
 primPaths ::
   Bool ->
@@ -51,5 +20,12 @@ primPaths multi =
   spin
   where
     spin = \case
-      SpinePrim meta -> [primPath multi meta]
+      SpinePrim meta -> [primMetaPath multi meta]
       SpineComp meta compSort sub -> prependIndexWith (indexPath multi meta) compSort (spin =<< sub)
+
+renderPrimPaths ::
+  Bool ->
+  SpineDef ->
+  [Sql]
+renderPrimPaths multi frag =
+  renderPrimPath <$> primPaths multi frag

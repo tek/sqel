@@ -10,9 +10,10 @@ import Sqel.Data.Dd (Dd)
 import Sqel.Data.Drop (Drop)
 import Sqel.Data.Field (CondField, Field, PrimField, RootField, TypeField)
 import Sqel.Data.Order (Order)
+import Sqel.Data.Path (FieldPath)
 import Sqel.Data.PgType (PgColumnName, PgPrimName, PgTypeRef)
 import Sqel.Data.PgTypeName (PgTableName, PgTypeName)
-import Sqel.Data.Spine (CompFor, PrimFor, Spine, SpinePath, SpineSort (SpineProj, SpineQuery, SpineTable))
+import Sqel.Data.Spine (CompFor, PrimFor, Spine, SpineSort (SpineProj, SpineQuery, SpineTable))
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql)
 import Sqel.Error.Clause (ClauseDesc, ClauseError)
@@ -20,6 +21,18 @@ import Sqel.Error.Fragment (FragmentMismatch, FragmentMismatchDefault)
 
 data Def = Def
   deriving stock (Show)
+
+data Expr = Expr
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (ToJSON, FromJSON)
+
+-- TODO
+data CondExpr =
+  CondExpr Expr
+  |
+  CondOp Sql
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (ToJSON, FromJSON)
 
 data CondMeta =
   CondMeta {
@@ -42,7 +55,7 @@ data QueryMeta =
 data PrimMeta =
   PrimMeta {
     name :: PgColumnName,
-    path :: SpinePath,
+    path :: FieldPath,
     colType :: PgPrimName,
     table :: PgTableName,
     constr :: Constraints,

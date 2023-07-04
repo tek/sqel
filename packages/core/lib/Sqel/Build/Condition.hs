@@ -5,17 +5,13 @@ import Exon (exon)
 import qualified Exon.Combinators as Exon
 
 import Sqel.Data.Field (CondField (CondField, CondOp))
-import Sqel.Data.PgTypeName (PgTableName)
-import Sqel.Data.Selector (Selector, pathSelectorTable)
-import Sqel.Data.Spine (
-  CompSort (CompCon, CompProd, CompSum),
-  Spine (SpineNest, SpinePrim),
-  pattern SpineComp,
-  SpinePath (SpinePath),
-  )
+import Sqel.Data.Path (PrimPath)
+import Sqel.Data.Selector (Selector)
+import Sqel.Data.Spine (CompSort (CompCon, CompProd, CompSum), Spine (SpineNest, SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default
 import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta), SpineDef)
+import Sqel.Path (primMetaPath, primSelector)
 import Sqel.Sql.Prepared (dollar)
 
 data Connective =
@@ -84,10 +80,6 @@ render =
       And -> " and "
       Or -> " or "
 
-selector :: Maybe PgTableName -> SpinePath -> Selector
-selector table (SpinePath path) =
-  pathSelectorTable table path
-
 nullGuard :: Maybe Bool -> Int -> Sql -> Sql
 nullGuard (Just True) index code = [exon|(#{dollar index} is null or #{code})|]
 nullGuard _ _ code = code
@@ -99,21 +91,19 @@ conGuard indexParam conIndex = \case
   where
     grd = ExprAtom [exon|#{dollar indexParam} = #{show conIndex}|]
 
-conditionPath :: Bool -> SpinePath -> PgTableName -> Selector
-conditionPath multi path table =
-  selector selTable path
-  where
-    selTable = if multi then Just table else Nothing
+conditionPath :: Bool -> PrimMeta -> Selector
+conditionPath multi meta =
+  primSelector (primMetaPath multi meta)
 
-paramCondition :: Bool -> SpinePath -> PgTableName -> Int -> CondMeta -> Expr
-paramCondition multi path table index (CondMeta op nullable) =
+paramCondition :: PrimPath -> Int -> CondMeta -> Expr
+paramCondition path index (CondMeta op nullable) =
   ExprAtom (nullGuard nullable index cond)
   where
-    cond = [exon|##{conditionPath multi path table} #{op} #{dollar index}|]
+    cond = [exon|##{primSelector path} #{op} #{dollar index}|]
 
 prim :: Bool -> PrimMeta -> Expr
 prim multi meta
-  | QueryMeta index (Just cond) <- meta.query = paramCondition multi meta.path meta.table index cond
+  | QueryMeta index (Just cond) <- meta.query = paramCondition (primMetaPath multi meta) index cond
   | otherwise = ExprEmpty
 
 joinConds :: (NonEmpty Expr -> Expr) -> [Expr] -> Expr
@@ -152,7 +142,7 @@ spineConditions multi = \case
 
 fieldOpCondition :: Bool -> Text -> SpineDef -> SpineDef -> Expr
 fieldOpCondition multi op (SpinePrim lmeta) (SpinePrim rmeta) =
-  ExprAtom [exon|##{conditionPath multi lmeta.path lmeta.table} ##{op} ##{conditionPath multi rmeta.path rmeta.table}|]
+  ExprAtom [exon|##{conditionPath multi lmeta} ##{op} ##{conditionPath multi rmeta}|]
 fieldOpCondition _ _ _ _ =
   ExprEmpty
 

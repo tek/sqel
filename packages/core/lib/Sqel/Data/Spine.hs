@@ -1,24 +1,10 @@
 module Sqel.Data.Spine where
 
 import Data.Aeson (FromJSON, ToJSON)
-import qualified Data.List.NonEmpty as NonEmpty
 import Prelude hiding (sort)
 
 import Sqel.Data.PgType (PgTypeRef)
 import Sqel.Data.PgTypeName (PgCompName)
-import Sqel.SOP.Constraint (KnownSymbols, symbolTexts)
-
-newtype SpinePath =
-  SpinePath { unSpinePath :: NonEmpty Text }
-  deriving stock (Eq, Show, Generic)
-  deriving newtype (ToJSON, FromJSON)
-
-spinePath ::
-  ∀ path .
-  KnownSymbols path =>
-  SpinePath
-spinePath =
-  SpinePath (NonEmpty.reverse (symbolTexts @path))
 
 type PrimFor :: Type -> Type
 type family PrimFor tag

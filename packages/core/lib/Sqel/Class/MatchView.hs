@@ -4,7 +4,7 @@ import Fcf (If)
 import Type.Errors (DelayError, ErrorMessage, IfStuck, Pure)
 
 import Sqel.Data.Dd (Dd)
-import Sqel.Data.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
+import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
 import Sqel.Dd (DdType)
 import Sqel.SOP.Error (QuotedError, QuotedType, ShowPath, Unlines)
 

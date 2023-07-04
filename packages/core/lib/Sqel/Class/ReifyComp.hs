@@ -10,10 +10,11 @@ import Sqel.Data.IndexState (IndexState)
 import Sqel.Data.PgType (pgColumnNameSym, pgTypeRefSym)
 import Sqel.Data.PgTypeName (PgTableName, TselPgTypeName (tselPgTypeName))
 import Sqel.Data.Sel (PathsL, PathsNameOr, PrefixedIndex, TSel, TSelName, TSelTypeName)
-import Sqel.Data.Spine (CompFor, CompSort (CompCon, CompProd, CompSum), spinePath)
+import Sqel.Data.Spine (CompFor, CompSort (CompCon, CompProd, CompSum))
 import Sqel.Dd (ExtMods, ExtPath)
 import qualified Sqel.Default
 import Sqel.Default (CompMeta (CompMeta), Def, PrimMeta (PrimMeta))
+import Sqel.Path (ddPath)
 import Sqel.SOP.Constraint (KnownSymbols)
 
 type DemoteSort :: ∀ {ext} . Type -> Sort -> Symbol -> ext -> Constraint
@@ -31,7 +32,7 @@ instance (
       query <- queryMeta @'[] @'False @'Cond
       pure $ CompSum PrimMeta {
         name = pgColumnNameSym @name,
-        path = spinePath @indexPath,
+        path = ddPath @indexPath,
         colType = "bigint",
         table,
         constr = def,

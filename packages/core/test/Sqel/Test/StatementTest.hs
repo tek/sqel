@@ -5,6 +5,7 @@ import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Test.Statement.BuildTest (test_build)
 import Sqel.Test.Statement.Con1Test (test_statement_con1)
+import Sqel.Test.Statement.CondExprTest (test_condExpr)
 import Sqel.Test.Statement.CustomTagTest (test_customTag)
 import Sqel.Test.Statement.DeleteTest (test_delete)
 import Sqel.Test.Statement.DropTableTest (test_dropTable)
@@ -41,5 +42,6 @@ test_statement =
     unitTest "sum query" test_sumQuery,
     unitTest "non-condition params" test_statement_params,
     unitTest "ignored query field" test_statement_ignore,
-    unitTest "empty query" test_statement_emptyQuery
+    unitTest "empty query" test_statement_emptyQuery,
+    unitTest "custom condition expression" test_condExpr
   ]

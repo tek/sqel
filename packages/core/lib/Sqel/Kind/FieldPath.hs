@@ -1,4 +1,4 @@
-module Sqel.Data.FieldPath where
+module Sqel.Kind.FieldPath where
 
 import Type.Errors (ErrorMessage)
 

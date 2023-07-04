@@ -11,11 +11,12 @@ import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (pgColumnNameSym)
 import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Sel (Paths (Paths))
-import Sqel.Data.Spine (PrimFor, spinePath)
+import Sqel.Data.Spine (PrimFor)
 import Sqel.Data.Sql (Sql (Sql))
 import Sqel.Dd (ExtMods, ExtPath)
 import qualified Sqel.Default
 import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta, QuerySynthetic))
+import Sqel.Path (ddPath)
 import Sqel.Reify.PrimName (PrimName, reifyPrimName)
 import Sqel.SOP.Constraint (KnownSymbols, symbolText)
 import Sqel.SOP.HasGeneric (BoolVal (boolVal))
@@ -82,7 +83,7 @@ instance (
     query <- queryMeta @mods @ignore @prim
     pure PrimMeta {
       name = pgColumnNameSym @name,
-      path = spinePath @tablePath,
+      path = ddPath @tablePath,
       colType = reifyPrimName @Def @a @mods,
       table,
       constr = demoteConstraints @constr,

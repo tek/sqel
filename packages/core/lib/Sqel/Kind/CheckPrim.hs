@@ -4,7 +4,7 @@ import Type.Errors (ErrorMessage)
 
 import Sqel.Class.MatchView (ColumnMessage, MatchViewPathError)
 import Sqel.Data.Dd (Dd)
-import Sqel.Data.FieldPath (FieldPath (FieldPath), FieldPaths)
+import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths)
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Dd (DdTypeName)
 import Sqel.SOP.Error (Unlines)

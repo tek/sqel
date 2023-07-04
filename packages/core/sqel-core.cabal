@@ -91,7 +91,6 @@ library
       Sqel.Data.Drop
       Sqel.Data.ExistingColumn
       Sqel.Data.Field
-      Sqel.Data.FieldPath
       Sqel.Data.Fragment
       Sqel.Data.Fragments
       Sqel.Data.IndexState
@@ -118,11 +117,11 @@ library
       Sqel.Data.Mods.Unique
       Sqel.Data.Name
       Sqel.Data.Order
+      Sqel.Data.Path
       Sqel.Data.PgType
       Sqel.Data.PgTypeName
       Sqel.Data.Sel
       Sqel.Data.Selector
-      Sqel.Data.SelectorP
       Sqel.Data.Spine
       Sqel.Data.Sqel
       Sqel.Data.Sql
@@ -141,6 +140,7 @@ library
       Sqel.Error.PrimCodec
       Sqel.Fragment
       Sqel.Kind.CheckPrim
+      Sqel.Kind.FieldPath
       Sqel.Kind.Fragment
       Sqel.Kind.HasFieldK
       Sqel.Kind.List
@@ -169,7 +169,9 @@ library
       Sqel.Migration.Transform
       Sqel.Migration.Type
       Sqel.Normalize
+      Sqel.Path
       Sqel.Reify.PrimName
+      Sqel.Selector
       Sqel.SOP.Constraint
       Sqel.SOP.Enum
       Sqel.SOP.Error
