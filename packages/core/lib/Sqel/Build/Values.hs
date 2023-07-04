@@ -4,10 +4,12 @@ import Exon (exon)
 
 import Sqel.Build.Index (prependIndex)
 import Sqel.Data.Field (Field (Field))
+import qualified Sqel.Data.QueryMeta
+import Sqel.Data.QueryMeta (QueryMeta (QueryMeta))
 import Sqel.Data.Spine (CompSort, Spine (SpineMerge, SpineNest, SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default
-import Sqel.Default (Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta), SpineDef)
+import Sqel.Default (Def, PrimMeta (PrimMeta), SpineDef)
 import Sqel.Sql (joinComma)
 import Sqel.Sql.Prepared (dollar)
 

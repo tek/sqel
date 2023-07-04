@@ -78,6 +78,7 @@ library
       Sqel.Codec.Product
       Sqel.Codec.Result
       Sqel.Codec.Sum
+      Sqel.CondExpr
       Sqel.Constraints
       Sqel.Crud
       Sqel.Data.Class.Dd
@@ -85,9 +86,11 @@ library
       Sqel.Data.ClauseConfig
       Sqel.Data.Codec
       Sqel.Data.CommaSep
+      Sqel.Data.CondExpr
       Sqel.Data.Constraints
       Sqel.Data.Crud
       Sqel.Data.Dd
+      Sqel.Data.Def
       Sqel.Data.Drop
       Sqel.Data.ExistingColumn
       Sqel.Data.Field
@@ -120,6 +123,7 @@ library
       Sqel.Data.Path
       Sqel.Data.PgType
       Sqel.Data.PgTypeName
+      Sqel.Data.QueryMeta
       Sqel.Data.Sel
       Sqel.Data.Selector
       Sqel.Data.Spine
@@ -129,6 +133,7 @@ library
       Sqel.Data.Uid
       Sqel.Dd
       Sqel.Default
+      Sqel.Default.Clauses
       Sqel.Dsl
       Sqel.Dsl.Comp
       Sqel.Dsl.Error

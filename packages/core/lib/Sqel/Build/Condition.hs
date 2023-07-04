@@ -4,13 +4,16 @@ import Data.List.NonEmpty ((<|))
 import Exon (exon)
 import qualified Exon.Combinators as Exon
 
+import Sqel.CondExpr (renderCondExpr)
 import Sqel.Data.Field (CondField (CondField, CondOp))
 import Sqel.Data.Path (PrimPath)
+import qualified Sqel.Data.QueryMeta as QueryMeta
+import Sqel.Data.QueryMeta (CondMeta (CondMeta), QueryMeta (QueryMeta), index)
 import Sqel.Data.Selector (Selector)
 import Sqel.Data.Spine (CompSort (CompCon, CompProd, CompSum), Spine (SpineNest, SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default
-import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta), SpineDef)
+import Sqel.Default (Def, PrimMeta (PrimMeta), SpineDef)
 import Sqel.Path (primMetaPath, primSelector)
 import Sqel.Sql.Prepared (dollar)
 
@@ -96,10 +99,12 @@ conditionPath multi meta =
   primSelector (primMetaPath multi meta)
 
 paramCondition :: PrimPath -> Int -> CondMeta -> Expr
-paramCondition path index (CondMeta op nullable) =
+paramCondition path index (CondMeta code nullable) =
   ExprAtom (nullGuard nullable index cond)
   where
-    cond = [exon|##{primSelector path} #{op} #{dollar index}|]
+    cond = case code of
+      QueryMeta.CondOp op -> [exon|##{primSelector path} #{op} #{dollar index}|]
+      QueryMeta.CondExpr expr -> renderCondExpr path index expr
 
 prim :: Bool -> PrimMeta -> Expr
 prim multi meta

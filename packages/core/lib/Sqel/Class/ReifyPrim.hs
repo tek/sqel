@@ -10,12 +10,13 @@ import Sqel.Data.Mods.Ignore (Ignore)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (pgColumnNameSym)
 import Sqel.Data.PgTypeName (PgTableName)
+import Sqel.Data.QueryMeta (CondMeta (CondMeta), pattern CondOp, QueryMeta (QueryMeta, QuerySynthetic))
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Data.Spine (PrimFor)
 import Sqel.Data.Sql (Sql (Sql))
 import Sqel.Dd (ExtMods, ExtPath)
 import qualified Sqel.Default
-import Sqel.Default (CondMeta (CondMeta), Def, PrimMeta (PrimMeta), QueryMeta (QueryMeta, QuerySynthetic))
+import Sqel.Default (Def, PrimMeta (PrimMeta))
 import Sqel.Path (ddPath)
 import Sqel.Reify.PrimName (PrimName, reifyPrimName)
 import Sqel.SOP.Constraint (KnownSymbols, symbolText)
@@ -62,7 +63,7 @@ instance (
     DemoteOp op
   ) => MkQueryMeta mods 'False 'Cond where
     queryMeta =
-      withNewIndex \ index -> QueryMeta index (Just (CondMeta (demoteOp @op) (demoteNullable @nullable)))
+      withNewIndex \ index -> QueryMeta index (Just (CondMeta (CondOp (demoteOp @op)) (demoteNullable @nullable)))
 
 type ReifyPrim :: ∀ {ext} . Type -> ext -> Type -> PrimType -> Constraint
 class ReifyPrim tag ext a prim where
