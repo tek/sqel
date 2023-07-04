@@ -15,12 +15,14 @@ module Sqel (
   module Sqel.Sqel,
   module Sqel.Data.Sqel,
   module Sqel.Data.Sql,
+  module Sqel.Data.CondExpr,
 ) where
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Class.ResultShape (ResultShape)
 import Sqel.Clauses hiding (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Data.Codec (FullCodec)
+import Sqel.Data.CondExpr
 import Sqel.Data.Crud (Crud)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql)
