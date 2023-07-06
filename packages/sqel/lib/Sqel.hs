@@ -16,6 +16,7 @@ module Sqel (
   module Sqel.Data.Sqel,
   module Sqel.Data.Sql,
   module Sqel.Data.CondExpr,
+  module Sqel.Data.Order,
 ) where
 
 import Sqel.Class.ReifySqel (sqel)
@@ -24,7 +25,8 @@ import Sqel.Clauses hiding (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.CondExpr
 import Sqel.Data.Crud (Crud)
-import Sqel.Data.Sqel (SqelFor)
+import Sqel.Data.Order (Order (..))
+import Sqel.Data.Sqel (Project, SqelFor)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
 import Sqel.Data.Uid (Uid (..), Uuid)

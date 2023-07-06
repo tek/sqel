@@ -18,6 +18,7 @@ module Sqel.Exts (
   module Sqel.Sqel,
   module Sqel.Sql,
   module Sqel.Class.HasqlStatement,
+  module Sqel.Data.Statement,
 ) where
 
 import Sqel.Build.Sql (BuildClause, BuildClauses)
@@ -51,8 +52,10 @@ import Sqel.Data.PgTypeName (
   )
 import Sqel.Data.Sel (Sel (..), TSel (..))
 import Sqel.Data.Sqel (SqelFor (..))
-import Sqel.Data.Sql (Sql (..))
+import Sqel.Data.Sql (Sql (..), sql)
+import Sqel.Data.Statement (statementSql)
 import Sqel.Data.Uid
 import Sqel.Dd (DdType)
 import Sqel.Sqel (sqelTableName)
 import Sqel.Sql (sqlQuote)
+
