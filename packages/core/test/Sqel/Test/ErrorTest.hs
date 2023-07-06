@@ -58,7 +58,7 @@ undeterminedParamMessage =
     "If you are calling a polymorphic function that has a constraint like ‘ReifySqel’,",
     "you probably need to use a type application to specify the spec, like ‘Prim’.",
     "If the variable is supposed to be polymorphic, you need to add ‘ReifySqel’ to its function's context",
-    "and use ‘sa’ in the type application."
+    "and use the variable in the type application."
   ]
 
 invalidSpecMessage :: [Text]

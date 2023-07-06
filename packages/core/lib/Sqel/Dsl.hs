@@ -436,21 +436,28 @@ type instance Reify a (OrNull spec) = ReifyNullable 'True a spec
 type instance Reify a (Newtype spec) = FromGen (ReifyNewtype a spec) a
 type instance Reify a (Array f spec) = ReifyArray a f spec
 
+type UndetGeneral :: Type -> ErrorMessage
+type UndetGeneral spec =
+  "If you are calling a polymorphic function that has a constraint like " <> Quoted "ReifySqel" <> "," %
+  "you probably need to use a type application to specify the spec, like " <> Quoted "Prim" <> "." %
+  "If the variable is supposed to be polymorphic, you need to add " <> Quoted "ReifySqel" <>
+  " to its function's context" %
+  "and use the variable in the type application."
+
 type NoSpec :: Type -> Type -> ErrorMessage
 type family NoSpec a spec where
   NoSpec a spec =
     "The type (variable) " <> Quoted spec <> " specifying a column of type " <> Quoted a <> " is undetermined." %
-    "If you are calling a polymorphic function that has a constraint like " <> Quoted "ReifySqel" <> "," %
-    "you probably need to use a type application to specify the spec, like " <> Quoted "Prim" <> "." %
-    "If the variable is supposed to be polymorphic, you need to add " <> Quoted "ReifySqel" <> " to its function's context" %
-    "and use " <> Quoted spec <> " in the type application."
+    UndetGeneral spec
 
 type NoReify :: Type -> Type -> ErrorMessage
 type family NoReify a spec where
   NoReify a spec =
     "The spec " <> Quoted spec % " given for a column of type " <> Quoted a <> " is not supported." %
     "If you intend to use it as a custom spec, you need to define:" %
-    "type instance Reify a (" <> spec <> ") = <impl>"
+    "type instance Reify a (" <> spec <> ") = <impl>" %
+    "If there is an undetermined type variable in the spec:" %
+    UndetGeneral spec
 
 type ReifyE :: Type -> Type -> Dd0
 type family ReifyE a spec where
