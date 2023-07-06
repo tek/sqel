@@ -120,7 +120,7 @@ tables =
   queryWith NothingD
 
 project ::
-  ∀ tag query tables proj projs .
+  ∀ tag proj query tables projs .
   Checked tables tag proj =>
   SqelFor tag proj ->
   Clauses tag '[] 'Nothing (Fragments tag query tables projs) ->
