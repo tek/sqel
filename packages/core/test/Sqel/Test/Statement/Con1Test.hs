@@ -7,7 +7,7 @@ import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
 import Sqel.Syntax.Fragments (table)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (table_NaNu)
+import Sqel.Data.TestTables (table_NaNu)
 
 statement_con1 :: Sql
 statement_con1 = statementSql S.do

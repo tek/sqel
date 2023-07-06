@@ -1,5 +1,3 @@
-{-# language QualifiedDo #-}
-
 module Sqel.Test.JoinTest where
 
 import Hasql.Session (Session)
@@ -10,56 +8,15 @@ import Sqel.Class.Query (QueryDd)
 import Sqel.Class.ReifySqel (ReifySqelFor)
 import Sqel.Clauses (createTable, createType, from, insertInto, join, on, select, values, where_)
 import Sqel.Data.Dd (Dd)
+import Sqel.Data.Def (Def)
 import Sqel.Data.Statement (Statement)
+import Sqel.Data.TestTables (Bird (Bird), Cat (Cat), Fur (Fur), FurQ (FurQ), Q (Q), Query_Q, Table_Bird, Table_Cat)
 import Sqel.Dd (DdType, EmptyQuery)
-import Sqel.Default (Def)
-import Sqel.Dsl (Gen, Prim, Prod, Query, Table, Unique)
 import Sqel.Fragment ((.=))
 import Sqel.Statement (runUnprepared)
 import Sqel.Syntax.Fragments (queryK, tableK, tableK_)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Run (integrationTest, stmt_)
-
-data Fur =
-  Fur {
-    color :: Text,
-    density :: Int
-  }
-  deriving stock (Eq, Show, Generic)
-
-data Cat =
-  Cat {
-    num :: Int,
-    nam :: Text,
-    fur :: Fur
-  }
-  deriving stock (Eq, Show, Generic)
-
-data Bird =
-  Bird {
-    bord :: Int,
-    cat :: Text,
-    fur :: Fur
-  }
-  deriving stock (Eq, Show, Generic)
-
-type Table_Cat = Table "cat" Cat (Prod [Prim, Unique Prim, Gen])
-type Table_Bird = Table "bird" Bird (Prod [Prim "num", Prim, Gen])
-
-data FurQ =
-  FurQ {
-    color :: Text
-  }
-  deriving stock (Eq, Show, Generic)
-
-data Q =
-  Q {
-    nam :: Maybe Text,
-    fur :: FurQ
-  }
-  deriving stock (Eq, Show, Generic)
-
-type Query_Q = Query Q (Prod [Prim, Gen])
 
 create ::
   ∀ (table :: Dd) .

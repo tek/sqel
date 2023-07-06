@@ -10,7 +10,7 @@ import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Table)
 import Sqel.Syntax.Fragments (query1)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (query_NaNu)
+import Sqel.Data.TestTables (query_NaNu)
 
 data Dat =
   Dat {

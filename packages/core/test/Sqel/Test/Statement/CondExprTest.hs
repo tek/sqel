@@ -13,7 +13,7 @@ import Sqel.Default (Sqel, withCondExpr)
 import Sqel.Dsl (Gen, Query)
 import Sqel.Syntax.Fragments (query1)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (Table_Simp)
+import Sqel.Data.TestTables (Table_Simp)
 
 data Qn =
   Qn {

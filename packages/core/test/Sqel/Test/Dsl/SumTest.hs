@@ -9,7 +9,7 @@ import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Name (NamePrefix (DefaultPrefix))
 import Sqel.Data.Sel (SelAuto, SelName, SelSkip, TSel (TSel), TSelNamed)
 import Sqel.Dsl (Con1, Gen, Prim, Reify, Sum)
-import Sqel.Test.Statement.Common (NaNu)
+import Sqel.Data.TestTables (NaNu)
 
 type Table_NaNu_1 =
   Reify NaNu (Sum [Con1 Prim, Con1 Prim])

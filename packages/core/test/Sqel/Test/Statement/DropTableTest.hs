@@ -10,7 +10,7 @@ import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
 import Sqel.Syntax.Fragments (table)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (table_Cat)
+import Sqel.Data.TestTables (table_Cat)
 
 statement1 :: Sql
 statement1 = statementSql @_ @() S.do

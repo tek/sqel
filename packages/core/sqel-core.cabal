@@ -130,6 +130,7 @@ library
       Sqel.Data.Sqel
       Sqel.Data.Sql
       Sqel.Data.Statement
+      Sqel.Data.TestTables
       Sqel.Data.Uid
       Sqel.Dd
       Sqel.Default
@@ -297,7 +298,6 @@ test-suite sqel-core-test
       Sqel.Test.SqelTypesTest
       Sqel.Test.SqlCodeTest
       Sqel.Test.Statement.BuildTest
-      Sqel.Test.Statement.Common
       Sqel.Test.Statement.Con1Test
       Sqel.Test.Statement.CondExprTest
       Sqel.Test.Statement.CondOpTest

@@ -9,7 +9,7 @@ import Sqel.Default (Def)
 import Sqel.Dsl (Gen, Prim, Prod, Table)
 import Sqel.Syntax.Fragments (tableK)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (Fur)
+import Sqel.Data.TestTables (Fur)
 
 data MergeProd =
   MergeProd { count :: Int, fur :: Fur }

@@ -9,11 +9,11 @@ import Sqel.Build.Sql (buildSqlDd)
 import Sqel.Clauses (from, join, on, select, where_)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement, statementSql)
+import Sqel.Data.TestTables (Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
 import Sqel.Default (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (query1, query1K, queryK)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
 
 stmt1 :: Sql
 stmt1 =

@@ -22,7 +22,7 @@ import Sqel.Fragment ((.=))
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Syntax.Fragments (project, query1)
 import qualified Sqel.Syntax.Monad as Sqel
-import Sqel.Test.Statement.Common (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
+import Sqel.Data.TestTables (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
 
 stmt1 ::
   ∀ {ext} (query :: DdK ext) .

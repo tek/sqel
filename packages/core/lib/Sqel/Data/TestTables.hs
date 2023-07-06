@@ -1,4 +1,4 @@
-module Sqel.Test.Statement.Common where
+module Sqel.Data.TestTables where
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Default (Sqel)
@@ -15,6 +15,17 @@ type Table_Simp = Table "simp" Simp Gen
 
 table_Simp :: Sqel Table_Simp
 table_Simp = sqel
+
+data QSimp =
+  QSimp {
+    name :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+type Query_QSimp = Query QSimp Gen
+
+query_QSimp :: Sqel Query_QSimp
+query_QSimp = sqel
 
 data Fur =
   Fur {

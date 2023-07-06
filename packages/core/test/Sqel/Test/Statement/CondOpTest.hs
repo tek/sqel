@@ -10,7 +10,7 @@ import Sqel.Data.Statement (Statement)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (GEq, Lt, Prim, Prod, Query)
 import qualified Sqel.Statement.Common as Statement
-import Sqel.Test.Statement.Common (Simp, table_Simp)
+import Sqel.Data.TestTables (Simp, table_Simp)
 
 data Q =
   Q {

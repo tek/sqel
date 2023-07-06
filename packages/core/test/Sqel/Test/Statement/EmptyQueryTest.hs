@@ -15,7 +15,7 @@ import Sqel.Default (From, Select, Where)
 import Sqel.Sqel (emptyQuery)
 import Sqel.Syntax.Fragments (query1)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (table_Cat)
+import Sqel.Data.TestTables (table_Cat)
 
 statement ::
   ReifySqelFor tag EmptyQuery =>

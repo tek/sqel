@@ -11,7 +11,7 @@ import Sqel.Default (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (queryK)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Test.Statement.Common (Query_Q, Table_Bird, Table_Cat)
+import Sqel.Data.TestTables (Query_Q, Table_Bird, Table_Cat)
 
 tableForQuery :: Sql
 tableForQuery =
