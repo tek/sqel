@@ -146,6 +146,7 @@ library
       Sqel.Error.PrimCodec
       Sqel.Fragment
       Sqel.Kind.CheckPrim
+      Sqel.Kind.Error
       Sqel.Kind.FieldPath
       Sqel.Kind.Fragment
       Sqel.Kind.HasFieldK
@@ -306,6 +307,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.DropTableTest
       Sqel.Test.Statement.EmptyQueryTest
       Sqel.Test.Statement.IgnoreTest
+      Sqel.Test.Statement.LiteralTest
       Sqel.Test.Statement.MergeProdTest
       Sqel.Test.Statement.MergeSumTest
       Sqel.Test.Statement.MinimalTest

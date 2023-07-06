@@ -1,7 +1,7 @@
 module Sqel.Kind.Fragment where
 
 import Sqel.Data.Dd (DdK)
-import Sqel.Data.Fragment (Frag (Frag, FragOp), Frag0 (Frag0))
+import Sqel.Data.Fragment (Frag (Frag, FragOp), Frag0 (Frag0), FragOperand (FragOpFrag, FragOpLit))
 import Sqel.Data.Spine (Spine)
 import Sqel.Dd (DdTypes)
 import Sqel.Kind.List (type (++))
@@ -19,10 +19,15 @@ type Frag0Dds :: Frag0 ext -> [DdK ext]
 type family Frag0Dds frag where
   Frag0Dds ('Frag0 _ _ s _ _) = '[s]
 
+type FragOperandDds :: FragOperand ext -> [DdK ext]
+type family FragOperandDds frag where
+  FragOperandDds ('FragOpLit _) = '[]
+  FragOperandDds ('FragOpFrag frag) = Frag0Dds frag
+
 type FragDds :: Frag ext -> [DdK ext]
 type family FragDds frag where
   FragDds ('Frag f) = Frag0Dds f
-  FragDds ('FragOp l r) = Frag0Dds l ++ Frag0Dds r
+  FragDds ('FragOp l r) = FragOperandDds l ++ FragOperandDds r
 
 type FragsDds :: [Frag ext] -> [DdK ext]
 type family FragsDds frags where

@@ -4,6 +4,7 @@ import Generics.SOP (NP)
 
 import Sqel.Data.ClauseConfig (ClauseFieldsFor)
 import Sqel.Data.Codec (Decoder)
+import Sqel.Kind.Error (PlainTypeError)
 import Sqel.Kind.List (type (++))
 import Sqel.Kind.Maybe (MaybeD (NothingD))
 import Sqel.SOP.NP (appendNP)
@@ -47,7 +48,7 @@ instance AppendClauses 'Nothing ('Just r) ('Just r) where
   appendResults _ res = res
 
 instance (
-    TypeError (ToErrorMessage ("Cannot use two result producing clauses in a statement"))
+    PlainTypeError ("Cannot use two result producing clauses in a statement")
   ) => AppendClauses ('Just l) ('Just r) ('Just r) where
     appendResults = error "unreachable"
 

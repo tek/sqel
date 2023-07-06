@@ -6,7 +6,7 @@ import GHC.Records (HasField (getField))
 import Sqel.Data.Dd (DdK)
 import Sqel.Data.Spine (SpineSort)
 import Sqel.Data.Sqel (SqelFor)
-import Sqel.Dd (IsComp)
+import Sqel.Dd (DdType, IsComp)
 
 type Frag0 :: Type -> Type
 data Frag0 ext =
@@ -18,16 +18,38 @@ data Frag0 ext =
     comp :: Bool
   }
 
+type FragType :: Frag0 ext -> Type
+type family FragType frag where
+  FragType ('Frag0 _ _ s _ _) = DdType s
+
+data FragOperand ext =
+  FragOpLit Type
+  |
+  FragOpFrag (Frag0 ext)
+
 type Frag :: Type -> Type
 data Frag ext =
   Frag (Frag0 ext)
   |
-  FragOp (Frag0 ext) (Frag0 ext)
+  FragOp (FragOperand ext) (FragOperand ext)
 
-type Fragment :: Frag ext -> Type
+type FragmentOperand :: ∀ ext . FragOperand ext -> Type
+data FragmentOperand k where
+  FragmentOpLit :: a -> FragmentOperand ('FragOpLit a)
+  FragmentOpFrag :: Fragment ('Frag k) -> FragmentOperand ('FragOpFrag k)
+
+instance Show a => Show (FragmentOperand ('FragOpLit a)) where
+  showsPrec d (FragmentOpLit a) =
+    showParen (d > 10) [exon|FragmentOpLit #{showsPrec 11 a}|]
+
+instance Show (Fragment ('Frag k)) => Show (FragmentOperand ('FragOpFrag k)) where
+  showsPrec d (FragmentOpFrag frag) =
+    showParen (d > 10) [exon|FragmentOpLit #{showsPrec 11 frag}|]
+
+type Fragment :: ∀ ext . Frag ext -> Type
 data Fragment k where
   Fragment :: SqelFor tag s -> Fragment ('Frag ('Frag0 tag sort s root comp))
-  FragmentOp :: Text -> Fragment ('Frag l) -> Fragment ('Frag r) -> Fragment ('FragOp l r)
+  FragmentOp :: Text -> FragmentOperand l -> FragmentOperand r -> Fragment ('FragOp l r)
 
 instance (
     Show (SqelFor tag s)
@@ -36,8 +58,8 @@ instance (
       showParen (d > 10) [exon|Fragment #{showsPrec 11 s}|]
 
 instance (
-    Show (Fragment ('Frag l)),
-    Show (Fragment ('Frag r))
+    Show (FragmentOperand l),
+    Show (FragmentOperand r)
   ) => Show (Fragment ('FragOp l r)) where
     showsPrec d (FragmentOp op l r) =
       showParen (d > 10) [exon|FragmentOp #{showsPrec 11 op} #{showsPrec 11 l} #{showsPrec 11 r}|]

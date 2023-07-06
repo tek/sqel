@@ -2,6 +2,7 @@ module Sqel.Class.DefaultFields where
 
 import Sqel.Data.Field (
   CondField (CondField, CondOp),
+  CondOperand (CondOpField, CondOpLit),
   Field (Field),
   PrimField (PrimField),
   RootField (RootField),
@@ -74,34 +75,30 @@ type DefaultFields :: Type -> Type -> Constraint
 class DefaultFields fields fieldsDef where
   defaultFields :: fields -> fieldsDef
 
-instance (
-    DefaultFields field fieldDef
-  ) => DefaultFields [field] [fieldDef] where
-    defaultFields = fmap defaultFields
+instance DefaultFields field fieldDef => DefaultFields [field] [fieldDef] where
+  defaultFields = fmap defaultFields
+
+instance DefaultMeta tag => DefaultFields (Field tag) (Field Def) where
+  defaultFields (Field s) = Field (defaultSpine s)
+
+instance DefaultMeta tag => DefaultFields (CondOperand tag) (CondOperand Def) where
+  defaultFields = \case
+    CondOpField s -> CondOpField (defaultSpine s)
+    CondOpLit lit -> CondOpLit lit
 
 instance (
-    DefaultMeta tag
-  ) => DefaultFields (Field tag) (Field Def) where
-    defaultFields (Field s) = Field (defaultSpine s)
-
-instance (
-    DefaultMeta tag
+    DefaultMeta tag,
+    DefaultFields (CondOperand tag) (CondOperand Def)
   ) => DefaultFields (CondField tag) (CondField Def) where
     defaultFields = \case
       CondField s -> CondField (defaultSpine s)
-      CondOp op l r -> CondOp op (defaultSpine l) (defaultSpine r)
+      CondOp op l r -> CondOp op (defaultFields l) (defaultFields r)
 
-instance (
-    DefaultMeta tag
-  ) => DefaultFields (PrimField tag) (PrimField Def) where
-    defaultFields (PrimField s) = PrimField (defaultPrimMeta @tag s)
+instance DefaultMeta tag => DefaultFields (PrimField tag) (PrimField Def) where
+  defaultFields (PrimField s) = PrimField (defaultPrimMeta @tag s)
 
-instance (
-    DefaultMeta tag
-  ) => DefaultFields (RootField tag) (RootField Def) where
-    defaultFields (RootField s) = RootField (defaultSpine s)
+instance DefaultMeta tag => DefaultFields (RootField tag) (RootField Def) where
+  defaultFields (RootField s) = RootField (defaultSpine s)
 
-instance (
-    DefaultMeta tag
-  ) => DefaultFields (TypeField tag) (TypeField Def) where
-    defaultFields (TypeField s) = TypeField (defaultSpine s)
+instance DefaultMeta tag => DefaultFields (TypeField tag) (TypeField Def) where
+  defaultFields (TypeField s) = TypeField (defaultSpine s)

@@ -59,6 +59,7 @@ import Sqel.Dsl.Error (TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
+import Sqel.Kind.Error (PlainTypeError)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeDd)
 import Sqel.SOP.Error (Quoted, QuotedType)
@@ -275,7 +276,7 @@ type ProdCols :: [Symbol] -> [Type] -> [Type] -> [Dd0]
 type family ProdCols fields as cols where
   ProdCols '[] '[] '[] = '[]
   ProdCols (name : fields) (a : as) (col : cols) = ProdCol name a col : ProdCols fields as cols
-  ProdCols _ _ _ = TypeError (ToErrorMessage "The number of specified columns does not match the data type.")
+  ProdCols _ _ _ = PlainTypeError "The number of specified columns does not match the data type."
 
 type ProdSort :: Sort -> Type -> [Type] -> Symbol -> [Field] -> [Type] -> Dd0
 type family ProdSort sort a as name fields cols where
@@ -335,9 +336,9 @@ type family SumCons cons ass conSpecs where
   SumCons ('Constructor name : cons) (as : ass) (conSpec : conSpecs) =
     SumCon name as (ConstructorFields name 0 as) conSpec : SumCons cons ass conSpecs
   SumCons ('Infix _ _ _ : _) _ _ =
-    TypeError (ToErrorMessage ("Infix constructors are not supported."))
+    PlainTypeError "Infix constructors are not supported."
   SumCons _ _ _ =
-    TypeError (ToErrorMessage "The number of specified constructors does not match the data type.")
+    PlainTypeError "The number of specified constructors does not match the data type."
 
 type SumSort :: Sort -> Type -> [[Type]] -> Symbol -> [ConstructorInfo] -> [Type] -> Dd0
 type family SumSort sort a ass name cons cols where

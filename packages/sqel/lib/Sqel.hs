@@ -31,7 +31,7 @@ import Sqel.Data.Uid (Uid (..), Uuid)
 import Sqel.Dd (DdType)
 import Sqel.Default
 import Sqel.Dsl
-import Sqel.Fragment hiding (getFragment)
+import Sqel.Fragment
 import Sqel.Sqel (emptyQuery)
 import Sqel.Statement (prepared, unprepared)
 import Sqel.Uid

@@ -1,15 +1,24 @@
 module Sqel.Data.Field where
 
 import Sqel.Data.Spine (PrimFor, Spine)
+import Sqel.Data.Sql (Sql)
 
-data Field tag = Field (Spine tag)
+data Field tag =
+  Field (Spine tag)
 
 deriving stock instance Show (Spine tag) => Show (Field tag)
+
+data CondOperand tag =
+  CondOpField (Spine tag)
+  |
+  CondOpLit Sql
+
+deriving stock instance Show (Spine tag) => Show (CondOperand tag)
 
 data CondField tag =
   CondField (Spine tag)
   |
-  CondOp Text (Spine tag) (Spine tag)
+  CondOp Text (CondOperand tag) (CondOperand tag)
 
 deriving stock instance Show (Spine tag) => Show (CondField tag)
 

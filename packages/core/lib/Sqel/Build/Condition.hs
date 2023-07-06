@@ -1,17 +1,17 @@
 module Sqel.Build.Condition where
 
 import Data.List.NonEmpty ((<|))
-import Exon (exon)
 import qualified Exon as Exon
+import Exon (exon)
 
 import Sqel.CondExpr (renderCondExpr)
-import Sqel.Data.Field (CondField (CondField, CondOp))
+import Sqel.Data.Field (CondField (CondField, CondOp), CondOperand (CondOpField, CondOpLit))
 import Sqel.Data.Path (PrimPath)
 import qualified Sqel.Data.QueryMeta as QueryMeta
 import Sqel.Data.QueryMeta (CondMeta (CondMeta), QueryMeta (QueryMeta), index)
 import Sqel.Data.Selector (Selector)
 import Sqel.Data.Spine (CompSort (CompCon, CompProd, CompSum), Spine (SpineNest, SpinePrim), pattern SpineComp)
-import Sqel.Data.Sql (Sql)
+import Sqel.Data.Sql (Sql, toSql)
 import qualified Sqel.Default
 import Sqel.Default (Def, PrimMeta (PrimMeta), SpineDef)
 import Sqel.Path (primMetaPath, primSelector)
@@ -145,11 +145,23 @@ spineConditions multi = \case
   SpineNest _ compSort sub -> comp multi compSort sub
   n -> node multi n
 
-fieldOpCondition :: Bool -> Text -> SpineDef -> SpineDef -> Expr
-fieldOpCondition multi op (SpinePrim lmeta) (SpinePrim rmeta) =
-  ExprAtom [exon|##{conditionPath multi lmeta} ##{op} ##{conditionPath multi rmeta}|]
-fieldOpCondition _ _ _ _ =
-  ExprEmpty
+-- TODO support ops on comps
+condOperand ::
+  Bool ->
+  CondOperand Def ->
+  Maybe Sql
+condOperand multi = \case
+  CondOpLit s -> Just s
+  CondOpField (SpinePrim meta) -> Just (toSql (conditionPath multi meta))
+  CondOpField _ -> Nothing
+
+fieldOpCondition :: Bool -> Text -> CondOperand Def -> CondOperand Def -> Expr
+fieldOpCondition multi op left right =
+  case (condOperand multi left, condOperand multi right) of
+    (Just l, Just r) ->
+      ExprAtom [exon|#{l} ##{op} #{r}|]
+    _ ->
+      ExprEmpty
 
 fieldConditions :: Bool -> CondField Def -> Expr
 fieldConditions multi = \case

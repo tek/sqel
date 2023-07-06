@@ -9,6 +9,7 @@ import Sqel.Data.ClauseConfig (ClauseFieldsFor, ClauseResultFor)
 import Sqel.Data.Codec (Decoder)
 import Sqel.Data.Fragment (Frag, Fragment)
 import Sqel.Error.Clause (CheckClauseError)
+import Sqel.Kind.Error (PlainTypeError)
 import Sqel.Kind.Maybe (MaybeD)
 import Sqel.Kind.NormalizeFrags (InvalidFrags, NormalizeFrags (normalizeFrags))
 import Sqel.Kind.ResultDds (ResultTypes)
@@ -72,10 +73,12 @@ type family ArgsError param fields where
   ArgsError 'Nothing _ = ()
   ArgsError ('Just param) (ClauseParam _ param) = ()
   ArgsError ('Just param) (ClauseParam _ cparam) =
-    TypeError (ToErrorMessage ("A parameter of type " <> Quoted param <> " was given," %
-    "but the clause takes a " <> Quoted cparam <> "."))
+    TypeError (
+      "A parameter of type " <> Quoted param <> " was given," %
+      "but the clause takes a " <> Quoted cparam <> "."
+    )
   ArgsError ('Just _) _ =
-    TypeError (ToErrorMessage ("A parameter was given, but the clause doesn't support it."))
+    PlainTypeError "A parameter was given, but the clause doesn't support it."
 
 type AcceptClauseArgs :: Void -> Type -> Type -> Type -> Maybe Type -> Type -> Maybe [Type] -> Constraint
 class AcceptClauseArgs error tag clause expr param fields result | clause expr -> result where
