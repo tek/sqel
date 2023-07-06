@@ -158,3 +158,10 @@ type family CheckFragmentMismatch tag clause sort acceptSort acceptRoot where
     IfStuck tag
     (NoTag clause sort)
     (Pure (CheckClause tag clause sort))
+
+------------------------------------------------------------------------------------------------------------------------
+
+type NoLiteralField :: Type -> Type -> k
+type family NoLiteralField clause lit where
+  NoLiteralField clause lit =
+    TypeError ("A " <> ClauseDesc clause <> " does not accept literals of type " <> Quoted lit)

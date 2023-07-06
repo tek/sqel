@@ -4,27 +4,28 @@ import Data.Type.Bool (type (&&), type (||))
 import Exon (exon)
 import Generics.SOP (All, NP ((:*)))
 
-import Sqel.Data.ClauseConfig (ClauseSortsFor)
+import Sqel.Data.ClauseConfig (ClauseLiteralFor, ClauseSortsFor)
 import Sqel.Data.Dd (DdK (Dd), StructWith (Prim))
 import Sqel.Data.Field (
   CondField (CondField, CondOp),
   CondOperand (CondOpField, CondOpLit),
   Field (Field),
+  OrLiteral (LiteralField, NotLiteral),
   PrimField (PrimField),
   RootField (RootField),
   TypeField (TypeField),
   )
 import Sqel.Data.Fragment (
-  Frag (Frag, FragOp),
+  Frag (Frag, FragLit, FragOp),
   Frag0 (Frag0),
   FragOperand (FragOpFrag, FragOpLit),
-  Fragment (Fragment, FragmentOp),
+  Fragment (Fragment, FragmentLit, FragmentOp),
   FragmentOperand (FragmentOpFrag, FragmentOpLit),
   )
 import Sqel.Data.Spine (SpineSort (SpineTable))
 import Sqel.Data.Sqel (SqelFor (SqelPrim), sqelSpine)
 import Sqel.Data.Sql (Sql (Sql))
-import Sqel.Error.Fragment (CheckFragmentMismatch)
+import Sqel.Error.Fragment (CheckFragmentMismatch, NoLiteralField)
 import Sqel.SOP.NP (hcmapList)
 
 type AcceptRoot :: Bool -> Type -> Bool
@@ -38,41 +39,51 @@ type family AcceptSort sort accepted where
   AcceptSort sort (sort : _) = 'True
   AcceptSort sort (_ : accepted) = AcceptSort sort accepted
 
-------------------------------------------------------------------------------------------------------------------------
-
-type DemoteFrag :: ∀ {ext} . Frag0 ext -> Type -> Constraint
-class DemoteFrag frag field where
-  demoteFrag :: Fragment ('Frag frag) -> field
-
-instance DemoteFrag ('Frag0 tag sort s root comp) (Field tag) where
-    demoteFrag (Fragment s) = Field (sqelSpine s)
-
-instance DemoteFrag ('Frag0 tag sort ('Dd ext a ('Prim prim)) root comp) (PrimField tag) where
-    demoteFrag (Fragment (SqelPrim meta _)) = PrimField meta
-
-instance DemoteFrag ('Frag0 tag sort s root comp) (CondField tag) where
-    demoteFrag (Fragment s) = CondField (sqelSpine s)
-
-instance DemoteFrag ('Frag0 tag sort s 'True comp) (RootField tag) where
-  demoteFrag (Fragment s) = RootField (sqelSpine s)
-
-instance DemoteFrag ('Frag0 tag 'SpineTable s root 'True) (TypeField tag) where
-  demoteFrag (Fragment s) = TypeField (sqelSpine s)
+type AcceptLiteral :: Type -> Maybe Type -> Bool
+type family AcceptLiteral lit accepted where
+  AcceptLiteral lit ('Just lit) = 'True
+  AcceptLiteral _ _ = 'False
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type AcceptLiteral :: Type -> Constraint
-class AcceptLiteral lit where
-  acceptLiteral :: lit -> Sql
+type DemoteFragment :: ∀ {ext} . Frag0 ext -> Type -> Constraint
+class DemoteFragment frag field where
+  demoteFragment :: Fragment ('Frag frag) -> field
 
-instance AcceptLiteral Int64 where
-  acceptLiteral = Sql . show
+instance (
+    DemoteFragment frag field
+  ) => DemoteFragment frag (OrLiteral lit field) where
+    demoteFragment frag = NotLiteral (demoteFragment frag)
 
-instance AcceptLiteral Text where
-  acceptLiteral s = Sql [exon|'#{s}'|]
+instance DemoteFragment ('Frag0 tag sort s root comp) (Field tag) where
+    demoteFragment (Fragment s) = Field (sqelSpine s)
 
-instance AcceptLiteral Bool where
-  acceptLiteral = \case
+instance DemoteFragment ('Frag0 tag sort ('Dd ext a ('Prim prim)) root comp) (PrimField tag) where
+    demoteFragment (Fragment (SqelPrim meta _)) = PrimField meta
+
+instance DemoteFragment ('Frag0 tag sort s root comp) (CondField tag) where
+    demoteFragment (Fragment s) = CondField (sqelSpine s)
+
+instance DemoteFragment ('Frag0 tag sort s 'True comp) (RootField tag) where
+  demoteFragment (Fragment s) = RootField (sqelSpine s)
+
+instance DemoteFragment ('Frag0 tag 'SpineTable s root 'True) (TypeField tag) where
+  demoteFragment (Fragment s) = TypeField (sqelSpine s)
+
+------------------------------------------------------------------------------------------------------------------------
+
+type DemoteLiteral :: Type -> Constraint
+class DemoteLiteral lit where
+  demoteLiteral :: lit -> Sql
+
+instance DemoteLiteral Int64 where
+  demoteLiteral = Sql . show
+
+instance DemoteLiteral Text where
+  demoteLiteral s = Sql [exon|'#{s}'|]
+
+instance DemoteLiteral Bool where
+  demoteLiteral = \case
     True -> "true"
     False -> "false"
 
@@ -82,8 +93,26 @@ type AcceptFrag :: ∀ {ext} . Bool -> Constraint -> Frag0 ext -> Type -> Constr
 class AcceptFrag accepted error frag field where
   acceptFrag :: Fragment ('Frag frag) -> field
 
-instance DemoteFrag frag field => AcceptFrag 'True error frag field where
-  acceptFrag = demoteFrag
+instance DemoteFragment frag field => AcceptFrag 'True error frag field where
+  acceptFrag = demoteFragment
+
+------------------------------------------------------------------------------------------------------------------------
+
+type DemoteLiteralField :: Type -> Type -> Constraint
+class DemoteLiteralField lit field where
+  demoteLiteralField :: lit -> field
+
+instance DemoteLiteralField lit (OrLiteral lit field) where
+  demoteLiteralField = LiteralField
+
+------------------------------------------------------------------------------------------------------------------------
+
+type AcceptFragLit :: Bool -> Constraint -> Type -> Type -> Constraint
+class AcceptFragLit accepted error lit field where
+  acceptFragLit :: lit -> field
+
+instance DemoteLiteralField lit field => AcceptFragLit 'True error lit field where
+  acceptFragLit = demoteLiteralField
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -102,14 +131,27 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
+type AcceptFragmentLiteral :: Type -> Type -> Type -> Constraint
+class AcceptFragmentLiteral clause field lit where
+  acceptFragmentLiteral :: Fragment ('FragLit lit) -> field
+
+instance (
+    accepted ~ AcceptLiteral lit (ClauseLiteralFor clause),
+    error ~ NoLiteralField clause lit,
+    AcceptFragLit accepted error lit field
+  ) => AcceptFragmentLiteral clause field lit where
+    acceptFragmentLiteral (FragmentLit lit) = acceptFragLit @accepted @error lit
+
+------------------------------------------------------------------------------------------------------------------------
+
 type AcceptFragmentOperand :: ∀ {ext} . Type -> Type -> FragOperand ext -> Constraint
 class AcceptFragmentOperand clause field frag where
   acceptFragmentOperand :: FragmentOperand frag -> field
 
 instance (
-    AcceptLiteral lit
+    DemoteLiteral lit
   ) => AcceptFragmentOperand clause (CondOperand tag) ('FragOpLit lit) where
-    acceptFragmentOperand (FragmentOpLit lit) = CondOpLit (acceptLiteral lit)
+    acceptFragmentOperand (FragmentOpLit lit) = CondOpLit (demoteLiteral lit)
 
 instance (
     AcceptFragOrError clause 'True (Field tag) frag
@@ -137,6 +179,13 @@ instance (
       where
         lfrag = acceptFragmentOperand @clause l
         rfrag = acceptFragmentOperand @clause r
+
+-- TODO can probably check acceptance here without indirection
+-- unless this can be reused for ops
+instance (
+    AcceptFragmentLiteral clause field lit
+  ) => AcceptFragment clause field ('FragLit lit) where
+    acceptFragment = acceptFragmentLiteral @clause
 
 ------------------------------------------------------------------------------------------------------------------------
 

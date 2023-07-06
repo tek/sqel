@@ -1,9 +1,9 @@
 module Sqel.Fragment where
 
 import Sqel.Data.Fragment (
-  Frag (Frag, FragOp),
+  Frag (Frag, FragLit, FragOp),
   FragOperand (FragOpFrag, FragOpLit),
-  Fragment (FragmentOp),
+  Fragment (FragmentLit, FragmentOp),
   FragmentOperand (FragmentOpFrag, FragmentOpLit),
   )
 import Sqel.Kind.Error (PlainTypeError)
@@ -88,3 +88,6 @@ checkOp =
 
 (.>=) :: Op
 (.>=) l r = checkOp ">=" l r
+
+lit :: a -> Fragment ('FragLit a)
+lit = FragmentLit

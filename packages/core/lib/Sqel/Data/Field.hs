@@ -37,3 +37,14 @@ deriving stock instance Show (Spine tag) => Show (TypeField tag)
 data TableField tag = TableField (Spine tag)
 
 deriving stock instance Show (Spine tag) => Show (TableField tag)
+
+type OrLiteral :: Type -> Type -> Type
+data OrLiteral lit field =
+  LiteralField lit
+  |
+  NotLiteral field
+
+deriving stock instance (
+    Show lit,
+    Show field
+  ) => Show (OrLiteral lit field)

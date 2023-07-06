@@ -8,7 +8,8 @@ data ClauseConfig tag =
     result :: Bool,
     sorts :: [SpineSort],
     fields :: Type,
-    keyword :: Symbol
+    keyword :: Symbol,
+    literal :: Maybe Type
   }
 
 type ClauseConfigFor :: ∀ tag -> Type -> ClauseConfig tag
@@ -16,7 +17,7 @@ type family ClauseConfigFor tag clause
 
 type ClauseResultOf :: ClauseConfig tag -> Bool
 type family ClauseResultOf config where
-  ClauseResultOf ('ClauseConfig r _ _ _) = r
+  ClauseResultOf ('ClauseConfig r _ _ _ _) = r
 
 type ClauseResultFor :: Type -> Bool
 type family ClauseResultFor clause where
@@ -24,7 +25,7 @@ type family ClauseResultFor clause where
 
 type ClauseSortsOf :: ClauseConfig tag -> [SpineSort]
 type family ClauseSortsOf config where
-  ClauseSortsOf ('ClauseConfig _ ss _ _) = ss
+  ClauseSortsOf ('ClauseConfig _ ss _ _ _) = ss
 
 type ClauseSortsFor :: Type -> [SpineSort]
 type family ClauseSortsFor clause where
@@ -32,7 +33,7 @@ type family ClauseSortsFor clause where
 
 type ClauseFieldsOf :: ClauseConfig tag -> Type
 type family ClauseFieldsOf config where
-  ClauseFieldsOf ('ClauseConfig _ _ fs _) = fs
+  ClauseFieldsOf ('ClauseConfig _ _ fs _ _) = fs
 
 type ClauseFieldsFor :: Type -> Type -> Type
 type family ClauseFieldsFor tag clause where
@@ -40,8 +41,16 @@ type family ClauseFieldsFor tag clause where
 
 type ClauseKeywordOf :: ClauseConfig tag -> Symbol
 type family ClauseKeywordOf config where
-  ClauseKeywordOf ('ClauseConfig _ _ _ desc) = desc
+  ClauseKeywordOf ('ClauseConfig _ _ _ desc _) = desc
 
 type ClauseKeywordFor :: Type -> Symbol
 type family ClauseKeywordFor clause where
   ClauseKeywordFor clause = ClauseKeywordOf (ClauseConfigFor () clause)
+
+type ClauseLiteralOf :: ClauseConfig tag -> Maybe Type
+type family ClauseLiteralOf config where
+  ClauseLiteralOf ('ClauseConfig _ _ _ _ lit) = lit
+
+type ClauseLiteralFor :: Type -> Maybe Type
+type family ClauseLiteralFor clause where
+  ClauseLiteralFor clause = ClauseLiteralOf (ClauseConfigFor () clause)
