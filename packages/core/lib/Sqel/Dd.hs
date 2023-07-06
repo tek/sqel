@@ -21,7 +21,7 @@ import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Mods.TableName (TableName)
 import Sqel.Data.Name (Name (Name), NamePrefix (DefaultPrefix), SetName)
 import Sqel.Data.Sel (Paths (Paths, PathsRoot), PathsName, PathsNameOr, Sel (Sel), ShowSel, TSel (TSel), TSelName)
-import Sqel.SOP.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
 
 type MapSub :: (o -> Exp ext) -> [DdK o] -> [DdK ext]
 type family MapSub f s where

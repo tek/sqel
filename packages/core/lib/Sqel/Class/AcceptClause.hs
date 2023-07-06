@@ -13,7 +13,7 @@ import Sqel.Kind.Error (PlainTypeError)
 import Sqel.Kind.Maybe (MaybeD)
 import Sqel.Kind.NormalizeFrags (InvalidFrags, NormalizeFrags (normalizeFrags))
 import Sqel.Kind.ResultDds (ResultTypes)
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 
 data Mult = Unclear | Multi
 

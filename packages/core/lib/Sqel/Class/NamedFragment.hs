@@ -8,7 +8,7 @@ import Type.Errors (ErrorMessage)
 import Sqel.Data.Dd (DdK)
 import Sqel.Dd (DdKNames, DdName, DdTypeName, DdTypeNames)
 import Sqel.Kind.List (type (++))
-import Sqel.SOP.Error (BulletedLines, Quoted, QuotedError, StuckError)
+import Sqel.Kind.Error (BulletedLines, Quoted, QuotedError, StuckError)
 import Sqel.SOP.HFind (HFind (HFindT, hfind))
 
 type ClassName :: Symbol -> Symbol

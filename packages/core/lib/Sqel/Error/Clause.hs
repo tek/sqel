@@ -5,7 +5,7 @@ import Type.Errors (DelayError, DelayErrorFcf, ErrorMessage, IfStuck)
 
 import Sqel.Data.ClauseConfig (ClauseKeywordFor)
 import Sqel.Data.Fragment (Frag)
-import Sqel.SOP.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted, QuotedType)
 
 type ClauseDesc :: Type -> ErrorMessage
 type family ClauseDesc clause where

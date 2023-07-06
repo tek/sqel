@@ -5,7 +5,7 @@ import Generics.SOP (NP (Nil, (:*)))
 import Sqel.Data.Dd (type (:>) ((:>)))
 import Sqel.Data.Fragment (Frag, Fragment)
 import Sqel.Kind.List (type (++))
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 import Sqel.SOP.NP (appendNP)
 
 -- TODO more tuples

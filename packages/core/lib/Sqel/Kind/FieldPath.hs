@@ -5,7 +5,7 @@ import Type.Errors (ErrorMessage)
 import Sqel.Data.Dd (Dd, DdK (Dd), Ext (Ext), PrimType (Cond, NoCond), StructWith (Comp, Prim))
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Kind.List (type (++))
-import Sqel.SOP.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
 
 data FieldPath =
   FieldPath {

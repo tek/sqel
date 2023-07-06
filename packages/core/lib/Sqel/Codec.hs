@@ -16,7 +16,7 @@ import Sqel.Codec.PrimDecoder (PrimDecoder)
 import qualified Sqel.Codec.PrimEncoder as PrimEncoder
 import Sqel.Codec.PrimEncoder (PrimEncoder)
 import Sqel.Data.PgType (PgPrimName, pgPrimName)
-import Sqel.SOP.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted, QuotedType)
 
 ignoreEncoder :: Encoder.Value a -> Params b
 ignoreEncoder v =

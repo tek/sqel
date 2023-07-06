@@ -17,7 +17,7 @@ import Sqel.Data.Sel (Paths, PathsNameOr, RenderTSel, TSelName)
 import Sqel.Dd (ExtMods, ExtName, ExtPath)
 import Sqel.Default (Def)
 import Sqel.Reify.PrimName (PrimName)
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 
 data DdlStruct =
   DdlPrim {

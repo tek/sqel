@@ -5,7 +5,7 @@ import Sqel.Data.Fragment (Frag (Frag, FragOp), Frag0 (Frag0), FragOperand (Frag
 import Sqel.Data.Spine (Spine)
 import Sqel.Dd (DdTypes)
 import Sqel.Kind.List (type (++))
-import Sqel.SOP.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted, QuotedType)
 
 type Frag0Tag :: Frag0 ext -> Type
 type family Frag0Tag frag where

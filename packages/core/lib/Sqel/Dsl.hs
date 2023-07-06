@@ -62,7 +62,7 @@ import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson
 import Sqel.Kind.Error (PlainTypeError)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeDd)
-import Sqel.SOP.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted, QuotedType)
 
 type FromGenF k = DatatypeInfo -> [[Type]] -> Exp k
 

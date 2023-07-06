@@ -61,6 +61,7 @@ instance DemoteFrag ('Frag0 tag 'SpineTable s root 'True) (TypeField tag) where
 
 ------------------------------------------------------------------------------------------------------------------------
 
+type AcceptLiteral :: Type -> Constraint
 class AcceptLiteral lit where
   acceptLiteral :: lit -> Sql
 

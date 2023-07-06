@@ -6,7 +6,7 @@ import Type.Errors (DelayError, ErrorMessage, IfStuck, Pure)
 import Sqel.Data.Dd (Dd)
 import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
 import Sqel.Dd (DdType)
-import Sqel.SOP.Error (QuotedError, QuotedType, ShowPath, Unlines)
+import Sqel.Kind.Error (QuotedError, QuotedType, ShowPath, Unlines)
 
 type ColumnMessage :: Symbol -> FieldPath -> ErrorMessage
 type family ColumnMessage viewType path where

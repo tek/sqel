@@ -6,7 +6,7 @@ import Type.Errors (DelayError, ErrorMessage, IfStuck)
 import Sqel.Data.ClauseConfig (ClauseKeywordFor)
 import Sqel.Data.Spine (SpineDesc, SpineSort)
 import Sqel.Error.Clause (ClauseDesc, GenericClause)
-import Sqel.SOP.Error (Quoted, QuotedType, StuckError)
+import Sqel.Kind.Error (Quoted, QuotedType, StuckError)
 
 type FragmentMismatch :: Type -> Type -> SpineSort -> k
 type family FragmentMismatch tag clause sort

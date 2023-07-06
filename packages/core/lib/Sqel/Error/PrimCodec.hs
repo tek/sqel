@@ -3,7 +3,7 @@ module Sqel.Error.PrimCodec where
 import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Mods.Sort (ModSort (CreateFinal, ToFinal))
-import Sqel.SOP.Error (BulletedLines, Quoted)
+import Sqel.Kind.Error (BulletedLines, Quoted)
 
 type ModTycon :: Type -> ErrorMessage
 type family ModTycon mod where

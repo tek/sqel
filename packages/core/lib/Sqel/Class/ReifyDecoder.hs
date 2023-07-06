@@ -9,7 +9,7 @@ import Sqel.Class.CompleteCodec (CompleteCodec (completeCodec))
 import Sqel.Codec (PrimColumnOrError (primDecoderOrError))
 import Sqel.Data.Mods.Sort (ModSort (Create, CreateFinal, Skip, ToFinal, Transform))
 import Sqel.Error.PrimCodec (MissingCodecInstance, ModOrderError, ModUnsupported)
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 
 type DecoderMod :: Type -> ModSort
 type family DecoderMod mod

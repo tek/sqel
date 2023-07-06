@@ -181,7 +181,6 @@ library
       Sqel.Selector
       Sqel.SOP.Constraint
       Sqel.SOP.Enum
-      Sqel.SOP.Error
       Sqel.SOP.Fundep
       Sqel.SOP.HasGeneric
       Sqel.SOP.HFind

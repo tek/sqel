@@ -3,7 +3,7 @@ module Sqel.Normalize where
 import Sqel.Data.Dd (Dd, Dd0, DdK (Dd), Ext (Ext), Ext0 (Ext0), Struct, Struct0, StructWith (Comp, Prim))
 import Sqel.Data.Name (Name (Name, NameAuto))
 import Sqel.Data.Sel (Path (Path, PathSkip), Paths (Paths, PathsRoot), Sel (Sel))
-import Sqel.SOP.Error (ShowPath)
+import Sqel.Kind.Error (ShowPath)
 
 type NormalizeName :: [Symbol] -> Name -> Symbol
 type family NormalizeName pre name where

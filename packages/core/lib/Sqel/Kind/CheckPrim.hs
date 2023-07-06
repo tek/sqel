@@ -7,7 +7,7 @@ import Sqel.Data.Dd (Dd)
 import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths)
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Dd (DdTypeName)
-import Sqel.SOP.Error (Unlines)
+import Sqel.Kind.Error (Unlines)
 
 data TableFPaths = TableFPaths Symbol Dd [FieldPath]
 

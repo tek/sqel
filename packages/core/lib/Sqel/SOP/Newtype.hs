@@ -5,7 +5,7 @@ import Generics.SOP.Type.Metadata (DatatypeInfo (Newtype))
 import Type.Errors (DelayError, ErrorMessage)
 import Unsafe.Coerce (unsafeCoerce)
 
-import Sqel.SOP.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted, QuotedType)
 import Sqel.SOP.HasGeneric (HasGeneric)
 
 type ErrHead :: Type -> ErrorMessage

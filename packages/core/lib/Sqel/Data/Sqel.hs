@@ -8,7 +8,7 @@ import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (DdK (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), StructWith (Comp, Prim))
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Dd (DdSub, DdType)
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 import Sqel.Data.Statement (Statement)
 
 type SqelFor :: ∀ {ext} . Type -> DdK ext -> Type

@@ -5,7 +5,7 @@ import Type.Errors (ErrorMessage)
 import Sqel.Data.Dd (Ext0 (Ext0))
 import Sqel.Data.Name (Name (Name, NameAuto))
 import Sqel.Data.Sel (Sel (Sel))
-import Sqel.SOP.Error (Quoted)
+import Sqel.Kind.Error (Quoted)
 
 type ColumnNameForError :: Ext0 -> ErrorMessage
 type family ColumnNameForError ext where
