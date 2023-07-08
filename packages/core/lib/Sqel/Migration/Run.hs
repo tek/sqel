@@ -11,6 +11,7 @@ import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.DefaultFields (DefaultMeta, defaultTypes)
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect (runMigrationStatements))
+import Sqel.Data.Dd (DdK (Dd))
 import Sqel.Data.Migration (
   CompAction,
   Mig,
@@ -22,6 +23,7 @@ import Sqel.Data.Migration (
   Migrations (InitialMigration, Migrations),
   TableDdl (TableDdl, TableMigrations),
   TypeAction (AddAction),
+  tableDdlCurrent,
   )
 import Sqel.Data.PgType (PgTypeRef (PgTypeRef))
 import Sqel.Data.PgTypeName (
@@ -297,29 +299,37 @@ conclusion table types = \case
   where
     name = getPgTypeName (sqelTableName table)
 
-runMigrations ::
-  ∀ tag m table migs .
-  Monad m =>
-  DefaultMeta tag =>
-  MigrationEffect m =>
-  BuildClause tag CreateType =>
-  InitTable tag table =>
-  TableDdl tag m table migs ->
-  m TypeStatus
-runMigrations (TableMigrations table steps) = do
-  MigrationEffect.log [exon|Checking migrations for '#{name}'|]
-  (initialStatus, initialTypes) <- matches Match types
-  (status, _) <- runMigrationSteps steps initialStatus initialTypes types
-  status <$ conclusion table types status
-  where
-    PgOnlyTableName name = spineTableName types.table
-    types = spineTypes spine
-    spine = sqelSpine table
-runMigrations (TableDdl table) = do
-  MigrationEffect.log [exon|Checking table '#{name}'|]
-  (status, _) <- matches Match types
-  status <$ conclusion table types status
-  where
-    PgOnlyTableName name = spineTableName types.table
-    types = spineTypes spine
-    spine = sqelSpine table
+type RunMigrations :: ∀ {ext} . Type -> DdK ext -> Constraint
+class RunMigrations tag table where
+  runMigrations ::
+    Monad m =>
+    MigrationEffect m =>
+    TableDdl tag m table migs ->
+    m TypeStatus
+
+  migrationTableName :: TableDdl tag m table migs -> PgTableName
+
+instance (
+    DefaultMeta tag,
+    BuildClause tag CreateType,
+    InitTable tag ('Dd ext a s)
+  ) => RunMigrations tag ('Dd ext a s) where
+    runMigrations (TableMigrations table steps) = do
+      MigrationEffect.log [exon|Checking migrations for '#{name}'|]
+      (initialStatus, initialTypes) <- matches Match types
+      (status, _) <- runMigrationSteps steps initialStatus initialTypes types
+      status <$ conclusion table types status
+      where
+        PgOnlyTableName name = spineTableName types.table
+        types = spineTypes spine
+        spine = sqelSpine table
+    runMigrations (TableDdl table) = do
+      MigrationEffect.log [exon|Checking table '#{name}'|]
+      (status, _) <- matches Match types
+      status <$ conclusion table types status
+      where
+        PgOnlyTableName name = spineTableName types.table
+        types = spineTypes spine
+        spine = sqelSpine table
+
+    migrationTableName = sqelTableName . tableDdlCurrent
