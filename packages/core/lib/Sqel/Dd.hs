@@ -20,7 +20,16 @@ import Sqel.Data.Dd (
 import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Mods.TableName (TableName)
 import Sqel.Data.Name (Name (Name), NamePrefix (DefaultPrefix), SetName)
-import Sqel.Data.Sel (Paths (Paths, PathsRoot), PathsName, PathsNameOr, Sel (Sel), ShowSel, TSel (TSel), TSelName)
+import Sqel.Data.Sel (
+  Path (PathPrefix, PathSet),
+  Paths (Paths, PathsRoot),
+  PathsName,
+  PathsNameOr,
+  Sel (Sel),
+  ShowSel,
+  TSel (TSel),
+  TSelName,
+  )
 import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
 
 type MapSub :: (o -> Exp ext) -> [DdK o] -> [DdK ext]
@@ -203,3 +212,13 @@ type SetDdName :: Symbol -> Dd0 -> Dd0
 type family SetDdName name s where
   SetDdName name ('Dd ('Ext0 ('Sel old path) mods) a s) =
     'Dd ('Ext0 ('Sel (SetName name old) path) mods) a s
+
+type SetDdPath :: [Symbol] -> Dd0 -> Dd0
+type family SetDdPath path s where
+  SetDdPath path ('Dd ('Ext0 ('Sel name _) mods) a s) =
+    'Dd ('Ext0 ('Sel name ('Just ('PathSet path))) mods) a s
+
+type SetDdPrefix :: [Symbol] -> Dd0 -> Dd0
+type family SetDdPrefix pre s where
+  SetDdPrefix pre ('Dd ('Ext0 ('Sel name _) mods) a s) =
+    'Dd ('Ext0 ('Sel name ('Just ('PathPrefix pre))) mods) a s

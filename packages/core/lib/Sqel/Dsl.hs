@@ -34,9 +34,9 @@ import Sqel.Data.Dd (
   StructWith (Comp, Prim),
   )
 import Sqel.Data.Mods (NoMods)
-import qualified Sqel.Data.Mods.Array as Mods (Array)
+import qualified Sqel.Data.Mods.Array as Mods
 import qualified Sqel.Data.Mods.CondOp as Mods
-import qualified Sqel.Data.Mods.Enum as Mods (Enum)
+import qualified Sqel.Data.Mods.Enum as Mods
 import qualified Sqel.Data.Mods.Ignore as Mods
 import qualified Sqel.Data.Mods.Json as Mods
 import Sqel.Data.Mods.MigrationDefault (MigrationDefault)
@@ -53,16 +53,15 @@ import qualified Sqel.Data.Mods.Unique as Mods (Unique)
 import Sqel.Data.Name (AmendName, Name (Name, NameAuto), NamePrefix (DefaultPrefix, NamePrefix))
 import Sqel.Data.Sel (Path (PathSkip), Sel (Sel), SelAuto, TSel (TSel), TSelWithPrefix)
 import Sqel.Data.Uid (Uid)
-import Sqel.Dd (SetDdName)
+import Sqel.Dd (SetDdName, SetDdPath, SetDdPrefix)
 import Sqel.Dsl.Comp
 import Sqel.Dsl.Error (TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
-import Sqel.Kind.Error (PlainTypeError)
+import Sqel.Kind.Error (PlainTypeError, Quoted, QuotedType)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeDd)
-import Sqel.Kind.Error (Quoted, QuotedType)
 
 type FromGenF k = DatatypeInfo -> [[Type]] -> Exp k
 
@@ -113,6 +112,14 @@ type instance Eval (ApplyIndexPrefix prefix ('Dd ext a ('Comp tsel ('Sum _) i s)
 data ApplyName :: Symbol -> Dd0 -> Exp Dd0
 type instance Eval (ApplyName name s) =
   SetDdName name s
+
+data ApplyPath :: [Symbol] -> Dd0 -> Exp Dd0
+type instance Eval (ApplyPath path s) =
+  SetDdPath path s
+
+data ApplyPrefix :: [Symbol] -> Dd0 -> Exp Dd0
+type instance Eval (ApplyPrefix pre s) =
+  SetDdPrefix pre s
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -211,6 +218,12 @@ type Default value = Mod (MigrationDefault value)
 
 type Name :: Symbol -> Type -> Type
 type Name name = ModTrans (ApplyName name)
+
+type Path :: [Symbol] -> Type -> Type
+type Path pre = ModTrans (ApplyPath pre)
+
+type Prefix :: [Symbol] -> Type -> Type
+type Prefix pre = ModTrans (ApplyPrefix pre)
 
 type Json :: Type
 type Json = Prim PrimJson

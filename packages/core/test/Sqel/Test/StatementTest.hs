@@ -20,6 +20,8 @@ import Sqel.Test.Statement.NullableQueryTest (test_statement_nullableQuery, test
 import Sqel.Test.Statement.OrderTest (test_statement_order)
 import Sqel.Test.Statement.ParamsTest (test_statement_params)
 import Sqel.Test.Statement.ProjectTest (test_project)
+import Sqel.Test.Statement.QueryPathTest (test_queryPath)
+import Sqel.Test.Statement.QueryPrefixTest (test_queryPrefix)
 import Sqel.Test.Statement.SumQueryTest (test_sumQuery)
 import Sqel.Test.Statement.UpsertTest (test_upsert)
 
@@ -45,5 +47,7 @@ test_statement =
     unitTest "ignored query field" test_statement_ignore,
     unitTest "empty query" test_statement_emptyQuery,
     unitTest "custom condition expression" test_condExpr,
-    unitTest "literal in condition operator" test_statement_literal
+    unitTest "literal in condition operator" test_statement_literal,
+    unitTest "path prefix for query field" test_queryPrefix,
+    unitTest "static path for query field" test_queryPath
   ]

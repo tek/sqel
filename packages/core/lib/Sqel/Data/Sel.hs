@@ -43,9 +43,10 @@ instance (
   ) => TypeName prefixSpec tpe name where
 
 -- TODO Skip should be in Comp, it doesn't make sense for Prim
--- TODO check whether Skip is still used
 data Path =
-  Path { dd :: Maybe [Symbol], table :: [Symbol] }
+  PathPrefix [Symbol]
+  |
+  PathSet [Symbol]
   |
   PathSkip
 
@@ -89,7 +90,9 @@ type SelName name = 'Sel ('Name name) 'Nothing
 
 type SelSkip name = 'Sel ('Name name) ('Just 'PathSkip)
 
-type SelPath name table = 'Sel ('Name name) ('Just ('Path 'Nothing table))
+type SelPrefix name pre = 'Sel ('Name name) ('Just ('PathPrefix pre))
+
+type SelPath name path = 'Sel ('Name name) ('Just ('PathSet path))
 
 type ShowSel :: Sel -> Symbol
 type family ShowSel sel where

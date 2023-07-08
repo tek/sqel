@@ -2,7 +2,7 @@ module Sqel.Normalize where
 
 import Sqel.Data.Dd (Dd, Dd0, DdK (Dd), Ext (Ext), Ext0 (Ext0), Struct, Struct0, StructWith (Comp, Prim))
 import Sqel.Data.Name (Name (Name, NameAuto))
-import Sqel.Data.Sel (Path (Path, PathSkip), Paths (Paths, PathsRoot), Sel (Sel))
+import Sqel.Data.Sel (Path (PathPrefix, PathSet, PathSkip), Paths (Paths, PathsRoot), Sel (Sel))
 import Sqel.Kind.Error (ShowPath)
 
 type NormalizeName :: [Symbol] -> Name -> Symbol
@@ -18,8 +18,8 @@ type family SetPath paths sel where
 type UpdatePreWith :: ([Symbol], [Symbol]) -> Maybe Path -> Symbol -> ([Symbol], [Symbol])
 type family UpdatePreWith paths sel name where
   UpdatePreWith '(dd, table) ('Just 'PathSkip) name = '(name : dd, table)
-  UpdatePreWith '(dd, _) ('Just ('Path 'Nothing table)) name = '(name : dd, table)
-  UpdatePreWith _ ('Just ('Path ('Just dd) table)) _ = '(dd, table)
+  UpdatePreWith '(dd, _) ('Just ('PathSet table)) name = '(name : dd, table)
+  UpdatePreWith '(dd, _) ('Just ('PathPrefix pre)) name = '(name : dd, name : pre)
   UpdatePreWith '(dd, table) 'Nothing name = '(name : dd, name : table)
 
 type UpdatePre :: ([Symbol], [Symbol]) -> Ext0 -> ([Symbol], [Symbol])

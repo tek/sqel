@@ -315,6 +315,8 @@ test-suite sqel-core-test
       Sqel.Test.Statement.OrderTest
       Sqel.Test.Statement.ParamsTest
       Sqel.Test.Statement.ProjectTest
+      Sqel.Test.Statement.QueryPathTest
+      Sqel.Test.Statement.QueryPrefixTest
       Sqel.Test.Statement.SumQueryTest
       Sqel.Test.Statement.UpsertTest
       Sqel.Test.StatementTest
