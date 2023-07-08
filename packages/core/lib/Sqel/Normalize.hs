@@ -8,7 +8,7 @@ import Sqel.Kind.Error (ShowPath)
 type NormalizeName :: [Symbol] -> Name -> Symbol
 type family NormalizeName pre name where
   NormalizeName _ ('Name name) = name
-  NormalizeName pre 'NameAuto = TypeError ("NameAuto in non-root non-comp node at " <> ShowPath pre)
+  NormalizeName pre 'NameAuto = TypeError ("NameAuto in non-root-comp node at " <> ShowPath pre)
 
 type SetPath :: ([Symbol], [Symbol]) -> Ext0 -> Ext
 type family SetPath paths sel where
@@ -41,10 +41,16 @@ type family ResolvePathsNode pre s where
   ResolvePathsNode pre ('Dd ext a s) =
     'Dd (SetPath pre ext) a (ResolvePathsStruct pre s)
 
+type family InitPre (path :: Maybe Path) :: [Symbol] where
+  InitPre 'Nothing = '[]
+  InitPre ('Just 'PathSkip) = '[]
+  InitPre ('Just ('PathSet pre)) = pre
+  InitPre ('Just ('PathPrefix pre)) = pre
+
 type ResolvePaths :: ([Symbol], [Symbol]) -> Dd0 -> Dd
 type family ResolvePaths pre s where
-  ResolvePaths '( '[], '[]) ('Dd ('Ext0 ('Sel 'NameAuto 'Nothing) mods) a ('Comp tsel c i sub)) =
-    'Dd ('Ext 'PathsRoot mods) a ('Comp tsel c i (ResolvePathsComp '( '[], '[]) sub))
+  ResolvePaths '( '[], '[]) ('Dd ('Ext0 ('Sel 'NameAuto path) mods) a ('Comp tsel c i sub)) =
+    'Dd ('Ext 'PathsRoot mods) a ('Comp tsel c i (ResolvePathsComp '( '[], (InitPre path)) sub))
   ResolvePaths pre ('Dd ext a s) =
     ResolvePathsNode (UpdatePre pre ext) ('Dd ext a s)
 

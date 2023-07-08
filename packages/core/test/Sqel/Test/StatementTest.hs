@@ -19,7 +19,7 @@ import Sqel.Test.Statement.NamedCompQueryTest (test_namedCompQuery)
 import Sqel.Test.Statement.NullableQueryTest (test_statement_nullableQuery, test_statement_orNullQuery)
 import Sqel.Test.Statement.OrderTest (test_statement_order)
 import Sqel.Test.Statement.ParamsTest (test_statement_params)
-import Sqel.Test.Statement.ProjectTest (test_project)
+import Sqel.Test.Statement.ProjectTest (test_project, test_project_merge)
 import Sqel.Test.Statement.QueryPathTest (test_queryPath)
 import Sqel.Test.Statement.QueryPrefixTest (test_queryPrefix)
 import Sqel.Test.Statement.SumQueryTest (test_sumQuery)
@@ -31,6 +31,7 @@ test_statement =
     unitTest "minimal table" test_minimal,
     unitTest "build basics" test_build,
     unitTest "abstract projection" test_project,
+    unitTest "projection with prefix, merge and nest products" test_project_merge,
     unitTest "order" test_statement_order,
     unitTest "merge sum" test_statement_merge_sum,
     unitTest "merge prod" test_statement_merge_prod,
