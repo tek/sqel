@@ -31,7 +31,7 @@ createTable ::
   ∀ tag table .
   BuildClause tag CreateTable =>
   SqelFor tag table ->
-  Statement () ()
+  Statement '[DdType table] () ()
 createTable s = S.do
   fs <- table_ s
   Clauses.createTable fs.table
@@ -41,7 +41,7 @@ dropTable ::
   ∀ tag table .
   BuildClause tag DropTable =>
   SqelFor tag table ->
-  Statement () ()
+  Statement '[DdType table] () ()
 dropTable s = S.do
   fs <- table_ s
   Clauses.dropTable fs.table (Drop True Nothing)
@@ -51,7 +51,7 @@ dropTableCascade ::
   ∀ tag table .
   BuildClause tag DropTable =>
   SqelFor tag table ->
-  Statement () ()
+  Statement '[DdType table] () ()
 dropTableCascade s = S.do
   fs <- table_ s
   Clauses.dropTable fs.table (Drop True (Just Cascade))
@@ -62,7 +62,7 @@ createType ::
   IsComp t ~ 'True =>
   BuildClause tag CreateType =>
   SqelFor tag t ->
-  Statement () ()
+  Statement '[DdType t] () ()
 createType s = S.do
   fs <- table_ s
   Clauses.createType fs.table
@@ -75,7 +75,7 @@ selectWhere ::
   BuildClause tag Where =>
   SqelFor tag query ->
   SqelFor tag table ->
-  Statement (DdType query) (DdType table)
+  Statement '[DdType table] (DdType query) (DdType table)
 selectWhere q t = S.do
   c <- query1 q t
   select c.table
@@ -87,7 +87,7 @@ selectAll ::
   BuildClause tag Select =>
   BuildClause tag From =>
   SqelFor tag table ->
-  Statement () (DdType table)
+  Statement '[DdType table] () (DdType table)
 selectAll s = S.do
   fs <- table_ s
   select fs.table
@@ -98,7 +98,7 @@ insert ::
   BuildClause tag InsertInto =>
   BuildClause tag Values =>
   SqelFor tag table ->
-  Statement (DdType table) ()
+  Statement '[DdType table] (DdType table) ()
 insert s = S.do
   t <- table s
   insertInto t
@@ -111,7 +111,7 @@ upsert ::
   BuildClause tag OnConflict =>
   BuildClause tag DoUpdateSet =>
   SqelFor tag table ->
-  Statement (DdType table) ()
+  Statement '[DdType table] (DdType table) ()
 upsert s = S.do
   t <- table s
   insertInto t
@@ -127,7 +127,7 @@ delete ::
   BuildClause tag Returning =>
   SqelFor tag query ->
   SqelFor tag table ->
-  Statement (DdType query) (DdType table)
+  Statement '[DdType table] (DdType query) (DdType table)
 delete q t = S.do
   fs <- query1 q t
   deleteFrom fs.table
@@ -139,7 +139,7 @@ deleteAll ::
   BuildClause tag DeleteFrom =>
   BuildClause tag Returning =>
   SqelFor tag table ->
-  Statement () (DdType table)
+  Statement '[DdType table] () (DdType table)
 deleteAll t = S.do
   fs <- table_ t
   deleteFrom fs.table

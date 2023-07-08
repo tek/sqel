@@ -38,11 +38,11 @@ return :: a -> Clauses tag '[] 'Nothing a
 return a = Clauses Nil NothingD a
 
 (>>=) ::
-  ∀ tag frags cs results result q a .
-  DoResult frags tag cs results a q result =>
+  ∀ tag frags cs results result ts q a .
+  DoResult frags tag cs results a ts q result =>
   Clauses tag '[] 'Nothing frags ->
   (frags -> Clauses tag cs results a) ->
-  Statement q result
+  Statement ts q result
 Clauses Nil NothingD frags >>= f =
   doResult @frags frags (f frags)
 

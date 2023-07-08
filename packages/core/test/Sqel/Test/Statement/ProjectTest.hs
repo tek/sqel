@@ -9,11 +9,11 @@ import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Data.Statement as Statement
 import Sqel.Data.Statement (Statement)
+import Sqel.Data.TestTables (query_Q, table_Cat)
 import Sqel.Dd (DdType)
 import Sqel.Default (Sqel)
 import Sqel.Syntax.Fragments (project, query1)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (query_Q, table_Cat)
 
 -- TODO when using the wrong result type, the error doesn't show @ProjectionNamed@, but @HFindT@.
 -- Would be good to have a custom error here, unclear whether it's feasible.
@@ -26,7 +26,7 @@ statement ::
   Sqel query ->
   Sqel table ->
   Sqel proj ->
-  Statement (DdType query) (DdType p)
+  Statement '[DdType table] (DdType query) (DdType p)
 statement query table proj = S.do
   frags <- project proj (query1 query table)
   select frags.projections.fur

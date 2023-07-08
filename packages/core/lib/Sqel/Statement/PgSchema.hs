@@ -9,7 +9,7 @@ import Sqel.Data.Statement (Statement (Statement))
 
 dbColumns ::
   Sql ->
-  Statement Text ExistingColumn
+  Statement '[] Text ExistingColumn
 dbColumns code =
   Statement code encoder decoder
   where

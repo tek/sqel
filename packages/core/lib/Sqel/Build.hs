@@ -10,7 +10,7 @@ import Sqel.Data.Dd (DdK)
 import Sqel.Data.Fragments (Fragments)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Statement (Statement)
-import Sqel.Dd (MaybeDdType)
+import Sqel.Dd (DdTypes, MaybeDdType)
 import Sqel.Default (Def, Sqel)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Kind.ResultTuple (ResultTuple)
@@ -21,14 +21,14 @@ class Build tag result query tables cs results where
     MaybeD (SqelFor tag) query ->
     NP (SqelFor tag) tables ->
     (Fragments tag query tables '[] -> Clauses tag cs results ()) ->
-    Statement (MaybeDdType query) result
+    Statement (DdTypes tables) (MaybeDdType query) result
 
 instance (
     FragmentsSqel tag query tables,
-    BuildStatement tag query cs results result
+    BuildStatement tag (DdTypes tables) query cs results result
   ) => Build tag result query tables cs results where
   build query tables use =
-    buildStatement @tag @query @cs @results frags.multi (use frags) query
+    buildStatement @tag @(DdTypes tables) @query @cs @results frags.multi (use frags) query
     where
       frags = fragmentsSqel @tag query tables
 
@@ -43,7 +43,7 @@ type BuildK ::
 class BuildK tag query tables result cs results where
   buildK ::
     (Fragments tag query tables '[] -> Clauses tag cs results ()) ->
-    Statement (MaybeDdType query) result
+    Statement (DdTypes tables) (MaybeDdType query) result
 
 instance (
     ReifySqelFor tag query,
@@ -64,7 +64,7 @@ buildAs ::
   MaybeD Sqel query ->
   NP Sqel tables ->
   (Fragments Def query tables '[] -> Clauses Def cs results ()) ->
-  Statement (MaybeDdType query) result
+  Statement (DdTypes tables) (MaybeDdType query) result
 buildAs =
   build @Def @result
 
@@ -72,7 +72,7 @@ buildKAs ::
   ∀ query tables result cs results .
   BuildK Def query tables result cs results =>
   (Fragments Def query tables '[] -> Clauses Def cs results ()) ->
-  Statement (MaybeDdType query) result
+  Statement (DdTypes tables) (MaybeDdType query) result
 buildKAs =
   buildK
 
@@ -82,7 +82,7 @@ buildTuple ::
   MaybeD (SqelFor tag) query ->
   NP (SqelFor tag) tables ->
   (Fragments tag query tables '[] -> Clauses tag cs results ()) ->
-  Statement (MaybeDdType query) (ResultTuple results)
+  Statement (DdTypes tables) (MaybeDdType query) (ResultTuple results)
 buildTuple =
   build @tag @(ResultTuple results)
 
@@ -90,6 +90,6 @@ buildKTuple ::
   ∀ query tables cs results .
   BuildK Def query tables (ResultTuple results) cs results =>
   (Fragments Def query tables '[] -> Clauses Def cs results ()) ->
-  Statement (MaybeDdType query) (ResultTuple results)
+  Statement (DdTypes tables) (MaybeDdType query) (ResultTuple results)
 buildKTuple =
   buildK @Def

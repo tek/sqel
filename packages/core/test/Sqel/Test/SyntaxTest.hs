@@ -9,7 +9,7 @@ import Sqel.Build.Sql (buildSqlDd)
 import Sqel.Clauses (from, join, on, select, where_)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement, statementSql)
-import Sqel.Data.TestTables (Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
+import Sqel.Data.TestTables (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
 import Sqel.Default (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (query1, query1K, queryK)
@@ -24,13 +24,13 @@ stmt1 =
 
 stmt2 :: Sql
 stmt2 =
-  statementSql @Q @Fur S.do
+  statementSql @_ @Q @Fur S.do
     c <- query1 query_Q table_Cat
     select (c.cat.fur.color, c.cat.fur.density)
     from c.cat
     where_ c.query.fur
 
-stmt14 :: Statement Q Fur
+stmt14 :: Statement '[Cat] Q Fur
 stmt14 = S.do
   c <- query1K @Query_Q @Table_Cat @Def
   select (c.cat.fur.color, c.cat.fur.density)

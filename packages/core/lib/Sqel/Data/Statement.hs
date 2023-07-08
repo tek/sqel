@@ -6,20 +6,20 @@ import Hasql.Encoders (Params)
 
 import Sqel.Data.Sql (Sql)
 
--- TODO add table parameter for safety
--- probably with nominal type role so it can't be faked
-data Statement query proj =
+type role Statement nominal nominal nominal
+type Statement :: [Type] -> Type -> Type -> Type
+data Statement tables query proj =
   Statement {
     sql :: Sql,
     encoder :: Params query,
     decoder :: Row proj
   }
 
-instance Show (Statement query result) where
+instance Show (Statement tables query result) where
   showsPrec d s = showParen (d > 10) [exon|Statement #{showsPrec 11 s.sql}|]
 
 statementSql ::
-  ∀ query proj .
-  Statement query proj ->
+  ∀ tables query proj .
+  Statement tables query proj ->
   Sql
 statementSql Statement {sql} = sql

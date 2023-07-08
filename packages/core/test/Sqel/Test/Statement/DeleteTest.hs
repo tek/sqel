@@ -8,12 +8,12 @@ import Test.Tasty (TestTree, testGroup)
 import Sqel.Clauses (deleteFrom, returning, where_)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
+import Sqel.Data.TestTables (query_Q, table_Cat)
 import Sqel.Syntax.Fragments (query1, table_)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (query_Q, table_Cat)
 
 statementAll :: Sql
-statementAll = statementSql @_ @() S.do
+statementAll = statementSql @_ @_ @() S.do
   f <- table_ table_Cat
   deleteFrom f.table
 

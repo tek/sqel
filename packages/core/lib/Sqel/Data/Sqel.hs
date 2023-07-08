@@ -7,9 +7,9 @@ import Sqel.Class.DdField (DdKField (ddKField), DdKFieldT)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (DdK (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), StructWith (Comp, Prim))
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
+import Sqel.Data.Statement (Statement)
 import Sqel.Dd (DdSub, DdType)
 import Sqel.Kind.Error (Quoted)
-import Sqel.Data.Statement (Statement)
 
 type SqelFor :: ∀ {ext} . Type -> DdK ext -> Type
 data SqelFor tag s where
@@ -113,4 +113,4 @@ sqelSub = \case
   SqelPrim _ _ -> Nil
   SqelComp _ _ _ sub _ -> sub
 
-type StatementDd query table = Statement (DdType query) (DdType table)
+type StatementDd tables query table = Statement tables (DdType query) (DdType table)

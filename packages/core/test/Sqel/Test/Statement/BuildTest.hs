@@ -16,13 +16,13 @@ import Sqel.Data.Dd (DdK, type (:>) ((:>)))
 import Sqel.Data.Sqel (Project, Projected, SqelFor, StatementDd)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
+import Sqel.Data.TestTables (Bird, Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
 import Sqel.Dd (DdType)
 import Sqel.Default (CreateTable, Def, From, Select, Sqel, Where)
 import Sqel.Fragment ((.=))
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Syntax.Fragments (project, query1)
 import qualified Sqel.Syntax.Monad as Sqel
-import Sqel.Data.TestTables (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
 
 stmt1 ::
   ∀ {ext} (query :: DdK ext) .
@@ -42,7 +42,7 @@ type PF res = Projected "fur" res
 -- If you want to see the full type, call 'statementWith @(RawErrors tag)' (insert 'tag' from what's present).
 --
 -- However, since we've now achieved automatic result type extraction, this can be specialized to the query type.
-stmt2 :: Statement Q Fur
+stmt2 :: Statement '[Cat] Q Fur
 stmt2 =
   buildKAs @('Just Query_Q) @'[Table_Cat] \ c ->
     select c.cat.fur +> from c.cat +> where_ c.query.fur
@@ -52,7 +52,7 @@ stmt3 ::
   Check '[d] q =>
   Sqel q ->
   Sqel d ->
-  StatementDd q d
+  StatementDd '[DdType d] q d
 stmt3 q d =
   buildAs @(DdType d) (JustD q) (d :* Nil) \ frags ->
     select frags.table +> from frags.table +> where_ frags.query
@@ -82,7 +82,7 @@ stmt4 =
 --     on (c.cat.nam .= c.bird.cat) +>
 --     where_ c.query.fur
 
-stmt6 :: Statement Q Cat
+stmt6 :: Statement '[Cat, Bird] Q Cat
 stmt6 =
   buildKTuple @('Just Query_Q) @[Table_Cat, Table_Bird] \ c ->
       select c.cat +>
@@ -100,7 +100,7 @@ stmt7 =
     on (c.cat.nam .= c.bird.cat) +>
     where_ c.query.fur
 
-stmt8 :: Statement Q (Text, Int)
+stmt8 :: Statement '[Cat] Q (Text, Int)
 stmt8 =
   buildKTuple @('Just Query_Q) @'[Table_Cat] \ c ->
     select (c.cat.fur.color, c.cat.fur.density) +> from c.cat +> where_ c.query.fur
@@ -109,7 +109,7 @@ data TextInt =
   TextInt Text Int
   deriving stock (Generic)
 
-stmt9 :: Statement Q TextInt
+stmt9 :: Statement '[Cat] Q TextInt
 stmt9 =
   buildKAs @('Just Query_Q) @'[Table_Cat] \ c ->
     select (c.cat.fur.color :> c.cat.fur.density) +> from c.cat +> where_ c.query.fur
@@ -121,7 +121,7 @@ stmt10 =
     from c.cat +>
     where_ c.query.fur
 
-stmt11 :: Statement Q TextInt
+stmt11 :: Statement '[Cat] Q TextInt
 stmt11 =
   buildKAs @('Just Query_Q) @'[Table_Cat] \ c ->
     select (c.cat.fur.color, c.cat.fur.density) +>
@@ -131,7 +131,7 @@ stmt11 =
 stmt12 ::
   BuildClause tag CreateTable =>
   SqelFor tag Table_Cat ->
-  Statement () ()
+  Statement '[Cat] () ()
 stmt12 table =
   buildTuple NothingD (table :* Nil) \ c ->
     createTable c.table
@@ -144,7 +144,7 @@ selectQuery ::
   SqelFor tag query ->
   SqelFor tag proj ->
   SqelFor tag table ->
-  Statement (DdType query) (DdType proj)
+  Statement '[DdType table] (DdType query) (DdType proj)
 selectQuery query proj table = Sqel.do
   frags <- project proj (query1 query table)
   select frags.projection

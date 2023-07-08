@@ -21,7 +21,7 @@ import Sqel.Test.Run (integrationTest, stmt_)
 create ::
   ∀ (table :: Dd) .
   QueryDd Def EmptyQuery '[table] =>
-  Statement () ()
+  Statement '[DdType table] () ()
 create = S.do
   c <- queryK @EmptyQuery @'[table]
   createTable @Def c.table
@@ -29,13 +29,13 @@ create = S.do
 ins ::
   ∀ (table :: Dd) .
   ReifySqelFor Def table =>
-  Statement (DdType table) ()
+  Statement '[DdType table] (DdType table) ()
 ins = S.do
   t <- tableK @table @Def
   insertInto t
   values t
 
-selJoin :: Statement Q Int
+selJoin :: Statement '[Cat, Bird] Q Int
 selJoin = S.do
   c <- queryK @Query_Q @[Table_Cat, Table_Bird] @Def
   select c.bird.num

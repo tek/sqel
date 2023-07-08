@@ -10,18 +10,18 @@ import Sqel.Data.Statement (Statement (Statement))
 import Sqel.Dd (MaybeDdType)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 
-type BuildStatement :: ∀ {extq} . Type -> Maybe (DdK extq) -> [Type] -> Maybe [Type] -> Type -> Constraint
-class BuildStatement tag query cs results result where
+type BuildStatement :: ∀ {extq} . Type -> [Type] -> Maybe (DdK extq) -> [Type] -> Maybe [Type] -> Type -> Constraint
+class BuildStatement tag tables query cs results result where
   buildStatement ::
     Bool ->
     Clauses tag cs results a ->
     MaybeD (SqelFor tag) query ->
-    Statement (MaybeDdType query) result
+    Statement tables (MaybeDdType query) result
 
 instance (
     BuildSql tag cs,
     ClausesResultDecoder results result
-  ) => BuildStatement tag query cs results result where
+  ) => BuildStatement tag tables query cs results result where
     buildStatement multi cs@(Clauses _ res _) query =
       Statement (buildSql @tag multi cs) params row
       where

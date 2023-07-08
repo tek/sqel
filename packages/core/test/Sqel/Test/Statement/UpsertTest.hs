@@ -7,13 +7,13 @@ import Test.Tasty (TestTree, testGroup)
 import Sqel.Clauses (doUpdateSet, insertInto, onConflict, values)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
+import Sqel.Data.TestTables (table_Cat)
 import Sqel.Syntax.Fragments (table)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (table_Cat)
 
 statement :: Sql
 statement =
-  statementSql @_ @() S.do
+  statementSql @_ @_ @() S.do
     t <- table table_Cat
     insertInto t
     values t

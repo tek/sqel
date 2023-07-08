@@ -15,16 +15,16 @@ import Sqel.Data.Statement (Statement (Statement))
 import Sqel.Statement.Common
 
 prepared ::
-  ∀ result query a .
+  ∀ result tables query a .
   HasqlStatement a result =>
-  Statement query a ->
+  Statement tables query a ->
   Hasql.Statement query result
 prepared = hasqlStatement True
 
 unprepared ::
-  ∀ result query a .
+  ∀ result tables query a .
   HasqlStatement a result =>
-  Statement query a ->
+  Statement tables query a ->
   Hasql.Statement query result
 unprepared = hasqlStatement False
 
@@ -45,19 +45,19 @@ unsafeUntypedSql s =
   unsafeSql s mempty unit
 
 runPrepared ::
-  ∀ result query a .
+  ∀ result tables query a .
   HasqlStatement a result =>
   query ->
-  Statement query a ->
+  Statement tables query a ->
   Session result
 runPrepared query =
   Session.statement query . prepared
 
 runUnprepared ::
-  ∀ result query a .
+  ∀ result tables query a .
   HasqlStatement a result =>
   query ->
-  Statement query a ->
+  Statement tables query a ->
   Session result
 runUnprepared query =
   Session.statement query . unprepared

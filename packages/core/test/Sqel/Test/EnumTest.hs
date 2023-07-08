@@ -49,11 +49,11 @@ table_E :: Sqel Table_E
 table_E = sqel
 
 sql_e :: Sql
-sql_e = statementSql @_ @() S.do
+sql_e = statementSql @_ @_ @() S.do
   t <- tableK @Table_E @Def
   createTable t
 
-statement_e :: Statement () E
+statement_e :: Statement '[E] () E
 statement_e = S.do
   frags <- tableK_ @Table_E @Def
   select frags.table

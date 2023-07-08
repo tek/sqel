@@ -10,9 +10,9 @@ import Sqel.Statement (runUnprepared)
 
 class MigrationEffect m where
   runMigrationStatements :: [MigrationStatement] -> m ()
-  runStatement :: q -> Statement q a -> m [a]
-  runStatement_ :: q -> Statement q () -> m ()
-  dbCols :: Text -> Statement Text ExistingColumn -> m [ExistingColumn]
+  runStatement :: q -> Statement t q a -> m [a]
+  runStatement_ :: q -> Statement t q () -> m ()
+  dbCols :: Text -> Statement t Text ExistingColumn -> m [ExistingColumn]
   dbCols = runStatement
   log :: Text -> m ()
   error :: Text -> m ()

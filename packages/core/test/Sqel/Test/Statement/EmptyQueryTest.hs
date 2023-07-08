@@ -10,12 +10,12 @@ import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Sql (Sql, sql)
 import qualified Sqel.Data.Statement
 import Sqel.Data.Statement (Statement)
+import Sqel.Data.TestTables (table_Cat)
 import Sqel.Dd (DdType, EmptyQuery)
 import Sqel.Default (From, Select, Where)
 import Sqel.Sqel (emptyQuery)
 import Sqel.Syntax.Fragments (query1)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (table_Cat)
 
 statement ::
   ReifySqelFor tag EmptyQuery =>
@@ -24,7 +24,7 @@ statement ::
   BuildClause tag From =>
   BuildClause tag Where =>
   SqelFor tag table ->
-  Statement () (DdType table)
+  Statement '[DdType table] () (DdType table)
 statement table = S.do
   frags <- query1 emptyQuery table
   select frags.table

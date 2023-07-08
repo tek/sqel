@@ -51,7 +51,7 @@ statement1 = statementSql S.do
   from t
 
 statement2 :: Sql
-statement2 = statementSql @_ @() S.do
+statement2 = statementSql @_ @_ @() S.do
   t <- table mergeSum
   createTable t
 

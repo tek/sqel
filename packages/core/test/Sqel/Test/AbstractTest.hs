@@ -31,7 +31,7 @@ table_Dat = sqel
 statement ::
   ∀ (sa :: Type) a .
   ReifySqel (Table_Dat a sa) =>
-  Statement () (Dat a)
+  Statement '[Dat a] () (Dat a)
 statement = S.do
   frags <- table_ tab
   select frags.table
