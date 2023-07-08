@@ -22,7 +22,7 @@ spineColumns cond = \case
       | cond s' = case s' of
         SpinePrim PrimMeta {name} -> [columnNameQuoted name]
         SpineNest CompMeta {name} _ _ -> [columnNameQuoted name]
-        SpineMerge _ _ cols -> sub =<< cols
+        SpineMerge _ compSort cols -> prependIndexName compSort (sub =<< cols)
       | otherwise = []
 
 -- TODO in @do update set@ this could also use ops
