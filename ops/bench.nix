@@ -37,6 +37,8 @@ let
 
   statements = concatStringsSep "\n" (genList (n: statement (toString n)) count);
 
+  seqs = concatStringsSep " `seq` " (genList (n: "stmt_${toString n}") count);
+
   file = ''
   ${header}
 
