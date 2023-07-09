@@ -77,7 +77,7 @@ meta1 =
           "colType": "sqel_type__pord",
           "name": "pord"
         },
-        "sort": {
+        "compSort": {
           "tag": "CompProd"
         },
         "sub": [],
@@ -149,7 +149,7 @@ meta1 =
           "colType": "sqel_type__pord",
           "name": "pord"
         },
-        "sort": {
+        "compSort": {
           "tag": "CompProd"
         },
         "sub": [],
@@ -249,7 +249,7 @@ meta1 =
           "colType": "sqel_type__pord",
           "name": "pord"
         },
-        "sort": {
+        "compSort": {
           "tag": "CompProd"
         },
         "sub": [],
