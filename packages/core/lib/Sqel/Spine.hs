@@ -8,15 +8,14 @@ import Sqel.Data.PgType (PgColumnName (PgColumnName), PgTypeRef)
 import Sqel.Data.PgTypeName (pattern PgCompName, PgTableName, pattern PgTypeName, pgTableName)
 import qualified Sqel.Data.Spine
 import Sqel.Data.Spine (
+  CompSort (CompSum),
   Spine (SpineMerge, SpineNest, SpinePrim),
   pattern SpineComp,
   TypeSpine (TypeSpine),
-  Types (Types), CompSort (CompSum),
+  Types (Types),
   )
 import qualified Sqel.Default
 import Sqel.Default (CompMeta (CompMeta), PrimMeta (PrimMeta))
-
--- TODO can we get rid of some of these? Types?
 
 spineComps ::
   ∀ tag .
@@ -55,7 +54,7 @@ mergeCols cols =
   cols >>= \case
     s@SpinePrim {} -> [s]
     s@SpineNest {} -> [s]
-    SpineMerge {sub} -> mergeCols sub
+    SpineMerge {compSort, sub} -> prependIndex compSort (mergeCols sub)
 
 spineTypeCols :: Spine tag -> [Spine tag]
 spineTypeCols = \case

@@ -288,6 +288,7 @@ test-suite sqel-core-test
       Sqel.Test.ErrorTest
       Sqel.Test.HasGeneric
       Sqel.Test.JsonTest
+      Sqel.Test.Migration.ColumnMapTest
       Sqel.Test.Migration.ConsistencyData
       Sqel.Test.Migration.ConsistencyTest
       Sqel.Test.Migration.RunTest

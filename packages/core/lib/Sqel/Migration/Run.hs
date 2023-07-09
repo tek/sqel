@@ -39,7 +39,7 @@ import qualified Sqel.Data.Spine
 import Sqel.Data.Spine (Spine, Types)
 import Sqel.Data.Sqel (SqelFor, sqelSpine)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (CreateType)
+import Sqel.Default.Clauses (CreateType)
 import Sqel.Migration.Data.TypeStatus (TypeStatus (Absent, Match, Mismatch))
 import Sqel.Migration.Init (InitTable, initTable)
 import Sqel.Migration.Metadata (columnMap, logType, typeColumns, typeStatus)
