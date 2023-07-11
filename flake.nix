@@ -151,12 +151,16 @@
       expose = true;
       command = let
         bench = import ./ops/bench.nix { inherit config; };
+        run = file: ''
+        rm -f Bench.hs
+        cp ${file} Bench.hs
+        command time -a -o bench.stats -f 'user %Us | wall %es | kernel %S' ghc -Wall -H64m -O +RTS -A64M -RTS Bench.hs
+        cat bench.stats
+        rm -f Bench.* bench.stats bench
+        '';
       in ''
-      rm -f Bench.hs
-      cp ${bench.bench} Bench.hs
-      command time -a -o bench.stats -f 'user %Us | wall %es | kernel %S' ghc -Wall -H64m -O +RTS -A64M -RTS Bench.hs
-      cat bench.stats
-      rm -f Bench.* bench.stats bench
+      ${run bench.simple}
+      ${run bench.complex}
       '';
     };
 
