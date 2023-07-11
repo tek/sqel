@@ -6,7 +6,7 @@ import Sqel.Data.Clause (ClauseParam (ClauseParam))
 import Sqel.Data.Field (PrimField (PrimField))
 import Sqel.Data.Order (Order)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Path (primMetaPath, primSelector)
 
 -- TODO order by comp?

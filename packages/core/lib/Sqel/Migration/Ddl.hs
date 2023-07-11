@@ -15,7 +15,7 @@ import Sqel.Data.Mods.MigrationRenameType (MigrationRenameType)
 import Sqel.Data.Name (NamePrefix)
 import Sqel.Data.Sel (Paths, PathsNameOr, RenderTSel, TSelName)
 import Sqel.Dd (ExtMods, ExtName, ExtPath)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Reify.PrimName (PrimName)
 import Sqel.Kind.Error (Quoted)
 

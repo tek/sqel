@@ -6,7 +6,7 @@ import Sqel.Build.Columns (fieldColumns)
 import Sqel.Build.Values (fieldValues)
 import Sqel.Data.Field (Field)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Sql (joinComma)
 
 setter :: Sql -> Sql -> Sql

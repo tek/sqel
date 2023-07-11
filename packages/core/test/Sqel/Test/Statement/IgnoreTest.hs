@@ -5,7 +5,7 @@ import Hedgehog (TestT, (===))
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Dsl (Ignore, Prim, Prod, Query)
 import Sqel.Syntax.Fragments (query1K)
 import qualified Sqel.Syntax.Monad as S

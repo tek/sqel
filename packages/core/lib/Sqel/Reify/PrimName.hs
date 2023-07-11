@@ -7,7 +7,7 @@ import Sqel.Data.Mods.Name (SetPrimName)
 import Sqel.Data.Mods.Newtype (Newtype)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (PgPrimName, pgPrimName)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Error.PrimCodec (ArrayMismatch)
 import Sqel.Kind.List (type (++))
 

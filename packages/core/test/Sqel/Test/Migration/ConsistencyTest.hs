@@ -7,7 +7,7 @@ import Prelude hiding (Default)
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Data.Migration (Migrate)
 import Sqel.Default (Def, Sqel)
-import Sqel.Dsl
+import Sqel.Dsl (Default, Delete, Nullable, Prim, Prod, Rename, TypeName, UidTable)
 import Sqel.Migration.Class.Syntax ((-->))
 import Sqel.Migration.Consistency (migrationsMetadata)
 import Sqel.Migration.Consistency.Check (checkMigrationConsistency)

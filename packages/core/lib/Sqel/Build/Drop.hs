@@ -8,7 +8,7 @@ import qualified Sqel.Data.Drop
 import Sqel.Data.Drop (Cascade (Cascade, Restrict), Drop (Drop))
 import Sqel.Data.Field (RootField)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 
 dropTableClause :: ClauseParam (RootField Def) Drop -> Sql
 dropTableClause (ClauseParam field Drop {..}) =

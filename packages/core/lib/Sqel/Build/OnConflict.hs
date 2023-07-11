@@ -8,7 +8,7 @@ import Sqel.Data.Field (Field)
 import Sqel.Data.Spine (Spine (SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default as Default
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Sql (concatMapComma)
 
 spineUnique :: Spine Def -> Bool

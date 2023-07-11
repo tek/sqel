@@ -6,7 +6,7 @@ import Sqel.Build.Columns (rootColumns)
 import Sqel.Build.Table (tableName)
 import Sqel.Data.Field (RootField)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Sql (joinComma)
 
 insertIntoClause :: RootField Def -> Sql

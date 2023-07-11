@@ -12,7 +12,7 @@ import Sqel.Data.Spine (
   Types (Types),
   spineComp,
   )
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 
 type TransformMeta :: Type -> Type -> Constraint
 class TransformMeta tag1 tag2 where
