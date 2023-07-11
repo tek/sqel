@@ -4,13 +4,11 @@ import Hasql.Session (Session)
 import Hedgehog (TestT, (===))
 
 import Sqel.Class.ReifySqel (sqel)
-import Sqel.Clauses (createType)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Table)
+import Sqel.Migration.Init (initTable)
 import Sqel.Statement (runUnprepared)
 import qualified Sqel.Statement.Common as Statement
-import Sqel.Syntax.Fragments (table_)
-import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Run (integrationTest, stmt_)
 
 data S =
@@ -29,13 +27,7 @@ session = do
   stmt_ "drop type if exists sqel_type__s1"
   stmt_ "drop type if exists sqel_type__s2"
   stmt_ "drop table if exists s"
-  runUnprepared @() () S.do
-    f <- table_ table_S
-    createType f.s._S1
-  runUnprepared @() () S.do
-    f <- table_ table_S
-    createType f.s._S2
-  runUnprepared () (Statement.createTable table_S)
+  initTable table_S
   runUnprepared (S1 5) (Statement.insert table_S)
   runUnprepared (S2 13) (Statement.insert table_S)
   runUnprepared () (Statement.selectAll table_S)

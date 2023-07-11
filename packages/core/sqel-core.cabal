@@ -383,7 +383,6 @@ test-suite sqel-integration
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Sqel.Test.InitTest
       Sqel.Test.JoinTest
       Sqel.Test.NestedSumTest
       Sqel.Test.Run

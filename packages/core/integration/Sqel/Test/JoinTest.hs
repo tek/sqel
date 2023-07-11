@@ -6,15 +6,27 @@ import Prelude hiding (join, on)
 
 import Sqel.Class.Query (QueryDd)
 import Sqel.Class.ReifySqel (ReifySqelFor)
-import Sqel.Clauses (createTable, createType, from, insertInto, join, on, select, values, where_)
+import Sqel.Clauses (createTable, from, insertInto, join, on, select, values, where_)
 import Sqel.Data.Dd (Dd)
 import Sqel.Data.Def (Def)
 import Sqel.Data.Statement (Statement)
-import Sqel.Data.TestTables (Bird (Bird), Cat (Cat), Fur (Fur), FurQ (FurQ), Q (Q), Query_Q, Table_Bird, Table_Cat)
+import Sqel.Data.TestTables (
+  Bird (Bird),
+  Cat (Cat),
+  Fur (Fur),
+  FurQ (FurQ),
+  Q (Q),
+  Query_Q,
+  Table_Bird,
+  Table_Cat,
+  table_Bird,
+  table_Cat,
+  )
 import Sqel.Dd (DdType, EmptyQuery)
 import Sqel.Fragment ((.=))
+import Sqel.Migration.Init (initTable)
 import Sqel.Statement (runUnprepared)
-import Sqel.Syntax.Fragments (queryK, tableK, tableK_)
+import Sqel.Syntax.Fragments (queryK, tableK)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Run (integrationTest, stmt_)
 
@@ -49,11 +61,8 @@ session = do
   stmt_ "drop table if exists cat"
   stmt_ "drop table if exists bird"
   stmt_ "drop type if exists sqel_type__fur"
-  runUnprepared @() () S.do
-    f <- tableK_ @Table_Cat @Def
-    createType f.cat.fur
-  runUnprepared () (create @Table_Cat)
-  runUnprepared () (create @Table_Bird)
+  initTable table_Cat
+  initTable table_Bird
   runUnprepared (Cat 1 "cat 1" (Fur "red" 10)) (ins @Table_Cat)
   runUnprepared (Cat 2 "cat 2" (Fur "red" 15)) (ins @Table_Cat)
   runUnprepared (Bird 94 "cat 2" (Fur "green" 23)) (ins @Table_Bird)
