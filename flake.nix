@@ -29,9 +29,7 @@
       meta = {
         maintainer = "hackage@tryp.io";
         category = "Database";
-        git = "https://git.tryp.io/tek/sqel";
-        homepage = "https://git.tryp.io/tek/sqel";
-        bug-reports = "https://github.com/tek/sqel/issues";
+        github = "tek/sqel";
         extra-source-files = ["changelog.md" "readme.md"];
       };
     };

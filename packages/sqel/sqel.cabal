@@ -9,7 +9,7 @@ version:        0.0.1.0
 synopsis:       Hasql statement typelevel DSL
 description:    See https://hackage.haskell.org/package/sqel/docs/Sqel.html
 category:       Database
-homepage:       https://git.tryp.io/tek/sqel
+homepage:       https://github.com/tek/sqel#readme
 bug-reports:    https://github.com/tek/sqel/issues
 author:         Torsten Schmits
 maintainer:     hackage@tryp.io
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://git.tryp.io/tek/sqel
+  location: https://github.com/tek/sqel
 
 library
   exposed-modules:
