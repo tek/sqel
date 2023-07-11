@@ -1,10 +1,10 @@
 module Sqel.Build.Create where
 
 import Exon (exon)
-import Lens.Micro ((.~))
 
 import Sqel.Build.Index (prependIndex)
 import Sqel.Build.Table (tableName, typeName)
+import Sqel.Data.Constraints (Constraints (nullable))
 import Sqel.Data.Field (RootField (RootField), TypeField (TypeField))
 import Sqel.Data.Spine (Spine (SpineMerge, SpineNest, SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql, sql, toSql)
@@ -17,7 +17,7 @@ createPrim :: Bool -> Bool -> PrimMeta -> Sql
 createPrim isTable sumCol meta =
   [sql|##{meta.name} ##{meta.colType} #{if isTable then toSql constr else ""}|]
   where
-    constr | sumCol = meta.constr & #nullable .~ True
+    constr | sumCol = meta.constr { nullable = True }
            | otherwise = meta.constr
 
 createComp :: Bool -> CompMeta -> Sql

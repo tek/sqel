@@ -1,40 +1,21 @@
 module Sqel.SOP.Constraint where
 
-import Data.Generics.Labels ()
-import Generics.SOP (All, All2, I, NP, NS (Z), SOP (SOP), Top, unSOP, unZ)
-import Generics.SOP.Constraint (Head)
-import Generics.SOP.GGP (GCode, GDatatypeInfoOf, GFrom, GTo, gfrom, gto)
+import Generics.SOP (All, SListI2)
+import Generics.SOP.GGP (GCode, GDatatypeInfoOf, GFrom, GTo)
 import Generics.SOP.Type.Metadata (DatatypeInfo (ADT, Newtype))
 import Type.Reflection (typeRep)
 
-type Coded (d :: Type) (dss :: [[Type]]) =
-  GCode d ~ dss
-
-type ProductGCode d =
-  Head (GCode d)
-
-type ProductCoded (d :: Type) (ds :: [Type]) =
-  Coded d '[ds]
-
 type ReifySOP (d :: Type) (dss :: [[Type]]) =
-  (Generic d, GTo d, GCode d ~ dss, All2 Top dss)
+  (Generic d, GTo d, GCode d ~ dss, SListI2 dss)
 
 type ConstructSOP (d :: Type) (dss :: [[Type]]) =
-  (Generic d, GFrom d, GCode d ~ dss, All2 Top dss)
+  (Generic d, GFrom d, GCode d ~ dss, SListI2 dss)
 
 type ReifyProd d ds =
   ReifySOP d '[ds]
 
-reifyProd :: ReifyProd d ds => NP I ds -> d
-reifyProd =
-  gto . SOP . Z
-
 type ConstructProd d ds =
   ConstructSOP d '[ds]
-
-constructProd :: ConstructProd d ds => d -> NP I ds
-constructProd =
-  unZ . unSOP . gfrom
 
 type IsNullary =
   (~) '[]

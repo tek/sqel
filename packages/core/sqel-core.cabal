@@ -255,7 +255,6 @@ library
     , hasql ==1.6.*
     , incipit-base ==0.5.*
     , invariant ==0.6.*
-    , microlens ==0.4.*
     , path ==0.9.*
     , path-io ==1.7.*
     , prettyprinter ==1.7.*
@@ -386,6 +385,7 @@ test-suite sqel-integration
   other-modules:
       Sqel.Test.InitTest
       Sqel.Test.JoinTest
+      Sqel.Test.NestedSumTest
       Sqel.Test.Run
       Sqel.Test.SumTest
   hs-source-dirs:

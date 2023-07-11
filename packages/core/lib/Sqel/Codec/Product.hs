@@ -20,7 +20,6 @@ import Generics.SOP (
   type  (-.->) (Fn),
   )
 import Generics.SOP.GGP (gfrom, gto)
-import Lens.Micro.Extras (view)
 
 import qualified Sqel.Data.Codec as Codec
 import Sqel.Data.Codec (Codec (Codec), Decoder, Encoder, FullCodec)
@@ -51,7 +50,7 @@ class GetEncoder b a where
   getEncoder :: b a -> Encoder a
 
 instance GetEncoder FullCodec a where
-  getEncoder = view #encoder
+  getEncoder c = c.encoder
 
 instance GetEncoder Encoder a where
   getEncoder = id
@@ -61,7 +60,7 @@ class GetDecoder b a where
   getDecoder :: b a -> Decoder a
 
 instance GetDecoder FullCodec a where
-  getDecoder = view #decoder
+  getDecoder c = c.decoder
 
 instance GetDecoder Decoder a where
   getDecoder = id

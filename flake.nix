@@ -62,7 +62,6 @@
         "generics-sop ^>= 0.5"
         "hasql ^>= 1.6"
         "invariant ^>= 0.6"
-        "microlens ^>= 0.4"
         "path ^>= 0.9"
         "path-io ^>= 1.7"
         "prettyprinter ^>= 1.7"

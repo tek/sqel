@@ -1,7 +1,6 @@
 module Sqel.Data.Sql where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Generics.Labels ()
 import qualified Data.Text as Text
 import qualified Data.Text.Lazy.Builder as Text
 import Exon (

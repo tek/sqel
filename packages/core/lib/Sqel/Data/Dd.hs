@@ -9,6 +9,9 @@ import Sqel.Data.Sel (Paths, Sel, TSel)
 type ConCol :: [Type] -> Type
 newtype ConCol as = ConCol (NP I as)
 
+type ConColF :: (Type -> Type) -> [Type] -> Type
+newtype ConColF f as = ConColF { conColF :: f (NP I as) }
+
 data Ext0 =
   Ext0 {
     sel :: Sel,

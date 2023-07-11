@@ -1,6 +1,6 @@
 module Sqel.Data.Codec where
 
-import Data.Functor.Invariant (Invariant (invmap), invmapContravariant)
+import Data.Functor.Invariant (Invariant (invmap), invmapContravariant, invmapFunctor)
 import Exon (exon)
 import Hasql.Decoders (Row)
 import Hasql.Encoders (Params)
@@ -46,6 +46,9 @@ instance Applicative Decoder where
 
   liftA2 f (Decoder vl nl) (Decoder vr nr) =
     Decoder (liftA2 f vl vr) (nl *> nr)
+
+instance Invariant Decoder where
+  invmap = invmapFunctor
 
 data Codec e d a =
   Codec {

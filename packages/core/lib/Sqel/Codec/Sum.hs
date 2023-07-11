@@ -4,6 +4,7 @@ import Data.Functor.Contravariant.Divisible (choose)
 import Data.Functor.Invariant (Invariant (invmap))
 import Exon (exon)
 import Generics.SOP (
+  All,
   All2,
   HIndex (hindex),
   I,
@@ -14,21 +15,20 @@ import Generics.SOP (
   SOP (SOP),
   Top,
   hcfoldMap,
+  hcmap,
   hctraverse_,
-  hmap,
   hsequence,
   unSOP,
   )
 import Generics.SOP.GGP (gfrom, gto)
 import Hasql.Decoders (Row)
 import Hasql.Encoders (Params)
-import Lens.Micro.Extras (view)
 
 import Sqel.Class.ReifyPrimCodec (reifyPrimCodec)
-import Sqel.Codec.Product (prodParams)
+import Sqel.Codec.Product (GetDecoder (getDecoder), GetEncoder (getEncoder), prodParams)
 import qualified Sqel.Data.Codec as Codec
 import Sqel.Data.Codec (Codec (Codec), Decoder (Decoder), Encoder (Encoder), FullCodec)
-import Sqel.Data.Dd (ConCol (ConCol))
+import Sqel.Data.Dd (ConCol (ConCol), ConColF (ConColF, conColF))
 import Sqel.Data.Mods (NoMods)
 import Sqel.SOP.Constraint (ConstructSOP, ReifySOP)
 
@@ -39,121 +39,196 @@ unconsNS = \case
   Z x -> Left x
   S x -> Right x
 
-newtype ConB b as =
-  ConB { unConB :: b (NP I as) }
-
-readNull ::
-  ∀ as .
-  Decoder (NP I as) ->
-  Row ()
-readNull rs =
-  rs.decodeNulls
-
 readNulls ::
   ∀ ass .
   SListI2 ass =>
-  NP (ConB Decoder) ass ->
+  NP (ConColF Decoder) ass ->
   Row ()
 readNulls cons =
-  hctraverse_ (Proxy @SListI) (readNull . (.unConB)) cons
+  hctraverse_ (Proxy @SListI) (\ (ConColF d) -> d.decodeNulls) cons
 
 sumRows ::
   All2 Top ass =>
-  NP (ConB Decoder) ass ->
+  NP (ConColF Decoder) ass ->
   Int64 ->
   Row (NS (NP I) ass)
-sumRows (ConB con :* cons) 0 =
+sumRows (ConColF con :* cons) 0 =
   Z <$> con.decodeValue <* readNulls cons
-sumRows (ConB con :* cons) index = do
-  readNull con
+sumRows (ConColF con :* cons) index = do
+  con.decodeNulls
   S <$> sumRows cons (index - 1)
 sumRows Nil index =
   fail [exon|invalid index into sum type in database: #{show index}|]
 
 writeNull ::
   ∀ a as .
-  ConB Encoder as ->
+  ConColF Encoder as ->
   Params a
-writeNull (ConB enc) =
-  contramap unit enc.encodeNulls
+writeNull (ConColF enc) =
+  unit >$< enc.encodeNulls
 
 writeNulls ::
   ∀ a ass .
   SListI2 ass =>
-  NP (ConB Encoder) ass ->
+  NP (ConColF Encoder) ass ->
   Params a
 writeNulls =
   hcfoldMap (Proxy @SListI) writeNull
 
 sumParams ::
-  All2 Top ass =>
-  NP (ConB Encoder) ass ->
+  SListI2 ass =>
+  NP (ConColF Encoder) ass ->
   Params (NS (NP I) ass)
 sumParams = \case
   con :* cons ->
     choose unconsNS inhabited uninhabited
     where
-      inhabited = con.unConB.encodeValue <> writeNulls cons
+      inhabited = con.conColF.encodeValue <> writeNulls cons
       uninhabited = writeNull con <> sumParams cons
   Nil ->
     mempty
 
-type WrapConB :: (Type -> Type) -> [[Type]] -> [Type] -> Constraint
-class WrapConB b ass as | ass -> as where
-  wrapConB :: NP b as -> NP (ConB b) ass
+type WrapCons :: (Type -> Type) -> [[Type]] -> [Type] -> Constraint
+class WrapCons b ass as | ass -> as where
+  wrapCons :: NP b as -> NP (ConColF b) ass
 
-instance WrapConB b '[] '[] where
-  wrapConB Nil = Nil
+instance WrapCons b '[] '[] where
+  wrapCons Nil = Nil
 
 instance (
     Invariant b,
-    WrapConB b ass as
-  ) => WrapConB b (as' : ass) (ConCol as' : as) where
-    wrapConB (b :* bs) =
-      ConB (invmap coerce ConCol b) :* wrapConB bs
+    WrapCons b ass as
+  ) => WrapCons b (as' : ass) (ConCol as' : as) where
+    wrapCons (b :* bs) =
+      ConColF (invmap coerce coerce b) :* wrapCons bs
+
+indexDecoder :: Decoder Int64
+indexDecoder = reifyPrimCodec @NoMods
+
+indexEncoder :: Encoder Int64
+indexEncoder = reifyPrimCodec @NoMods
+
+decodeValue ::
+  ReifySOP a ass =>
+  NP (ConColF Decoder) ass ->
+  Row a
+decodeValue decoders =
+  gto . SOP <$> (sumRows decoders =<< indexDecoder.decodeValue)
 
 encodeValue ::
   ConstructSOP a ass =>
-  Params Int64 ->
-  NP (ConB Encoder) ass ->
+  NP (ConColF Encoder) ass ->
   Params a
-encodeValue indexParams wrapped =
-  unSOP . gfrom >$< (indexEncoder <> sumParams wrapped)
+encodeValue encoders =
+  unSOP . gfrom >$< (index <> sumParams encoders)
   where
-    indexEncoder = (fromIntegral . hindex) >$< indexParams
+    index = fromIntegral . hindex >$< indexEncoder.encodeValue
+
+type GetConEncoder :: (Type -> Type) -> [Type] -> Constraint
+class GetConEncoder b as where
+  getConEncoder :: ConColF b as -> ConColF Encoder as
+
+instance GetConEncoder FullCodec a where
+  getConEncoder (ConColF c) = ConColF c.encoder
+
+instance GetConEncoder Encoder a where
+  getConEncoder = id
+
+type GetConDecoder :: (Type -> Type) -> [Type] -> Constraint
+class GetConDecoder b as where
+  getConDecoder :: ConColF b as -> ConColF Decoder as
+
+instance GetConDecoder FullCodec a where
+  getConDecoder (ConColF c) = ConColF c.decoder
+
+instance GetConDecoder Decoder a where
+  getConDecoder = id
+
+type SumEncoder :: (Type -> Type) -> Type -> [[Type]] -> Constraint
+class SumEncoder b a ass | a -> ass where
+  sumEncoder :: NP (ConColF b) ass -> Encoder a
+
+instance (
+    ConstructSOP a ass,
+    All (GetConEncoder b) ass
+  ) => SumEncoder b a ass where
+    sumEncoder conCodecs =
+      Encoder (encodeValue encoders) (indexEncoder.encodeNulls <> writeNulls encoders)
+      where
+        encoders = hcmap (Proxy @(GetConEncoder b)) getConEncoder conCodecs
+
+type SumDecoder :: (Type -> Type) -> Type -> [[Type]] -> Constraint
+class SumDecoder b a ass | a -> ass where
+  sumDecoder :: NP (ConColF b) ass -> Decoder a
+
+instance (
+    ReifySOP a ass,
+    All (GetConDecoder b) ass
+  ) => SumDecoder b a ass where
+    sumDecoder conCodecs =
+      Decoder (decodeValue decoders) (indexDecoder.decodeNulls *> readNulls decoders)
+      where
+        decoders = hcmap (Proxy @(GetConDecoder b)) getConDecoder conCodecs
 
 type SumCodec :: (Type -> Type) -> Type -> [Type] -> Constraint
 class SumCodec b a as | a -> as where
   sumCodec :: NP b as -> b a
 
--- TODO add null builders
 instance (
-    ReifySOP a ass,
-    ConstructSOP a ass,
-    WrapConB FullCodec ass as
+    WrapCons FullCodec ass as,
+    SumDecoder FullCodec a ass,
+    SumEncoder FullCodec a ass
   ) => SumCodec FullCodec a as where
     sumCodec conCodecs =
       Codec {
-        decoder = Decoder decodeValue unit,
-        encoder = Encoder (encodeValue index (hmap (ConB . view #encoder . (.unConB)) wrapped)) mempty
+        decoder = sumDecoder wrapped,
+        encoder = sumEncoder wrapped
       }
       where
-        index = reifyPrimCodec @NoMods
-        indexRow = reifyPrimCodec @NoMods
-        decodeValue =
-          gto . SOP <$> (sumRows decs =<< indexRow)
-        decs =
-          hmap (ConB . view #decoder . (.unConB)) wrapped
-        wrapped =
-          wrapConB conCodecs
+        wrapped = wrapCons conCodecs
+
+instance (
+    WrapCons Encoder ass as,
+    SumEncoder Encoder a ass
+  ) => SumCodec Encoder a as where
+    sumCodec = sumEncoder . wrapCons
+
+instance (
+    WrapCons Decoder ass as,
+    SumDecoder Decoder a ass
+  ) => SumCodec Decoder a as where
+    sumCodec = sumDecoder . wrapCons
+
+type ConEncoder :: (Type -> Type) -> [Type] -> Constraint
+class ConEncoder b as where
+  conEncoder :: NP b as -> Encoder (ConCol as)
+
+instance All (GetEncoder b) as => ConEncoder b as where
+  conEncoder cs = coerce (prodParams (hcmap (Proxy @(GetEncoder b)) getEncoder cs))
+
+type ConDecoder :: (Type -> Type) -> [Type] -> Constraint
+class ConDecoder b as where
+  conDecoder :: NP b as -> Decoder (ConCol as)
+
+instance All (GetDecoder b) as => ConDecoder b as where
+  conDecoder cs = ConCol <$> hsequence (hcmap (Proxy @(GetDecoder b)) getDecoder cs)
 
 type ConCodec :: (Type -> Type) -> [Type] -> Constraint
 class ConCodec b as where
   conCodec :: NP b as -> b (ConCol as)
 
-instance SListI as => ConCodec FullCodec as where
-  conCodec np =
-    Codec {
-      decoder = ConCol <$> hsequence (hmap (view #decoder) np),
-      encoder = coerce (prodParams (hmap (view #encoder) np))
-    }
+instance (
+    ConDecoder FullCodec as,
+    ConEncoder FullCodec as
+  ) => ConCodec FullCodec as where
+    conCodec cs =
+      Codec {
+        decoder = conDecoder cs,
+        encoder = conEncoder cs
+      }
+
+instance ConEncoder Encoder as => ConCodec Encoder as where
+  conCodec = conEncoder
+
+instance ConDecoder Decoder as => ConCodec Decoder as where
+  conCodec = conDecoder

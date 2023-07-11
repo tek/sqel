@@ -56,9 +56,7 @@ let
 
   type Type_B = Prod [Newtype Prim, Newtype Prim, Newtype Prim, Newtype Prim, Newtype Prim]
 
-  type Table_C name i d sd = UidTable name i (A d) Prim (Type_A d sd)
-
-  type Table_C_Int name d sd = Table_C name Int d sd
+  type Table_C name d sd = IntTable name (A d) (Type_A d sd)
 
   type Type_S1 = Prod [Prim, Merge Type_B]
 
@@ -66,7 +64,7 @@ let
 
   type Type_S = Sum [Con1 Type_S1, Con1 Type_S2]
 
-  type Table_S = Table_C_Int "s" S Type_S
+  type Table_S = Table_C "s" S Type_S
 
   table_S :: Sqel Table_S
   table_S = sqel
