@@ -6,9 +6,11 @@
     exon.url = "git+https://git.tryp.io/tek/exon";
   };
 
-  outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: {
+  outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: let
+  in {
     depsFull = [exon];
     main = "sqel";
+    compiler = "ghc94";
 
     cabal = {
       license = "BSD-2-Clause-Patent";
@@ -36,6 +38,10 @@
 
     ghci.args = ["-fprint-potential-instances"];
 
+    overrides =  {jailbreak, ...}: {
+      th-extras = jailbreak;
+    };
+
     packages.sqel-core = {
       src = ./packages/core;
       versionFile = "ops/version-core.nix";
@@ -44,7 +50,7 @@
 
       library.enable = true;
       library.dependencies = [
-        "aeson ^>= 2.0"
+        "aeson >= 2.0 && < 2.2"
         "chronos ^>= 1.1"
         "composition ^>= 1.0"
         "containers"
@@ -76,13 +82,13 @@
         enable = true;
         default-extensions = ["QualifiedDo"];
         dependencies = [
-          "aeson ^>= 2.0"
+          "aeson >= 2.0 && < 2.2"
           "exon ^>= 1.4"
           "generics-sop ^>= 0.5"
           "hasql ^>= 1.6"
-          "hedgehog ^>= 1.1"
+          "hedgehog >= 1.1 && < 1.3"
           "tasty ^>= 1.4"
-          "tasty-hedgehog ^>= 1.3"
+          "tasty-hedgehog >= 1.3 && < 1.5"
           "transformers"
         ];
       };
@@ -94,10 +100,10 @@
         dependencies = [
           "exon ^>= 1.4"
           "hasql ^>= 1.6"
-          "hedgehog ^>= 1.1"
+          "hedgehog >= 1.1 && < 1.3"
           "lifted-base ^>= 0.2"
           "tasty ^>= 1.4"
-          "tasty-hedgehog ^>= 1.3"
+          "tasty-hedgehog >= 1.3 && < 1.5"
         ];
       };
 

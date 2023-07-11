@@ -84,10 +84,12 @@ sqelSpine =
       SqelNest meta compSort sub _ -> SpineNest meta compSort (hcollapse (hmap (K . spin) sub))
       SqelMerge meta compSort sub _ -> SpineMerge meta compSort (hcollapse (hmap (K . spin) sub))
 
+-- | Allowing this to be inlined incurs a 5% increase in compile time.
 sqelCodec :: SqelFor tag s -> FullCodec (DdType s)
 sqelCodec = \case
   SqelPrim _ c -> c
   SqelComp _ _ _ _ c -> c
+{-# noinline sqelCodec #-}
 
 type Projected :: ∀ {ext} . Symbol -> DdK ext -> DdK ext
 type family Projected name s where

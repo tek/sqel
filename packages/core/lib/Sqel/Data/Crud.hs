@@ -13,7 +13,7 @@ data Crud q d =
     fetch :: Statement '[d] q d,
     fetchAll :: Statement '[d] () d
   }
-  deriving stock (Generic)
+  deriving stock (Show, Generic)
 
 data CrudH f q d =
   CrudH {

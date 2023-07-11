@@ -7,7 +7,7 @@ import Prelude hiding (Mod, join, on)
 import Sqel.Clauses (from, join, on, select, where_)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (statementSql)
-import Sqel.Default (Def)
+import Sqel.Data.Def (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (queryK)
 import qualified Sqel.Syntax.Monad as S
