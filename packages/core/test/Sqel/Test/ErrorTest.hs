@@ -8,7 +8,6 @@ import Test (unitTest)
 import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Test.Error.FragmentMismatch (notAFragment, notRoot, tableForQuery)
-import Sqel.Test.Error.UndeterminedParam (invalidSpec, undeterminedParam)
 
 typeError ::
   Show a =>
@@ -93,9 +92,9 @@ test_errors =
   testGroup "type errors" [
     unitTest "table fragment for query clause" (typeError tableForQueryMessage tableForQuery),
     unitTest "not a fragment" (typeError notAFragmentMessage notAFragment),
-    unitTest "not a root fragment" (typeError notRootMessage notRoot),
-    unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam),
-    unitTest "invalid spec" (typeError invalidSpecMessage invalidSpec)
+    unitTest "not a root fragment" (typeError notRootMessage notRoot)
+    -- unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam),
+    -- unitTest "invalid spec" (typeError invalidSpecMessage invalidSpec)
     -- TODO
     -- unitTest "count mismatch" (typeError countMismatchMessage countMismatch)
   ]

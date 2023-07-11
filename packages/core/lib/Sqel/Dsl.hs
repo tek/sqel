@@ -15,12 +15,12 @@ module Sqel.Dsl (
 
 import Data.UUID (UUID)
 import Data.Vector (Vector)
-import Fcf (Eval, Exp, Pure, type (@@))
+import Fcf (Eval, Exp, type (@@))
 import Generics.SOP.GGP (GCode, GDatatypeInfoOf)
 import qualified Generics.SOP.Type.Metadata as SOP
 import Generics.SOP.Type.Metadata (ConstructorInfo (Constructor, Infix, Record), DatatypeInfo (ADT))
 import Prelude hiding (Enum, Mod)
-import Type.Errors (DelayError, ErrorMessage, IfStuck)
+import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (
   ConCol,
@@ -475,8 +475,9 @@ type family NoReify a spec where
 type ReifyE :: Type -> Type -> Dd0
 type family ReifyE a spec where
   ReifyE a spec =
-    IfStuck spec (DelayError (NoSpec a spec))
-    (Pure (IfStuck (Reify a spec) (DelayError (NoReify a spec)) (Pure (Reify a spec))))
+    Reify a spec
+    -- IfStuck spec (DelayError (NoSpec a spec))
+    -- (Pure (IfStuck (Reify a spec) (DelayError (NoReify a spec)) (Pure (Reify a spec))))
 
 type Table :: Symbol -> Type -> Type -> Dd
 type family Table name a spec where
