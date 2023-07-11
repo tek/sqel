@@ -1,8 +1,8 @@
 module Sqel.Class.DdVal where
 
-import Generics.SOP (All, AllZip, NP, SListI, hcpure, hmap, htrans)
+import Generics.SOP (AllZip, NP (Nil, (:*)), htrans, All, hcpure)
 
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (DdK (Dd))
 import Sqel.Dd (DdType, DdTypes)
 
 type DdVal :: ∀ {ext} . (Type -> Type) -> DdK ext -> Type
@@ -37,12 +37,15 @@ instance (
     ddPure cons =
       unDdVals @ss (hcpure (Proxy @c) cons)
 
-type DdMap :: ∀ {ext} . (DdK ext -> Type) -> (Type -> Type) -> [DdK ext] -> Constraint
-class DdMap f g ss where
-  ddmap :: (∀ s . f s -> g (DdType s)) -> NP f ss -> NP g (DdTypes ss)
+-- | Not using @hmap@ and @DdTypes@ here because it results in insane compile performance.
+type DdMap :: ∀ {ext} . (DdK ext -> Type) -> (Type -> Type) -> [DdK ext] -> [Type] -> Constraint
+class DdMap f g ss as | ss -> as where
+  ddmap :: (∀ s . f s -> g (DdType s)) -> NP f ss -> NP g as
+
+instance DdMap f g '[] '[] where
+  ddmap _ Nil = Nil
 
 instance (
-    SListI ss,
-    UnDdVals ss g
-  ) => DdMap f g ss where
-    ddmap f ss = unDdVals @ss (hmap (DdVal . f) ss)
+    DdMap f g ss as
+  ) => DdMap f g ('Dd ext a s : ss) (a : as) where
+    ddmap f (s :* ss) = f s :* ddmap f ss

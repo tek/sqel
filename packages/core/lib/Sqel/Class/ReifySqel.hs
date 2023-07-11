@@ -1,6 +1,5 @@
 module Sqel.Class.ReifySqel where
 
-import Control.Monad.Trans.State.Strict (evalState)
 import Generics.SOP (All, NP (Nil), hcpure)
 
 import Sqel.Class.DdVal (DdMap (ddmap))
@@ -10,12 +9,12 @@ import Sqel.Class.ReifyPrim (ReifyPrim (reifyPrim))
 import Sqel.Data.Class.Dd (SingInc (singInc))
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (DdK (Dd), StructWith (Comp, Prim))
-import Sqel.Data.IndexState (IndexState)
+import Sqel.Data.Def (Def)
+import Sqel.Data.IndexState (IndexState, indexState)
 import Sqel.Data.PgTypeName (PgTableName, pgTableName)
 import Sqel.Data.Sel (TSelName)
 import Sqel.Data.Sqel (SqelFor (SqelComp, SqelPrim), sqelCodec)
-import Sqel.Dd (DdTableName, DdTypes, ExtMods)
-import Sqel.Default (Def)
+import Sqel.Dd (DdTableName, ExtMods)
 import Sqel.SOP.Constraint (symbolText)
 import Sqel.SOP.NP (hcpureA)
 
@@ -37,9 +36,9 @@ instance (
     tname ~ TSelName tsel,
     mods ~ ExtMods ext,
     SingInc i,
-    DdMap (SqelFor tag) FullCodec sub,
+    DdMap (SqelFor tag) FullCodec sub as,
     ReifyComp tag root ext a tsel c i,
-    CompCodec c FullCodec a (DdTypes sub),
+    CompCodec c FullCodec a as,
     All (Node 'False tag) sub,
     DemoteSort tag c tname ext
   ) => Node root tag ('Dd ext a ('Comp tsel c i sub)) where
@@ -64,7 +63,7 @@ instance (
     Node 'True tag s
   ) => ReifySqelFor tag ('Dd ext a sub) where
     reifySqel =
-      evalState (node @'True (pgTableName (symbolText @table))) 1
+      indexState (node @'True (pgTableName (symbolText @table)))
 
 type ReifySqel = ReifySqelFor Def
 
