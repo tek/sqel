@@ -19,10 +19,10 @@ type family Prim where
   Prim @(Symbol -> Type) = PrimAs
   Prim @(Symbol -> Type -> Type) = PrimWith
 
-type AllAuto :: [k] -> [Type]
-type family AllAuto as where
-  AllAuto '[] = '[]
-  AllAuto (_ : as) = PrimAuto : AllAuto as
+type AllAuto :: Type -> [k] -> [Type]
+type family AllAuto spec as where
+  AllAuto _ '[] = '[]
+  AllAuto spec (_ : as) = spec : AllAuto spec as
 
 type PrimEnum :: Type
 data PrimEnum

@@ -35,9 +35,9 @@ data Q =
   }
   deriving stock (Eq, Show, Generic)
 
-type Query_Q = Query Q (Prod [Nullable (Newtype Prim), Prim])
+type Query_Q = Query Q (Prod [Nullable Newtype, Prim])
 
-type Query_Q_OrNull = Query Q (Prod [OrNull (Newtype Prim), OrNull Prim])
+type Query_Q_OrNull = Query Q (Prod [OrNull Newtype, OrNull Prim])
 
 target_nullable :: Sql
 target_nullable =

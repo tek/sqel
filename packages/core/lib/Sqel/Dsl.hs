@@ -183,8 +183,17 @@ data Nullable spec
 type OrNull :: Type -> Type
 data OrNull spec
 
-type Newtype :: Type -> Type
-data Newtype spec
+type NewtypeOf :: Type -> Type
+data NewtypeOf spec
+
+type Newtype :: ∀ k . k
+type family Newtype where
+  Newtype = NewtypeOf PrimAuto
+  Newtype = NewtypeOf
+
+-- TODO
+type Newtypes :: Type
+data Newtypes
 
 type Enum :: Type
 type Enum = Prim PrimEnum
@@ -261,12 +270,19 @@ type family SetNoCond s where
       Quoted "where" <> ", which only applies to primitive columns."
     )
 
+type CompDd :: Type -> TSel -> Sort -> Inc -> [Dd0] -> Dd0
+type CompDd a tsel sort inc sub = 'Dd ('Ext0 SelAuto NoMods) a ('Comp tsel sort inc sub)
+
+type PrimDd :: Type -> Dd0
+type PrimDd a = 'Dd ('Ext0 SelAuto NoMods) a ('Prim 'Cond)
+
 type PrimBasic :: Type -> Type -> Dd0
 type family PrimBasic a prim where
-  PrimBasic a PrimAuto = 'Dd ('Ext0 SelAuto NoMods) a ('Prim 'Cond)
-  PrimBasic a PrimEnum = AddMods [SetPrimName "text", Mods.Enum] (PrimBasic a PrimAuto)
-  PrimBasic a PrimJson = AddMod Mods.Json (PrimBasic a PrimAuto)
-  PrimBasic a PrimJsonb = AddMod Mods.Jsonb (PrimBasic a PrimAuto)
+  PrimBasic a PrimAuto = PrimDd a
+  PrimBasic a PrimEnum = AddMods [SetPrimName "text", Mods.Enum] (PrimDd a)
+  PrimBasic a PrimJson = AddMod Mods.Json (PrimDd a)
+  PrimBasic a PrimJsonb = AddMod Mods.Jsonb (PrimDd a)
+  PrimBasic a (NewtypeOf spec) = FromGen (ReifyNewtype a spec) a
 
 type PrimInfer :: Type -> Type -> Dd0
 type family PrimInfer a prim where
@@ -277,6 +293,11 @@ type family PrimInfer a prim where
   PrimInfer (Vector a) prim = ApplyArray Vector (PrimInfer a prim)
   PrimInfer (Set a) prim = ApplyArray Set (PrimInfer a prim)
   PrimInfer a prim = PrimBasic a prim
+
+type AutoPrim :: Type -> Type
+type family AutoPrim spec where
+  AutoPrim Gen = PrimAuto
+  AutoPrim Newtypes = Newtype PrimAuto
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -294,7 +315,7 @@ type family ProdCols fields as cols where
 type ProdSort :: Sort -> Type -> [Type] -> Symbol -> [Field] -> [Type] -> Dd0
 type family ProdSort sort a as name fields cols where
   ProdSort sort a as name fields cols =
-    'Dd ('Ext0 SelAuto NoMods) a ('Comp ('TSel 'DefaultPrefix name) sort 'Nest (ProdCols (ReifyFieldNames name fields) as cols))
+    CompDd a ('TSel 'DefaultPrefix name) sort 'Nest (ProdCols (ReifyFieldNames name fields) as cols)
 
 type ProdInfo :: Type -> [[Type]] -> DatatypeInfo -> [Type] -> Dd0
 type family ProdInfo a as info cols where
@@ -312,23 +333,23 @@ type family ProdGen a cols where
 type ConMeta :: Symbol -> [Type] -> [Field] -> Type
 data ConMeta name as fields
 
-type ConAutoCols :: [ConstructorInfo] -> [[Type]] -> [Type]
-type family ConAutoCols cons ass where
-  ConAutoCols '[] _ = '[]
-  ConAutoCols ('Constructor _ : cons) ('[_] : ass) = Gen : ConAutoCols cons ass
-  ConAutoCols ('Record _ _ : cons) ('[_] : ass) = Gen : ConAutoCols cons ass
-  ConAutoCols ('Constructor _ : cons) (_ : ass) = Gen : ConAutoCols cons ass
-  ConAutoCols ('Record _ _ : cons) (_ : ass) = Gen : ConAutoCols cons ass
+type ConAutoCols :: Type -> [ConstructorInfo] -> [[Type]] -> [Type]
+type family ConAutoCols spec cons ass where
+  ConAutoCols _ '[] _ = '[]
+  ConAutoCols spec ('Constructor _ : cons) ('[_] : ass) = spec : ConAutoCols spec cons ass
+  ConAutoCols spec ('Record _ _ : cons) ('[_] : ass) = spec : ConAutoCols spec cons ass
+  ConAutoCols spec ('Constructor _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
+  ConAutoCols spec ('Record _ _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
 
 type ConFor :: Symbol -> [Type] -> [Field] -> [Type] -> Dd0
 type family ConFor name as fields cols where
   ConFor name as fields cols =
     ProdSort 'Con (ConCol as) as name fields cols
 
-type ConPrims :: Symbol -> [Type] -> [Field] -> Dd0
-type family ConPrims name as fields where
-  ConPrims name as fields =
-    ProdSort 'Con (ConCol as) as name fields (AllAuto as)
+type ConPrims :: Type -> Symbol -> [Type] -> [Field] -> Dd0
+type family ConPrims spec name as fields where
+  ConPrims spec name as fields =
+    ProdSort 'Con (ConCol as) as name fields (AllAuto (AutoPrim spec) as)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -373,18 +394,14 @@ type SumGenDef :: Type -> [Type] -> Dd0
 type family SumGenDef a cols where
   SumGenDef a cols = SumGen a cols
 
-type SumGenAuto :: Type -> Symbol -> [ConstructorInfo] -> [[Type]] -> Dd0
-type family SumGenAuto a name cons ass where
-  SumGenAuto a name cons ass =
-    SumSort ('Sum 'DefaultPrefix) a ass name cons (ConAutoCols cons ass)
+type SumGenAuto :: Type -> Type -> Symbol -> [ConstructorInfo] -> [[Type]] -> Dd0
+type family SumGenAuto a spec name cons ass where
+  SumGenAuto a spec name cons ass =
+    SumSort ('Sum 'DefaultPrefix) a ass name cons (ConAutoCols spec cons ass)
 
-data SumGenAutoFor :: Type -> FromGenF Dd0
-type instance Eval (SumGenAutoFor a ('ADT _ name cons _) ass) =
-  SumGenAuto a name cons ass
-
-type SumGenAutoDef :: Type -> Symbol -> [ConstructorInfo] -> [[Type]] -> Dd0
-type family SumGenAutoDef a name cons ass where
-  SumGenAutoDef a name cons ass = SumGenAuto a name cons ass
+type SumGenAutoDef :: Type -> Type -> Symbol -> [ConstructorInfo] -> [[Type]] -> Dd0
+type family SumGenAutoDef a spec name cons ass where
+  SumGenAutoDef a spec name cons ass = SumGenAuto a spec name cons ass
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -402,25 +419,26 @@ type family SetMerge s where
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type PrimsGen :: Type -> [[Type]] -> DatatypeInfo -> Dd0
-type family PrimsGen a as info where
-  PrimsGen a '[as] ('ADT _ name '[ 'Record _ fields] _) =
-    ProdSort 'Prod a as name (NamedFields fields) (AllAuto as)
-  PrimsGen a ass ('ADT _ name cons _) =
-    SumGenAutoDef a name cons ass
+type PrimsGen :: Type -> Type -> [[Type]] -> DatatypeInfo -> Dd0
+type family PrimsGen a spec as info where
+  PrimsGen a spec '[as] ('ADT _ name '[ 'Record _ fields] _) =
+    ProdSort 'Prod a as name (NamedFields fields) (AllAuto (AutoPrim spec) as)
+  PrimsGen a spec ass ('ADT _ name cons _) =
+    SumGenAutoDef a spec name cons ass
 
-type Prims :: Type -> Dd0
-type family Prims a where
-  Prims (ConMeta name '[a] '[field]) = SetMerge (ConPrims name '[a] '[field])
-  Prims (ConMeta name as fields) = ConPrims name as fields
-  Prims a = PrimsGen a (GCode a) (GDatatypeInfoOf a)
+type Prims :: Type -> Type -> Dd0
+type family Prims a spec where
+  Prims (ConMeta name '[a] '[field]) spec = SetMerge (ConPrims spec name '[a] '[field])
+  Prims (ConMeta name as fields) spec = ConPrims spec name as fields
+  Prims a spec = PrimsGen a spec (GCode a) (GDatatypeInfoOf a)
 
 ------------------------------------------------------------------------------------------------------------------------
 
 type Reify :: Type -> Type -> Dd0
 type family Reify a spec
 
-type instance Reify a Gen = Prims a
+type instance Reify a Gen = Prims a Gen
+type instance Reify a Newtypes = Prims a Newtypes
 
 type instance Reify a (Prod cols) = ProdGen a cols
 type instance Reify a (ProdAs tname cols) = Reify a (TypeName tname (Prod cols))
@@ -446,7 +464,7 @@ type instance Reify a (ModWith f mod spec) = AddModWith f mod (Reify a spec)
 
 type instance Reify a (Nullable spec) = ReifyNullable 'False a spec
 type instance Reify a (OrNull spec) = ReifyNullable 'True a spec
-type instance Reify a (Newtype spec) = FromGen (ReifyNewtype a spec) a
+type instance Reify a (NewtypeOf spec) = PrimInfer a (NewtypeOf spec)
 type instance Reify a (Array f spec) = ReifyArray a f spec
 
 type UndetGeneral :: Type -> ErrorMessage

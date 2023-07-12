@@ -191,7 +191,7 @@ data New =
 -- scalar Dd) it is silently accepted.
 -- Need to enforce somewhere centrally that the mods are right, probably shouldn't _only_ be done in PrimName.
 -- same for Nullable.
-type Table_New = Table "new" New (Prod [Prim, Prim, Newtype Prim])
+type Table_New = Table "new" New (Prod [Prim, Prim, Newtype])
 -- (Prod New *> Prim "name" Text > Prim "status" Text > Newtyped Dogs (PrimArray "dogs" Text []))
 
 table_New :: Sqel Table_New
