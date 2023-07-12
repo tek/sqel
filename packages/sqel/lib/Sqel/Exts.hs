@@ -30,7 +30,7 @@ import Sqel.Class.ReifySqel (ReifySqel, ReifySqelFor)
 import Sqel.Class.ResultShape (ResultShape (..))
 import Sqel.Clauses (ClauseCon, ClausePCon, clause, clauseP)
 import Sqel.Codec (PrimColumn (..))
-import Sqel.Data.Dd (Dd, Dd0, Dd (Dd))
+import Sqel.Data.Dd (Dd (Dd), Dd0, Dd1)
 import Sqel.Data.Migration (
   ColumnAction (..),
   CompAction,
