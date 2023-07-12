@@ -53,10 +53,15 @@ newtype Nta =
   Nta [Nt]
   deriving stock (Eq, Show, Generic)
 
+newtype Ntap =
+  Ntap [Int64]
+  deriving stock (Eq, Show, Generic)
+
 data Dat3 =
   Dat3 {
     ant :: [Nt],
-    nta :: Nta
+    nta :: Nta,
+    ntap :: Ntap
   }
   deriving stock (Eq, Show, Generic)
 
@@ -70,7 +75,7 @@ data Dat4 =
 type Table1 = ProdGen Dat1 [Unique Prim, Prim "two" Text, Gen]
 type Table2 = Reify Dat2 Gen
 type TablePrim = Table "tab" Int64 (Name "col" Prim)
-type Table3 = ProdGen Dat3 '[Newtype, Newtype (Array [] Newtype)]
+type Table3 = ProdGen Dat3 '[Newtype, Newtype (Array [] Newtype), Newtype]
 type Table4 = Reify Dat4 Newtypes
 
 type Target1 =
@@ -92,7 +97,8 @@ type TargetPrim =
 type Target3 =
   'Dd ('Ext0 SelAuto NoMods) Dat3 ('Comp ('TSel 'DefaultPrefix "Dat3") 'Kind.Prod 'Kind.Nest '[
     'Dd ('Ext0 (SelName "ant") [Mods.Array [], Mods.Newtype Nt Int64]) [Nt] ('Kind.Prim 'Cond),
-    'Dd ('Ext0 (SelName "nta") [Mods.Newtype Nta [Nt], Mods.Array [], Mods.Newtype Nt Int64]) Nta ('Kind.Prim 'Cond)
+    'Dd ('Ext0 (SelName "nta") [Mods.Newtype Nta [Nt], Mods.Array [], Mods.Newtype Nt Int64]) Nta ('Kind.Prim 'Cond),
+    'Dd ('Ext0 (SelName "ntap") [Mods.Newtype Ntap [Int64], Mods.Array []]) Ntap ('Kind.Prim 'Cond)
   ])
 
 type Target4 =
