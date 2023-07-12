@@ -10,7 +10,7 @@ import Sqel.Codec.Product (ProdCodec (prodCodec))
 import Sqel.Codec.Sum (ConCodec (conCodec), SumCodec (sumCodec))
 import qualified Sqel.Data.Codec as Codec
 import Sqel.Data.Codec (Decoder, Encoder)
-import Sqel.Data.Dd (ConCol, DdK (Dd), Sort (Con, Prod, Sum), StructWith (Comp, Prim))
+import Sqel.Data.Dd (ConCol, Dd (Dd), Sort (Con, Prod, Sum), Struct (Comp, Prim))
 import Sqel.Dd (DdType, DdTypes, ExtMods)
 
 type CompCodec :: Sort -> (Type -> Type) -> Type -> [Type] -> Constraint
@@ -26,7 +26,7 @@ instance ConCodec b as => CompCodec 'Con b (ConCol as) as where
 instance SumCodec b a as => CompCodec ('Sum prefix) b a as where
   compCodec = sumCodec
 
-type ReifyCodec :: ∀ {ext} . (Type -> Type) -> DdK ext -> Constraint
+type ReifyCodec :: ∀ {ext} . (Type -> Type) -> Dd ext -> Constraint
 class ReifyCodec b s where
   reifyCodec :: b (DdType s)
 

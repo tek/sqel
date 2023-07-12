@@ -1,7 +1,7 @@
 module Sqel.Kind.ResultDds where
 
 import Sqel.Data.ClauseConfig (ClauseResultFor)
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragment (Frag)
 import Sqel.Kind.Fragment (FragsDds, FragsTypes)
 
@@ -10,13 +10,13 @@ type family NonEmptyK s = r | r -> s where
   NonEmptyK '[] = 'Nothing
   NonEmptyK s = 'Just s
 
-type ResultDds' :: ∀ {ext} . Bool -> [Frag ext] -> Maybe [DdK ext]
+type ResultDds' :: ∀ {ext} . Bool -> [Frag ext] -> Maybe [Dd ext]
 type family ResultDds' result frags where
   ResultDds' 'False _ = 'Nothing
   ResultDds' 'True '[] = 'Nothing
   ResultDds' 'True frags = NonEmptyK (FragsDds frags)
 
-type ResultDds :: ∀ {ext} . Type -> [Frag ext] -> Maybe [DdK ext]
+type ResultDds :: ∀ {ext} . Type -> [Frag ext] -> Maybe [Dd ext]
 type family ResultDds clause frags where
   ResultDds clause frags = ResultDds' (ClauseResultFor clause) frags
 

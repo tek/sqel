@@ -3,7 +3,7 @@ module Sqel.Dsl.Mod where
 import Fcf (Eval, Exp)
 import Prelude hiding (Mod)
 
-import Sqel.Data.Dd (Dd0, DdK (Dd), Ext0 (Ext0))
+import Sqel.Data.Dd (Dd0, Dd (Dd), Ext0 (Ext0))
 import Sqel.Kind.List (type (++))
 
 type Mod :: Type -> Type -> Type

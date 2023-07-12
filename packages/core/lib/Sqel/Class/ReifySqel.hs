@@ -8,7 +8,7 @@ import Sqel.Class.ReifyComp (DemoteSort (demoteSort), ReifyComp (reifyComp))
 import Sqel.Class.ReifyPrim (ReifyPrim (reifyPrim))
 import Sqel.Data.Class.Dd (SingInc (singInc))
 import Sqel.Data.Codec (FullCodec)
-import Sqel.Data.Dd (DdK (Dd), StructWith (Comp, Prim))
+import Sqel.Data.Dd (Dd (Dd), Struct (Comp, Prim))
 import Sqel.Data.Def (Def)
 import Sqel.Data.IndexState (IndexState, indexState)
 import Sqel.Data.PgTypeName (PgTableName, pgTableName)
@@ -18,7 +18,7 @@ import Sqel.Dd (DdTableName, ExtMods)
 import Sqel.SOP.Constraint (symbolText)
 import Sqel.SOP.NP (hcpureA)
 
-type Node :: ∀ {ext} . Bool -> Type -> DdK ext -> Constraint
+type Node :: ∀ {ext} . Bool -> Type -> Dd ext -> Constraint
 class Node root tag s where
   node :: PgTableName -> IndexState (SqelFor tag s)
 
@@ -52,7 +52,7 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type ReifySqelFor :: ∀ {ext} . Type -> DdK ext -> Constraint
+type ReifySqelFor :: ∀ {ext} . Type -> Dd ext -> Constraint
 class ReifySqelFor tag s where
   reifySqel :: SqelFor tag s
 
@@ -73,7 +73,7 @@ sqel ::
   SqelFor tag s
 sqel = reifySqel
 
-type ReifySqels :: ∀ {ext} . Type -> [DdK ext] -> Constraint
+type ReifySqels :: ∀ {ext} . Type -> [Dd ext] -> Constraint
 class ReifySqels tag ss where
   reifySqels :: NP (SqelFor tag) ss
 

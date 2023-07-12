@@ -5,13 +5,13 @@ import Generics.SOP (K (K), NP (Nil), SListI, hcollapse, hmap)
 
 import Sqel.Class.DdField (DdKField (ddKField), DdKFieldT)
 import Sqel.Data.Codec (FullCodec)
-import Sqel.Data.Dd (DdK (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), StructWith (Comp, Prim))
+import Sqel.Data.Dd (Dd (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), Struct (Comp, Prim))
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Data.Statement (Statement)
 import Sqel.Dd (DdSub, DdType)
 import Sqel.Kind.Error (Quoted)
 
-type SqelFor :: ∀ {ext} . Type -> DdK ext -> Type
+type SqelFor :: ∀ {ext} . Type -> Dd ext -> Type
 data SqelFor tag s where
 
   SqelPrim :: PrimFor tag -> FullCodec a -> SqelFor tag ('Dd ext a ('Prim pt))
@@ -91,13 +91,13 @@ sqelCodec = \case
   SqelComp _ _ _ _ c -> c
 {-# noinline sqelCodec #-}
 
-type Projected :: ∀ {ext} . Symbol -> DdK ext -> DdK ext
+type Projected :: ∀ {ext} . Symbol -> Dd ext -> Dd ext
 type family Projected name s where
   Projected name ('Dd _ _ ('Comp _ _ _ sub)) = DdKFieldT name sub
   Projected name ('Dd _ _ ('Prim _)) =
     TypeError ("Cannot project field named " <> Quoted name <> " from primitive Dd")
 
-type Project :: ∀ {ext} . Symbol -> DdK ext -> Constraint
+type Project :: ∀ {ext} . Symbol -> Dd ext -> Constraint
 class Project name s where
   project :: SqelFor tag s -> SqelFor tag (Projected name s)
 

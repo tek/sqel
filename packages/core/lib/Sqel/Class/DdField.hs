@@ -3,16 +3,16 @@ module Sqel.Class.DdField where
 import Generics.SOP (NP)
 
 import Sqel.Class.NamedFragment (MatchName, NoField)
-import Sqel.Data.Dd (Dd, DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Dd (DdKNames)
 import Sqel.SOP.HFind (HFind (HFindT, hfind))
 
-type DdKFieldT :: Symbol -> [DdK ext] -> DdK ext
+type DdKFieldT :: Symbol -> [Dd ext] -> Dd ext
 type family DdKFieldT field ss where
   DdKFieldT field ss =
     HFindT (MatchName field) ss
 
-type DdKField :: ∀ {ext} . Symbol -> [DdK ext] -> Constraint
+type DdKField :: ∀ {ext} . Symbol -> [Dd ext] -> Constraint
 class DdKField field ss where
   ddKField :: NP f ss -> f (DdKFieldT field ss)
 
@@ -23,9 +23,9 @@ instance (
   ) => DdKField field ss where
     ddKField = hfind @err @pred
 
-type DdField :: Symbol -> [Dd] -> Constraint
+type DdField :: Symbol -> [Dd ext] -> Constraint
 class DdField field ss where
-  type DdFieldT field ss :: Dd
+  type DdFieldT field ss :: Dd ext
   ddField :: NP f ss -> f (DdFieldT field ss)
 
 instance (

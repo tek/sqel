@@ -4,7 +4,7 @@ import Data.Type.Equality (type (:~:) (Refl))
 import Hedgehog (TestT)
 
 import qualified Sqel.Data.Dd as Kind
-import Sqel.Data.Dd (ConCol, DdK (Dd), Ext0 (Ext0), PrimType (Cond), StructWith (Comp))
+import Sqel.Data.Dd (ConCol, Dd (Dd), Ext0 (Ext0), PrimType (Cond), Struct (Comp))
 import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Name (NamePrefix (DefaultPrefix))
 import Sqel.Data.Sel (SelAuto, SelName, SelSkip, TSel (TSel), TSelNamed)

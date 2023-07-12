@@ -8,7 +8,7 @@ import Sqel.Class.DefaultFields (DefaultMeta)
 import Sqel.Class.MigrationEffect (MigrationEffect (runStatement, runStatement_))
 import Sqel.Class.ReifyCodec (ReifyCodec, reifyParams, reifyRow)
 import Sqel.Data.Codec (Decoder, Encoder)
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Migration (
   CompAction,
   Mig (Mig),
@@ -38,7 +38,7 @@ data MigrateTransform tag m old new =
     encoder :: Params new
   }
 
-type TransformAndMigrate :: ∀ {ext} . Type -> (Type -> Type) -> DdK ext -> DdK ext -> Constraint
+type TransformAndMigrate :: ∀ {ext} . Type -> (Type -> Type) -> Dd ext -> Dd ext -> Constraint
 class TransformAndMigrate tag m old new where
   transformTypeKeys :: Map PgCompName (CompAction tag) -> m (Set (PgCompName, Bool))
 
@@ -76,7 +76,7 @@ instance (
       where
         PgOnlyTableName oldName = sqelTableName current
 
-type MkMigrateTransform :: ∀ {ext} . Type -> (Type -> Type) -> DdK ext -> DdK ext -> Constraint
+type MkMigrateTransform :: ∀ {ext} . Type -> (Type -> Type) -> Dd ext -> Dd ext -> Constraint
 class MkMigrateTransform tag m old new where
   migrateTransform ::
     MigrationVersion ->

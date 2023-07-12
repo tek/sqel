@@ -9,7 +9,7 @@ import Data.Some (Some)
 
 import Sqel.Data.CondExpr (CondExpr)
 import Sqel.Data.Constraints (Constraints)
-import Sqel.Data.Dd (Dd)
+import Sqel.Data.Dd (Dd1)
 import Sqel.Data.Def (Def)
 import Sqel.Data.Path (FieldPath)
 import Sqel.Data.PgType (PgColumnName, PgPrimName, PgTypeRef)
@@ -57,7 +57,7 @@ type instance CompFor Def = CompMeta
 
 type SpineDef = Spine Def
 
-type Sqel :: Dd -> Type
+type Sqel :: Dd1 -> Type
 type Sqel = SqelFor Def
 
 -- TODO remove, this has no advantage really

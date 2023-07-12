@@ -5,7 +5,7 @@ import Generics.SOP (NP, SListI)
 
 import Sqel.Class.DefaultFields (DefaultMeta (defaultCompMeta, defaultPrimMeta))
 import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.PgType (PgColumnName (PgColumnName))
 import Sqel.Data.PgTypeName (PgCompName, PgTableName, pattern PgTypeName, pgCompName, pgTableName)
 import Sqel.Data.Spine (Types)
@@ -56,9 +56,9 @@ sqelCompName = \case
   SqelPrim (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) _ -> pgCompName name
 
 foldTypes ::
-  ∀ tag ext (table :: DdK ext) m .
+  ∀ tag ext (table :: Dd ext) m .
   Monoid m =>
-  (∀ (s :: DdK ext) . IsComp s ~ 'True => SqelFor tag s -> m) ->
+  (∀ (s :: Dd ext) . IsComp s ~ 'True => SqelFor tag s -> m) ->
   SqelFor tag table ->
   m
 foldTypes f = \case
@@ -66,9 +66,9 @@ foldTypes f = \case
   SqelNest _ _ sub _ -> spin sub
   SqelMerge _ _ sub _ -> spin sub
   where
-    spin :: ∀ (sub :: [DdK ext]) . SListI sub => NP (SqelFor tag) sub -> m
+    spin :: ∀ (sub :: [Dd ext]) . SListI sub => NP (SqelFor tag) sub -> m
     spin = hfoldMap one
-    one :: ∀ (s :: DdK ext) . SqelFor tag s -> m
+    one :: ∀ (s :: Dd ext) . SqelFor tag s -> m
     one = \case
       SqelPrim {} -> mempty
       s@(SqelNest _ _ sub _) -> f s <> spin sub

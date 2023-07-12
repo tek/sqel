@@ -5,7 +5,7 @@ import Exon (exon)
 import Generics.SOP (All, NP ((:*)))
 
 import Sqel.Data.ClauseConfig (ClauseLiteralFor, ClauseSortsFor)
-import Sqel.Data.Dd (DdK (Dd), StructWith (Prim))
+import Sqel.Data.Dd (Dd (Dd), Struct (Prim))
 import Sqel.Data.Field (
   CondField (CondField, CondOp),
   CondOperand (CondOpField, CondOpLit),

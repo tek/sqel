@@ -1,6 +1,6 @@
 module Sqel.Migration.Class.Syntax where
 
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Migration (
   Mig (Mig),
   Migration,
@@ -16,7 +16,7 @@ import qualified Sqel.Migration.Data.TransformStep
 import Sqel.Migration.Data.TransformStep (TransformStep (TransformStep))
 import Sqel.Migration.Transform (MkMigrateTransform (migrateTransform))
 
-type MigrationFrom :: Type -> (Type -> Type) -> Type -> DdK ext -> DdK ext -> [Mig ext] -> Constraint
+type MigrationFrom :: Type -> (Type -> Type) -> Type -> Dd ext -> Dd ext -> [Mig ext] -> Constraint
 class MigrationFrom tag m left old new migs | tag m left new -> old migs, tag m old migs -> left where
   migrationFrom ::
     Migration tag m ('Mig old new) ->
@@ -31,7 +31,7 @@ instance MigrationFrom tag m (TableDdl tag m old ('Mig from old : migs)) old new
   migrationFrom mig (TableMigrations old migs) =
     (old, Migrations mig migs, latestMigrationVersion migs + 1)
 
-type MigrationTo :: Type -> (Type -> Type) -> Type -> DdK ext -> DdK ext -> Constraint
+type MigrationTo :: Type -> (Type -> Type) -> Type -> Dd ext -> Dd ext -> Constraint
 class MigrationTo tag m right old new | right -> new where
   migrationTo :: MigrationVersion -> SqelFor tag old -> right -> (SqelFor tag new, Migration tag m ('Mig old new))
 

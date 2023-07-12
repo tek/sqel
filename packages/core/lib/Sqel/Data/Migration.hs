@@ -3,7 +3,7 @@ module Sqel.Data.Migration where
 import Data.Aeson (FromJSON, ToJSON)
 import Exon (exon)
 
-import Sqel.Data.Dd (DdK (Dd), StructWith (Comp))
+import Sqel.Data.Dd (Dd (Dd), Struct (Comp))
 import Sqel.Data.PgType (PgColumnName)
 import Sqel.Data.PgTypeName (PgCompName, PgTypeName)
 import Sqel.Data.Sqel (SqelFor)
@@ -40,8 +40,8 @@ type CompAction tag = TypeAction tag 'False
 type Mig :: Type -> Type
 data Mig ext =
   Mig {
-    from :: DdK ext,
-    to :: DdK ext
+    from :: Dd ext,
+    to :: Dd ext
   }
 
 type MigrationActions :: ∀ {ext} . Type -> (Type -> Type) -> Mig ext -> Type
@@ -71,15 +71,15 @@ data Migration tag m mig where
     actions :: MigrationActions tag m ('Mig from to)
   } -> Migration tag m ('Mig from to)
 
-type MigFrom :: ∀ {ext} . Mig ext -> DdK ext
+type MigFrom :: ∀ {ext} . Mig ext -> Dd ext
 type family MigFrom mig where
   MigFrom ('Mig from _) = from
 
-type MigTo :: ∀ {ext} . Mig ext -> DdK ext
+type MigTo :: ∀ {ext} . Mig ext -> Dd ext
 type family MigTo mig where
   MigTo ('Mig _ to) = to
 
-type UniMigs :: DdK ext -> [DdK ext] -> [Mig ext]
+type UniMigs :: Dd ext -> [Dd ext] -> [Mig ext]
 type family UniMigs new tables = r | r -> tables where
   UniMigs _ '[] = '[]
   UniMigs new (old : tables) = 'Mig old new : UniMigs old tables
@@ -92,7 +92,7 @@ data Migrations tag m migs where
     Migrations tag m ('Mig from to : 'Mig from' from : migs)
   InitialMigration :: Migration tag m ('Mig from to) -> Migrations tag m '[ 'Mig from to]
 
-type TableDdl :: ∀ {ext} . Type -> (Type -> Type) -> DdK ext -> [Mig ext] -> Type
+type TableDdl :: ∀ {ext} . Type -> (Type -> Type) -> Dd ext -> [Mig ext] -> Type
 data TableDdl tag m table migs where
   TableDdl :: SqelFor tag table -> TableDdl tag m table '[]
   TableMigrations ::
@@ -105,7 +105,7 @@ tableDdlCurrent = \case
   TableDdl table -> table
   TableMigrations table _ -> table
 
-type Migrate :: Type -> (Type -> Type) -> [DdK ext] -> Type
+type Migrate :: Type -> (Type -> Type) -> [Dd ext] -> Type
 type family Migrate tag m tables where
   Migrate tag m (cur : old) = TableDdl tag m cur (UniMigs cur old)
 

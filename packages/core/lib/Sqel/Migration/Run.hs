@@ -11,7 +11,7 @@ import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.DefaultFields (DefaultMeta, defaultTypes)
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect (runMigrationStatements))
-import Sqel.Data.Dd (DdK (Dd))
+import Sqel.Data.Dd (Dd (Dd))
 import Sqel.Data.Migration (
   CompAction,
   Mig,
@@ -299,7 +299,7 @@ conclusion table types = \case
   where
     name = getPgTypeName (sqelTableName table)
 
-type RunMigrations :: ∀ {ext} . Type -> DdK ext -> Constraint
+type RunMigrations :: ∀ {ext} . Type -> Dd ext -> Constraint
 class RunMigrations tag table where
   runMigrations ::
     Monad m =>

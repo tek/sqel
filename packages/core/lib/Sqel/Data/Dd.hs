@@ -50,33 +50,34 @@ instance Show (SInc i) where
 pattern AnyInc :: SInc i
 pattern AnyInc <- _
 
-type StructWith :: Type -> Type
-data StructWith ext =
+type Struct :: Type -> Type
+data Struct ext =
   Prim PrimType
   |
   Comp {
     typeName :: TSel,
     sort :: Sort,
     inc :: Inc,
-    sub :: [DdK ext]
+    sub :: [Dd ext]
   }
 
-type Struct0 = StructWith Ext0
+type Struct0 = Struct Ext0
 
-type Struct = StructWith Ext
+type Struct1 = Struct Ext
 
-type DdK :: Type -> Type
-data DdK ext =
+type Dd :: Type -> Type
+data Dd ext =
   Dd {
     ext :: ext,
     hsType :: Type,
-    struct :: StructWith ext
+    struct :: Struct ext
   }
 
-type Dd0 = DdK Ext0
+type Dd0 = Dd Ext0
 
-type Dd = DdK Ext
+type Dd1 = Dd Ext
 
+-- TODO remove?
 type (:>) :: Type -> Type -> Type
 data a :> b = a :> b
 infixr 3 :>

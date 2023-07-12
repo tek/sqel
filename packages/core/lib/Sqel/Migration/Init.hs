@@ -8,7 +8,7 @@ import Sqel.Build.Sql (BuildClause)
 import Sqel.Class.DefaultFields (DefaultMeta (defaultCompMeta))
 import qualified Sqel.Class.MigrationEffect as MigrationEffect
 import Sqel.Class.MigrationEffect (MigrationEffect)
-import Sqel.Data.Dd (DdK (Dd), StructWith (Comp, Prim))
+import Sqel.Data.Dd (Dd (Dd), Struct (Comp, Prim))
 import Sqel.Data.PgTypeName (pattern PgOnlyTableName, getPgTypeName)
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest)
 import Sqel.Dd (DdSub)
@@ -48,7 +48,7 @@ createType = \case
     MigrationEffect.runStatement_ () (Sqel.createType s)
   SqelMerge _ _ _ _ -> unit
 
-type InitComp :: ∀ {ext} . Type -> DdK ext -> Constraint
+type InitComp :: ∀ {ext} . Type -> Dd ext -> Constraint
 class InitComp tag s where
   initComp :: Monad m => MigrationEffect m => SqelFor tag s -> m ()
 
@@ -77,7 +77,7 @@ initStructure = \case
   SqelMerge _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag)) initComp cols
   SqelPrim _ _ -> unit
 
-type InitTable :: ∀ {ext} . Type -> DdK ext -> Constraint
+type InitTable :: ∀ {ext} . Type -> Dd ext -> Constraint
 class InitTable tag table where
   initTable :: Monad m => MigrationEffect m => SqelFor tag table -> m ()
 

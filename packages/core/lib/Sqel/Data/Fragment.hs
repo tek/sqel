@@ -3,7 +3,7 @@ module Sqel.Data.Fragment where
 import Exon (exon)
 import GHC.Records (HasField (getField))
 
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Spine (SpineSort)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Dd (DdType, IsComp)
@@ -13,7 +13,7 @@ data Frag0 ext =
   Frag0 {
     tag :: Type,
     sort :: SpineSort,
-    s :: DdK ext,
+    s :: Dd ext,
     root :: Bool,
     comp :: Bool
   }

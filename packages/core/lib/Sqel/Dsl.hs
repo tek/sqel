@@ -24,14 +24,14 @@ import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (
   ConCol,
-  Dd,
+  Dd (Dd),
   Dd0,
-  DdK (Dd),
+  Dd1,
   Ext0 (Ext0),
   Inc (Merge, Nest),
   PrimType (Cond, NoCond),
   Sort (Con, Prod, Sum),
-  StructWith (Comp, Prim),
+  Struct (Comp, Prim),
   )
 import Sqel.Data.Mods (NoMods)
 import qualified Sqel.Data.Mods.Array as Mods
@@ -497,7 +497,7 @@ type family ReifyE a spec where
     -- IfStuck spec (DelayError (NoSpec a spec))
     -- (Pure (IfStuck (Reify a spec) (DelayError (NoReify a spec)) (Pure (Reify a spec))))
 
-type Table :: Symbol -> Type -> Type -> Dd
+type Table :: Symbol -> Type -> Type -> Dd1
 type family Table name a spec where
   Table name a spec = NormalizeDd (ReifyE a (TableName name spec))
 
@@ -505,16 +505,16 @@ type MigrationTable :: Symbol -> Type -> Type -> Ddl
 type family MigrationTable name a spec where
   MigrationTable name a spec = ToDdl (Table name a spec)
 
-type UidTable :: Symbol -> Type -> Type -> Type -> Type -> Dd
+type UidTable :: Symbol -> Type -> Type -> Type -> Type -> Dd1
 type family UidTable name i a si sa where
   UidTable name i a si sa = Table name (Uid i a) (UidProd (Pk si) (Merge (TypeName name sa)))
 
-type IntTable :: Symbol -> Type -> Type -> Dd
+type IntTable :: Symbol -> Type -> Type -> Dd1
 type IntTable name a sa = UidTable name Int64 a Prim sa
 
-type UuidTable :: Symbol -> Type -> Type -> Dd
+type UuidTable :: Symbol -> Type -> Type -> Dd1
 type UuidTable name a sa = UidTable name UUID a Prim sa
 
-type Query :: Type -> Type -> Dd
+type Query :: Type -> Type -> Dd1
 type family Query a spec where
   Query a spec = NormalizeDd (ReifyE a spec)

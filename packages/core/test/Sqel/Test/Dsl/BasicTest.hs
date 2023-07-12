@@ -5,7 +5,7 @@ import Hedgehog (TestT)
 import Prelude hiding (Enum, Mod)
 
 import qualified Sqel.Data.Dd as Kind
-import Sqel.Data.Dd (DdK (Dd), Ext (Ext), Ext0 (Ext0), PrimType (Cond), StructWith (Comp))
+import Sqel.Data.Dd (Dd (Dd), Ext (Ext), Ext0 (Ext0), PrimType (Cond), Struct (Comp))
 import Sqel.Data.Mods (NoMods)
 import qualified Sqel.Data.Mods.Array as Mods (Array)
 import qualified Sqel.Data.Mods.Newtype as Mods

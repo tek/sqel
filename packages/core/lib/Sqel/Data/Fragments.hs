@@ -4,54 +4,54 @@ import GHC.Records (HasField (getField))
 import Generics.SOP (NP (Nil, (:*)))
 
 import Sqel.Class.NamedFragment (NamedProjection (namedProjection), NamedTable (namedTable))
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.Spine (SpineSort (SpineProj, SpineQuery, SpineTable))
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Dd (IsComp)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 
-type QueryFragment :: Type -> Maybe (DdK ext) -> Type
+type QueryFragment :: Type -> Maybe (Dd ext) -> Type
 data QueryFragment tag s where
   QueryFragment :: Fragment ('Frag ('Frag0 tag 'SpineQuery s 'True (IsComp s))) -> QueryFragment tag ('Just s)
   NoQueryFragment :: QueryFragment tag 'Nothing
 
-type TableFragment :: Type -> DdK ext -> Type
+type TableFragment :: Type -> Dd ext -> Type
 newtype TableFragment tag s =
   TableFragment (Fragment ('Frag ('Frag0 tag 'SpineTable s 'True (IsComp s))))
 
-type TableFragments :: Type -> [DdK ext] -> Type
+type TableFragments :: Type -> [Dd ext] -> Type
 newtype TableFragments tag tables =
   TableFragments (NP (TableFragment tag) tables)
 
 instance (
     NamedTable name tables s,
     comp ~ IsComp s
-  ) => HasField name (TableFragments tag (tables :: [DdK ext])) (Fragment ('Frag ('Frag0 tag 'SpineTable (s :: DdK ext) 'True comp))) where
+  ) => HasField name (TableFragments tag (tables :: [Dd ext])) (Fragment ('Frag ('Frag0 tag 'SpineTable (s :: Dd ext) 'True comp))) where
     getField (TableFragments ss) =
       coerce (namedTable @name ss)
 
-type ProjectionFragment :: Type -> DdK ext -> Type
+type ProjectionFragment :: Type -> Dd ext -> Type
 newtype ProjectionFragment tag s =
   ProjectionFragment (Fragment ('Frag ('Frag0 tag 'SpineProj s 'False (IsComp s))))
 
-type ProjectionFragments :: Type -> [DdK ext] -> Type
+type ProjectionFragments :: Type -> [Dd ext] -> Type
 newtype ProjectionFragments tag tables =
   ProjectionFragments (NP (ProjectionFragment tag) tables)
 
 instance (
     NamedProjection name proj s,
     comp ~ IsComp s
-  ) => HasField name (ProjectionFragments tag (proj :: [DdK ext])) (Fragment ('Frag ('Frag0 tag 'SpineProj (s :: DdK ext) 'False comp))) where
+  ) => HasField name (ProjectionFragments tag (proj :: [Dd ext])) (Fragment ('Frag ('Frag0 tag 'SpineProj (s :: Dd ext) 'False comp))) where
     getField (ProjectionFragments ss) =
       coerce (namedProjection @name ss)
 
 type Fragments ::
   ∀ {extq} {extt} .
   Type ->
-  Maybe (DdK extq) ->
-  [DdK extt] ->
-  [DdK extt] ->
+  Maybe (Dd extq) ->
+  [Dd extt] ->
+  [Dd extt] ->
   Type
 data Fragments tag query tables proj where
   Fragments ::
@@ -84,9 +84,9 @@ type GetFragmentsField ::
   ∀ {extq} {extt} .
   FragmentsField ->
   Type ->
-  Maybe (DdK extq) ->
-  [DdK extt] ->
-  [DdK extt] ->
+  Maybe (Dd extq) ->
+  [Dd extt] ->
+  [Dd extt] ->
   Type ->
   Constraint
 class GetFragmentsField field tag query tables proj r | field tag query tables proj -> r where

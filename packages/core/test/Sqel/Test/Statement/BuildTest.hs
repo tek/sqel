@@ -12,7 +12,7 @@ import Sqel.Class.Check (Check, Checked)
 import Sqel.Class.Query (FragmentsDd)
 import Sqel.Clauses (createTable, from, join, on, select, where_)
 import Sqel.Data.Clause ((+>))
-import Sqel.Data.Dd (DdK, type (:>) ((:>)))
+import Sqel.Data.Dd (Dd, type (:>) ((:>)))
 import Sqel.Data.Sqel (Project, Projected, SqelFor, StatementDd)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
@@ -25,7 +25,7 @@ import Sqel.Syntax.Fragments (project, query1)
 import qualified Sqel.Syntax.Monad as Sqel
 
 stmt1 ::
-  ∀ {ext} (query :: DdK ext) .
+  ∀ {ext} (query :: Dd ext) .
   FragmentsDd Def ('Just query) '[Table_Cat] =>
   Project "fur" query =>
   Sql
@@ -65,7 +65,7 @@ stmt4 =
 -- -- TODO QuerySqel should be mentioned in error message if stuck
 -- TODO apparently this is too polymorphic since the decoupling of the ext kinds of query/table
 -- stmt5 ::
---   ∀ {extt} res (tables :: [DdK extt]) .
+--   ∀ {extt} res (tables :: [Dd extt]) .
 --   ReifySqels Def tables =>
 --   NamedTable "cat" tables =>
 --   NamedTable "bird" tables =>
@@ -137,7 +137,7 @@ stmt12 table =
     createTable c.table
 
 selectQuery ::
-  ∀ {extq} {extt} (query :: DdK extq) (proj :: DdK extt) (table :: DdK extt) tag .
+  ∀ {extq} {extt} (query :: Dd extq) (proj :: Dd extt) (table :: Dd extt) tag .
   BuildClauses tag [Select, From, Where] =>
   Checked '[table] tag proj =>
   Checked '[table] tag query =>

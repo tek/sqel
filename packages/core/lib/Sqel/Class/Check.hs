@@ -2,19 +2,19 @@ module Sqel.Class.Check where
 
 import Generics.SOP (All, hcmap)
 
-import Sqel.Data.Dd (DdK (Dd), PrimType (Cond, NoCond), StructWith (Comp, Prim))
+import Sqel.Data.Dd (Dd (Dd), PrimType (Cond, NoCond), Struct (Comp, Prim))
+import Sqel.Data.Def (Def)
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.PgTypeName (pgTableName)
 import Sqel.Data.Sel (Paths)
 import Sqel.Data.Sqel (SqelFor (SqelPrim), pattern SqelMerge, pattern SqelNest)
 import Sqel.Dd (DdTableName, ExtPath, IsComp)
-import Sqel.Data.Def (Def)
 import qualified Sqel.Default as PrimMeta (PrimMeta (table))
 import Sqel.Kind.CheckPrim (CheckPrim)
 import Sqel.Kind.TableInfo (MkTableInfo, TableInfo (AvailTables, IsTable))
 import Sqel.SOP.Constraint (symbolText)
 
-type PrimTable :: TableInfo -> Paths -> Type -> Constraint
+type PrimTable :: ∀ {ext} . TableInfo ext -> Paths -> Type -> Constraint
 class PrimTable table path a where
   primTable :: Text
 
@@ -29,7 +29,7 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type Node :: ∀ {ext} . TableInfo -> Type -> DdK ext -> Constraint
+type Node :: ∀ {ext} . TableInfo ext -> Type -> Dd ext -> Constraint
 class Node table tag s where
   node :: SqelFor tag s -> SqelFor tag s
 
@@ -54,7 +54,7 @@ instance (
 
 ------------------------------------------------------------------------------------------------------------------------
 
-type Checked :: ∀ {extt} {extq} . [DdK extt] -> Type -> DdK extq -> Constraint
+type Checked :: ∀ {extt} {extq} . [Dd extt] -> Type -> Dd extq -> Constraint
 class Checked tables tag s where
   checked :: SqelFor tag s -> Fragment ('Frag ('Frag0 tag sort s root comp))
 

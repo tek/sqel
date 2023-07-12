@@ -4,7 +4,7 @@ import Generics.SOP (All, NP (Nil, (:*)), SListI, hcpure, hmap)
 
 import Sqel.Class.Check (Checked (checked), unchecked)
 import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragment (Fragment (Fragment))
 import Sqel.Data.Fragments (
   Fragments (Fragments),
@@ -23,7 +23,7 @@ type family IsMulti tables where
   IsMulti (_ : _ : _) = 'True
   IsMulti _ = 'False
 
-type NoQueryDd :: ∀ {ext} . Type -> [DdK ext] -> Constraint
+type NoQueryDd :: ∀ {ext} . Type -> [Dd ext] -> Constraint
 class NoQueryDd tag tables where
   noQueryDd :: Fragments tag 'Nothing tables '[]
 
@@ -40,7 +40,7 @@ instance (
         tableSpine :: ReifySqelFor tag s => TableFragment tag s
         tableSpine = TableFragment (Fragment sqel)
 
-type QueryDd :: ∀ {ext} . Type -> DdK ext -> [DdK ext] -> Constraint
+type QueryDd :: ∀ {ext} . Type -> Dd ext -> [Dd ext] -> Constraint
 class QueryDd tag query tables where
   queryDd :: Fragments tag ('Just query) tables '[]
 
@@ -62,7 +62,7 @@ withQueryDd ::
 withQueryDd f =
   f (queryDd @tag @query @tables)
 
-type FragmentsDd :: ∀ {extq} {extt} . Type -> Maybe (DdK extq) -> [DdK extt] -> Constraint
+type FragmentsDd :: ∀ {extq} {extt} . Type -> Maybe (Dd extq) -> [Dd extt] -> Constraint
 class FragmentsDd tag query tables where
   fragmentsDd :: Fragments tag query tables '[]
 
@@ -84,7 +84,7 @@ withFragmentsDd ::
 withFragmentsDd f =
   f (fragmentsDd @tag @query @tables)
 
-type NoQuerySqel :: Type -> [DdK ext] -> Constraint
+type NoQuerySqel :: Type -> [Dd ext] -> Constraint
 class NoQuerySqel tag tables where
   noQuerySqel :: NP (SqelFor tag) tables -> Fragments tag 'Nothing tables '[]
 
@@ -100,7 +100,7 @@ instance (
         tableSpine :: SqelFor tag s -> TableFragment tag s
         tableSpine t = TableFragment (unchecked t)
 
-type QuerySqel :: ∀ {extq} {extt} . Type -> DdK extq -> [DdK extt] -> Constraint
+type QuerySqel :: ∀ {extq} {extt} . Type -> Dd extq -> [Dd extt] -> Constraint
 class QuerySqel tag query tables where
   querySqel :: SqelFor tag query -> NP (SqelFor tag) tables -> Fragments tag ('Just query) tables '[]
 
@@ -113,7 +113,7 @@ instance (
       where
         Fragments NoQueryFragment tableSpines proj multi = noQuerySqel tables
 
-type FragmentsSqel :: ∀ {extq} {extt} . Type -> Maybe (DdK extq) -> [DdK extt] -> Constraint
+type FragmentsSqel :: ∀ {extq} {extt} . Type -> Maybe (Dd extq) -> [Dd extt] -> Constraint
 class FragmentsSqel tag query tables where
   fragmentsSqel :: MaybeD (SqelFor tag) query -> NP (SqelFor tag) tables -> Fragments tag query tables '[]
 

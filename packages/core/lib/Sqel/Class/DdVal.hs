@@ -2,21 +2,21 @@ module Sqel.Class.DdVal where
 
 import Generics.SOP (AllZip, NP (Nil, (:*)), htrans, All, hcpure)
 
-import Sqel.Data.Dd (DdK (Dd))
+import Sqel.Data.Dd (Dd (Dd))
 import Sqel.Dd (DdType, DdTypes)
 
-type DdVal :: ∀ {ext} . (Type -> Type) -> DdK ext -> Type
+type DdVal :: ∀ {ext} . (Type -> Type) -> Dd ext -> Type
 newtype DdVal f s =
   DdVal { val :: f (DdType s) }
 
-type UnDdVal :: ∀ {ext} . (Type -> Type) -> DdK ext -> Type -> Constraint
+type UnDdVal :: ∀ {ext} . (Type -> Type) -> Dd ext -> Type -> Constraint
 class UnDdVal f s a where
   unDdVal :: DdVal f s -> f a
 
 instance a ~ DdType s => UnDdVal f s a where
   unDdVal (DdVal fa) = fa
 
-type UnDdVals :: ∀ {ext} . [DdK ext] -> (Type -> Type) -> Constraint
+type UnDdVals :: ∀ {ext} . [Dd ext] -> (Type -> Type) -> Constraint
 class UnDdVals ss f where
   unDdVals :: NP (DdVal f) ss -> NP f (DdTypes ss)
 
@@ -25,7 +25,7 @@ instance (
   ) => UnDdVals ss f where
     unDdVals = htrans (Proxy @(UnDdVal f)) unDdVal
 
-type DdPure :: ∀ {ext} . (DdK ext -> Constraint) -> [DdK ext] -> (Type -> Type) -> [Type] -> Constraint
+type DdPure :: ∀ {ext} . (Dd ext -> Constraint) -> [Dd ext] -> (Type -> Type) -> [Type] -> Constraint
 class DdPure c ss f as | ss -> as where
   ddPure :: (∀ s . c s => DdVal f s) -> NP f as
 
@@ -38,7 +38,7 @@ instance (
       unDdVals @ss (hcpure (Proxy @c) cons)
 
 -- | Not using @hmap@ and @DdTypes@ here because it results in insane compile performance.
-type DdMap :: ∀ {ext} . (DdK ext -> Type) -> (Type -> Type) -> [DdK ext] -> [Type] -> Constraint
+type DdMap :: ∀ {ext} . (Dd ext -> Type) -> (Type -> Type) -> [Dd ext] -> [Type] -> Constraint
 class DdMap f g ss as | ss -> as where
   ddmap :: (∀ s . f s -> g (DdType s)) -> NP f ss -> NP g as
 

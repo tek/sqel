@@ -4,13 +4,13 @@ import Sqel.Build.Sql (BuildSql (buildSql))
 import Sqel.Codec.Result (ClausesResultDecoder (clausesResultDecoder))
 import Sqel.Data.Clause (Clauses (Clauses))
 import qualified Sqel.Data.Codec
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Sqel (SqelFor, sqelCodec)
 import Sqel.Data.Statement (Statement (Statement))
 import Sqel.Dd (MaybeDdType)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 
-type BuildStatement :: ∀ {extq} . Type -> [Type] -> Maybe (DdK extq) -> [Type] -> Maybe [Type] -> Type -> Constraint
+type BuildStatement :: ∀ {extq} . Type -> [Type] -> Maybe (Dd extq) -> [Type] -> Maybe [Type] -> Type -> Constraint
 class BuildStatement tag tables query cs results result where
   buildStatement ::
     Bool ->

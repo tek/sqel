@@ -6,7 +6,7 @@ import Sqel.Build.Statement (BuildStatement (buildStatement))
 import Sqel.Class.Query (FragmentsSqel (fragmentsSqel))
 import Sqel.Class.ReifySqel (ReifySqelFor, ReifySqels, sqel, sqels)
 import Sqel.Data.Clause (Clauses)
-import Sqel.Data.Dd (DdK)
+import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragments (Fragments)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Data.Statement (Statement)
@@ -15,7 +15,7 @@ import Sqel.Default (Def, Sqel)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Kind.ResultTuple (ResultTuple)
 
-type Build :: ∀ {ext} . Type -> Type -> Maybe (DdK ext) -> [DdK ext] -> [Type] -> Maybe [Type] -> Constraint
+type Build :: ∀ {ext} . Type -> Type -> Maybe (Dd ext) -> [Dd ext] -> [Type] -> Maybe [Type] -> Constraint
 class Build tag result query tables cs results where
   build ::
     MaybeD (SqelFor tag) query ->
@@ -34,8 +34,8 @@ instance (
 
 type BuildK ::
   ∀ {ext} . Type ->
-  Maybe (DdK ext) ->
-  [DdK ext] ->
+  Maybe (Dd ext) ->
+  [Dd ext] ->
   Type ->
   [Type] ->
   Maybe [Type] ->

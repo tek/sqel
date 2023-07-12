@@ -2,10 +2,10 @@ module Sqel.Kind.FieldPath where
 
 import Type.Errors (ErrorMessage)
 
-import Sqel.Data.Dd (Dd, DdK (Dd), Ext (Ext), PrimType (Cond, NoCond), StructWith (Comp, Prim))
+import Sqel.Data.Dd (Dd (Dd), Ext (Ext), PrimType (Cond, NoCond), Struct (Comp, Prim))
 import Sqel.Data.Sel (Paths (Paths))
-import Sqel.Kind.List (type (++))
 import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.List (type (++))
 
 data FieldPath =
   FieldPath {
@@ -17,13 +17,13 @@ type FieldPathPrim :: Paths -> Type -> [FieldPath]
 type family FieldPathPrim sel t where
   FieldPathPrim ('Paths _ _ path) t = '[ 'FieldPath path t]
 
-type FieldPathsProd :: [Dd] -> [FieldPath]
+type FieldPathsProd :: [Dd ext] -> [FieldPath]
 type family FieldPathsProd s where
   FieldPathsProd '[] = '[]
   FieldPathsProd (s : ss) = FieldPaths s ++ FieldPathsProd ss
   FieldPathsProd s = TypeError ("FieldPathsProd: " <> s)
 
-type FieldPaths :: Dd -> [FieldPath]
+type FieldPaths :: Dd ext -> [FieldPath]
 type family FieldPaths s where
   FieldPaths ('Dd ('Ext path _) t ('Prim 'Cond)) = FieldPathPrim path t
   FieldPaths ('Dd _ _ ('Prim 'NoCond)) = '[]
@@ -47,7 +47,7 @@ type family ShowFields fields where
   ShowFields (field : fields) =
     ShowField field : ShowFields fields
 
-class PrintFields (s :: Dd) where
+class PrintFields (s :: Dd ext) where
   printFields :: ()
   printFields = ()
 

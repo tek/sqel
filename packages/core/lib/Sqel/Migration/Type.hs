@@ -2,7 +2,7 @@ module Sqel.Migration.Type where
 
 import Generics.SOP (NP (Nil, (:*)))
 
-import Sqel.Data.Dd (DdK (Dd), StructWith (Comp))
+import Sqel.Data.Dd (Dd (Dd), Struct (Comp))
 import Sqel.Data.Migration (ColumnAction, CompAction, TableAction, TypeAction (AddAction, ModifyAction, RenameAction))
 import Sqel.Data.PgTypeName (PgCompName, PgTypeNameSym (pgTypeNameSym))
 import Sqel.Data.Sqel (SqelFor, sqelSub)
@@ -87,7 +87,7 @@ type TableMigrationActions :: DdlConf -> DdlConf -> (ModK, Column.ModK)
 type family TableMigrationActions old new where
   TableMigrationActions old new = '(TableActionResult (ActionType old '[ 'IxDdl 0 new] '[]), IndexActionDd old new)
 
-type TypeColumnsChanges :: ∀ {ext} . Type -> DdK ext -> DdK ext -> Constraint
+type TypeColumnsChanges :: ∀ {ext} . Type -> Dd ext -> Dd ext -> Constraint
 class TypeColumnsChanges tag old new where
   typeColumnsChanges :: SqelFor tag old -> SqelFor tag new -> [ColumnAction tag]
 
@@ -98,7 +98,7 @@ instance (
   ) => TypeColumnsChanges tag old new where
     typeColumnsChanges old new = columnsChanges @tag (sqelSub old) (sqelSub new)
 
-type ReifyKeepAction :: ∀ {ext} . Type -> Bool -> Symbol -> Column.ModK -> DdK ext -> DdK ext -> Constraint
+type ReifyKeepAction :: ∀ {ext} . Type -> Bool -> Symbol -> Column.ModK -> Dd ext -> Dd ext -> Constraint
 class ReifyKeepAction tag table tname indexAction old new where
   reifyKeepAction :: SqelFor tag old -> SqelFor tag new -> TypeAction tag table
 
@@ -117,7 +117,7 @@ type family ReifyModResult tag table where
   ReifyModResult tag 'True =
     TypeAction tag 'True
 
-type ReifyModAction :: ∀ {ext} . Type -> Bool -> ModK -> Column.ModK -> DdK ext -> DdK ext -> Constraint
+type ReifyModAction :: ∀ {ext} . Type -> Bool -> ModK -> Column.ModK -> Dd ext -> Dd ext -> Constraint
 class ReifyModAction tag table action indexAction old new where
   reifyModAction :: SqelFor tag old -> SqelFor tag new -> ReifyModResult tag table
 
@@ -142,7 +142,7 @@ instance (
     reifyModAction old new =
       [(pgTypeNameSym @'False @tname, RenameAction (pgTypeNameSym @'False @tnameNew) (typeColumnsChanges @tag old new))]
 
-type ReifyOldAction :: ∀ {ext} . Type -> Bool -> ActionK -> DdK ext -> [DdK ext] -> Constraint
+type ReifyOldAction :: ∀ {ext} . Type -> Bool -> ActionK -> Dd ext -> [Dd ext] -> Constraint
 class ReifyOldAction tag table action old new where
   reifyOldAction :: SqelFor tag old -> NP (SqelFor tag) new -> ReifyModResult tag table
 
@@ -156,7 +156,7 @@ instance (
 -- -- TODO this has to check that new columns in composite types are
 -- -- a) at the end of the list
 -- -- b) Maybe
-type ReifyNewAction :: ∀ {ext} . ActionK -> [DdK ext] -> Constraint
+type ReifyNewAction :: ∀ {ext} . ActionK -> [Dd ext] -> Constraint
 class ReifyNewAction action new where
   reifyNewAction :: NP (SqelFor tag) new -> (PgCompName, CompAction tag)
 
@@ -168,7 +168,7 @@ instance (
   reifyNewAction new =
     (pgTypeNameSym @'False @tname, AddAction (colIndex @index new))
 
-type ReifyActions :: ∀ {ext} . Type -> [ActionK] -> [DdK ext] -> [DdK ext] -> Constraint
+type ReifyActions :: ∀ {ext} . Type -> [ActionK] -> [Dd ext] -> [Dd ext] -> Constraint
 class ReifyActions tag actions old new where
   reifyActions :: NP (SqelFor tag) old -> NP (SqelFor tag) new -> [(PgCompName, CompAction tag)]
 
@@ -190,7 +190,7 @@ instance (
     reifyActions (o :* old) new =
       reifyOldAction @tag @'False @action o new <> reifyActions @tag @actions old new
 
-type TypeChanges :: Type -> [DdK ext] -> [DdK ext] -> Constraint
+type TypeChanges :: Type -> [Dd ext] -> [Dd ext] -> Constraint
 class TypeChanges tag old new where
   typeChanges :: NP (SqelFor tag) old -> NP (SqelFor tag) new -> [(PgCompName, CompAction tag)]
 
@@ -202,7 +202,7 @@ instance (
   ) => TypeChanges tag old new where
     typeChanges old new = reifyActions @tag @actions old new
 
-type ReifyTableAction :: ∀ {ext} . Type -> ModK -> Column.ModK -> DdK ext -> DdK ext -> Constraint
+type ReifyTableAction :: ∀ {ext} . Type -> ModK -> Column.ModK -> Dd ext -> Dd ext -> Constraint
 class ReifyTableAction tag action indexAction old new where
   reifyTableAction :: SqelFor tag old -> SqelFor tag new -> TableAction tag
 
@@ -213,7 +213,7 @@ instance (
       reifyKeepAction @tag @'True @tname @indexAction old new
 
 -- TODO would be nice to use that feature with a different tag for SqelFor that reifies as migrations
-type TableChange :: ∀ {ext} . Type -> DdK ext -> DdK ext -> Constraint
+type TableChange :: ∀ {ext} . Type -> Dd ext -> Dd ext -> Constraint
 class TableChange tag old new where
   tableChange :: SqelFor tag old -> SqelFor tag new -> TableAction tag
 

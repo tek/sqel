@@ -2,7 +2,7 @@ module Sqel.Migration.Column where
 
 import Generics.SOP (NP (Nil, (:*)))
 
-import Sqel.Data.Dd (DdK, Inc (Merge, Nest))
+import Sqel.Data.Dd (Dd, Inc (Merge, Nest))
 import Sqel.Data.Migration (ColumnAction (AddColumn, RemoveColumn, RenameColumn))
 import Sqel.Data.Name (NamePrefix)
 import Sqel.Data.PgType (PgColumnName, pgColumnName)
@@ -163,7 +163,7 @@ instance ColumnDefault 'Nothing where
 instance KnownSymbol def => ColumnDefault ('Just def) where
   columnDefault = Just (symbolText @def)
 
-type ColumnAddition :: ∀ {ext} . Type -> DdK ext -> Maybe Symbol -> Maybe Symbol -> Constraint
+type ColumnAddition :: ∀ {ext} . Type -> Dd ext -> Maybe Symbol -> Maybe Symbol -> Constraint
 class ColumnAddition tag s comp def where
   columnAddition :: SqelFor tag s -> PgColumnName -> [ColumnAction tag]
 
@@ -199,7 +199,7 @@ instance (
     [RenameColumn (pgColumnName (symbolText @oldName)) (pgColumnName (symbolText @newName))]
 
 -- TODO use Sqel in actions like for Add actions
-type ReifyOldAction :: ∀ {ext} . Type -> ActionK -> DdK ext -> [DdK ext] -> Constraint
+type ReifyOldAction :: ∀ {ext} . Type -> ActionK -> Dd ext -> [Dd ext] -> Constraint
 class ReifyOldAction tag action old new where
   reifyOldAction :: SqelFor tag old -> NP (SqelFor tag) new -> [ColumnAction tag]
 
@@ -230,7 +230,7 @@ instance (
 -- -- TODO this has to check that new columns in composite types are
 -- -- a) at the end of the list
 -- -- b) Maybe
-type ReifyNewAction :: ∀ {ext} . Type -> ActionK -> [DdK ext] -> Constraint
+type ReifyNewAction :: ∀ {ext} . Type -> ActionK -> [Dd ext] -> Constraint
 class ReifyNewAction tag action new where
   reifyNewAction :: NP (SqelFor tag) new -> [ColumnAction tag]
 
@@ -242,7 +242,7 @@ instance (
   reifyNewAction news =
     columnAddition @tag @new @comp @def (colIndex @index news) (pgColumnName (symbolText @name))
 
-type ReifyActions :: ∀ {ext} . Type -> [ActionK] -> [DdK ext] -> [DdK ext] -> Constraint
+type ReifyActions :: ∀ {ext} . Type -> [ActionK] -> [Dd ext] -> [Dd ext] -> Constraint
 class ReifyActions tag actions old new where
   reifyActions :: NP (SqelFor tag) old -> NP (SqelFor tag) new -> [ColumnAction tag]
 
@@ -263,7 +263,7 @@ instance (
     reifyActions (o :* old) new =
       reifyOldAction @tag @action o new <> reifyActions @tag @actions old new
 
-type ColumnsChanges :: ∀ {ext} . Type -> [DdK ext] -> [DdK ext] -> Constraint
+type ColumnsChanges :: ∀ {ext} . Type -> [Dd ext] -> [Dd ext] -> Constraint
 class ColumnsChanges tag old new where
   columnsChanges :: NP (SqelFor tag) old -> NP (SqelFor tag) new -> [ColumnAction tag]
 

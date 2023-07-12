@@ -4,9 +4,9 @@ import Fcf (If)
 import Type.Errors (DelayError, ErrorMessage, IfStuck, Pure)
 
 import Sqel.Data.Dd (Dd)
-import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
 import Sqel.Dd (DdType)
 import Sqel.Kind.Error (QuotedError, QuotedType, ShowPath, Unlines)
+import Sqel.Kind.FieldPath (FieldPath (FieldPath), FieldPaths, PathEq, ShowFields)
 
 type ColumnMessage :: Symbol -> FieldPath -> ErrorMessage
 type family ColumnMessage viewType path where
@@ -30,7 +30,7 @@ type family NoViewMatch viewType avail path where
     ColumnMessage viewType path %
     AvailableColumns avail
 
-type NoViewMatchTable :: Dd -> [FieldPath] -> ErrorMessage
+type NoViewMatchTable :: Dd ext -> [FieldPath] -> ErrorMessage
 type family NoViewMatchTable table avail where
   NoViewMatchTable table avail =
     "The table for type " <> QuotedType (DdType table) <> " contains these fields:" %
@@ -86,21 +86,21 @@ type family MatchViewPath vfield avail where
   MatchViewPath _ '[] =
     'False
 
-type MatchViewPathError :: Symbol -> Dd -> FieldPath -> [FieldPath] -> Maybe ErrorMessage
+type MatchViewPathError :: Symbol -> Dd ext -> FieldPath -> [FieldPath] -> Maybe ErrorMessage
 type family MatchViewPathError viewType table vfield avail where
   MatchViewPathError viewType table vfield avail =
     If (CheckMatch viewType vfield avail (MatchViewPath vfield avail))
     'Nothing
     ('Just (NoViewMatchTable table avail))
 
-type CheckViewPathError :: Symbol -> Dd -> FieldPath -> [FieldPath] -> [FieldPath] -> Bool -> Maybe ErrorMessage
+type CheckViewPathError :: Symbol -> Dd ext -> FieldPath -> [FieldPath] -> [FieldPath] -> Bool -> Maybe ErrorMessage
 type family CheckViewPathError viewType table vfield vfields avail match where
   CheckViewPathError viewType table _ vfields avail 'True =
     MatchViewPaths viewType table vfields avail
   CheckViewPathError viewType _ vfield _ avail 'False =
     'Just (NoViewMatch viewType avail vfield)
 
-type MatchViewPaths :: Symbol -> Dd -> [FieldPath] -> [FieldPath] -> Maybe ErrorMessage
+type MatchViewPaths :: Symbol -> Dd ext -> [FieldPath] -> [FieldPath] -> Maybe ErrorMessage
 type family MatchViewPaths viewType table view avail where
   MatchViewPaths viewType table (vfield : vfields) avail =
     CheckViewPathError viewType table vfield vfields avail
@@ -108,7 +108,7 @@ type family MatchViewPaths viewType table view avail where
   MatchViewPaths _ _ '[] _ =
     'Nothing
 
-type MatchView :: Symbol -> Dd -> Dd -> Maybe ErrorMessage
+type MatchView :: Symbol -> Dd ext -> Dd ext -> Maybe ErrorMessage
 type family MatchView viewType view table where
   MatchView viewType view table =
     MatchViewPaths viewType table (FieldPaths view) (FieldPaths table)

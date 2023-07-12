@@ -7,7 +7,7 @@ import Prelude hiding (join, on)
 import Sqel.Class.Query (QueryDd)
 import Sqel.Class.ReifySqel (ReifySqelFor)
 import Sqel.Clauses (createTable, from, insertInto, join, on, select, values, where_)
-import Sqel.Data.Dd (Dd)
+import Sqel.Data.Dd (Dd1)
 import Sqel.Data.Def (Def)
 import Sqel.Data.Statement (Statement)
 import Sqel.Data.TestTables (
@@ -31,7 +31,7 @@ import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Run (integrationTest, stmt_)
 
 create ::
-  ∀ (table :: Dd) .
+  ∀ (table :: Dd1) .
   QueryDd Def EmptyQuery '[table] =>
   Statement '[DdType table] () ()
 create = S.do
@@ -39,7 +39,7 @@ create = S.do
   createTable @Def c.table
 
 ins ::
-  ∀ (table :: Dd) .
+  ∀ (table :: Dd1) .
   ReifySqelFor Def table =>
   Statement '[DdType table] (DdType table) ()
 ins = S.do

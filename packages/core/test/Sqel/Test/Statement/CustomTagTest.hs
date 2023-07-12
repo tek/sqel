@@ -7,7 +7,7 @@ import Prelude hiding (Mod)
 import Sqel.Build.Sql (BuildClause (buildClause), BuildClauseViaDefault (buildClauseViaDefault))
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Clauses (from, select)
-import Sqel.Data.Dd (Dd)
+import Sqel.Data.Dd (Dd1)
 import Sqel.Data.Migration (Migrate)
 import Sqel.Data.Mods.MigrationRename (MigrationRename)
 import Sqel.Data.Spine (CompFor, PrimFor)
@@ -26,7 +26,7 @@ data Tag
 type instance PrimFor Tag = PrimMeta
 type instance CompFor Tag = CompMeta
 
-type SqelTag :: Dd -> Type
+type SqelTag :: Dd1 -> Type
 type SqelTag = SqelFor Tag
 
 type SqelTagDdl :: Ddl -> Type

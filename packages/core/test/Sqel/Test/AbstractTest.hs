@@ -45,3 +45,10 @@ target = [exon|select "id", "f2" from "dat"|]
 test_abstract :: TestT IO ()
 test_abstract = do
   target === (statement @Prim @Text).sql
+
+-- type UidTable_Simp i = UidTable "simp" i Simp Prim Gen
+
+-- uidtable_Simp ::
+--   ∀ i .
+--   Sqel (UidTable_Simp i)
+-- uidtable_Simp = sqel
