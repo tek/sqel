@@ -22,7 +22,7 @@ import Sqel.Data.Fragment (
   Fragment (Fragment, FragmentLit, FragmentOp),
   FragmentOperand (FragmentOpFrag, FragmentOpLit),
   )
-import Sqel.Data.Spine (SpineSort (SpineTable))
+import Sqel.Data.Spine (SpineSort (SpineProj, SpineQuery, SpineTable))
 import Sqel.Data.Sqel (SqelFor (SqelPrim), sqelSpine)
 import Sqel.Data.Sql (Sql (Sql))
 import Sqel.Error.Fragment (CheckFragmentMismatch, NoLiteralField)
@@ -46,6 +46,29 @@ type family AcceptLiteral lit accepted where
 
 ------------------------------------------------------------------------------------------------------------------------
 
+type SortIsQuery :: SpineSort -> Constraint
+class SortIsQuery sort where
+  sortIsQuery :: Bool
+
+instance SortIsQuery 'SpineTable where
+  sortIsQuery = False
+
+instance SortIsQuery 'SpineQuery where
+  sortIsQuery = True
+
+instance SortIsQuery 'SpineProj where
+  sortIsQuery = False
+
+sortField ::
+  ∀ sort tag field s root comp .
+  SortIsQuery sort =>
+  (Field tag -> field tag) ->
+  Fragment ('Frag ('Frag0 tag sort s root comp)) ->
+  field tag
+sortField con (Fragment s) = con (Field (sortIsQuery @sort) (sqelSpine s))
+
+------------------------------------------------------------------------------------------------------------------------
+
 type DemoteFragment :: ∀ {ext} . Frag0 ext -> Type -> Constraint
 class DemoteFragment frag field where
   demoteFragment :: Fragment ('Frag frag) -> field
@@ -55,20 +78,20 @@ instance (
   ) => DemoteFragment frag (OrLiteral lit field) where
     demoteFragment frag = NotLiteral (demoteFragment frag)
 
-instance DemoteFragment ('Frag0 tag sort s root comp) (Field tag) where
-    demoteFragment (Fragment s) = Field (sqelSpine s)
+instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort s root comp) (Field tag) where
+  demoteFragment = sortField id
 
-instance DemoteFragment ('Frag0 tag sort ('Dd ext a ('Prim prim)) root comp) (PrimField tag) where
-    demoteFragment (Fragment (SqelPrim meta _)) = PrimField meta
+instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort ('Dd ext a ('Prim prim)) root comp) (PrimField tag) where
+  demoteFragment (Fragment (SqelPrim meta _)) = PrimField (sortIsQuery @sort) meta
 
-instance DemoteFragment ('Frag0 tag sort s root comp) (CondField tag) where
-    demoteFragment (Fragment s) = CondField (sqelSpine s)
+instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort s root comp) (CondField tag) where
+    demoteFragment = sortField CondField
 
-instance DemoteFragment ('Frag0 tag sort s 'True comp) (RootField tag) where
-  demoteFragment (Fragment s) = RootField (sqelSpine s)
+instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort s 'True comp) (RootField tag) where
+  demoteFragment = sortField RootField
 
 instance DemoteFragment ('Frag0 tag 'SpineTable s root 'True) (TypeField tag) where
-  demoteFragment (Fragment s) = TypeField (sqelSpine s)
+  demoteFragment (Fragment s) = TypeField (Field False (sqelSpine s))
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -159,7 +182,7 @@ instance (
     acceptFragmentOperand (FragmentOpFrag frag) =
       CondOpField field
       where
-        Field field = acceptFragOrError @clause @'True frag
+        field = acceptFragOrError @clause @'True frag
 
 ------------------------------------------------------------------------------------------------------------------------
 

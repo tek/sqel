@@ -1,5 +1,7 @@
 module Sqel.Default.Clauses where
 
+import Prelude hiding (Set)
+
 import Sqel.Data.Clause (ClauseParam)
 import Sqel.Data.ClauseConfig (ClauseConfig (ClauseConfig), ClauseConfigFor)
 import Sqel.Data.Drop (Drop)
@@ -32,6 +34,16 @@ data InsertInto
 type instance ClauseConfigFor tag InsertInto =
   'ClauseConfig 'False '[ 'SpineTable] (RootField tag) "insert into" 'Nothing
 
+data Update
+
+type instance ClauseConfigFor tag Update =
+  'ClauseConfig 'False '[ 'SpineTable] (RootField tag) "update" 'Nothing
+
+data Set
+
+type instance ClauseConfigFor tag Set =
+  'ClauseConfig 'False '[ 'SpineTable, 'SpineQuery] [CondField tag] "set" 'Nothing
+
 data On
 
 type instance ClauseConfigFor tag On =
@@ -55,7 +67,7 @@ type instance ClauseConfigFor tag OnConflict =
 data DoUpdateSet
 
 type instance ClauseConfigFor tag DoUpdateSet =
-  'ClauseConfig 'False '[ 'SpineQuery, 'SpineTable] [Field tag] "do update set" 'Nothing
+  'ClauseConfig 'False '[ 'SpineQuery, 'SpineTable] [CondField tag] "do update set" 'Nothing
 
 data Returning
 

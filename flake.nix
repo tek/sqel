@@ -24,7 +24,6 @@
         };
         module = "IncipitBase";
       };
-      ghc-options = lib.mkAfter ["-Wno-partial-type-signatures"];
       paths = false;
       meta = {
         maintainer = "hackage@tryp.io";
@@ -36,7 +35,7 @@
 
     ghci.args = ["-fprint-potential-instances"];
 
-    overrides =  {jailbreak, ...}: {
+    overrides = {jailbreak, ...}: {
       th-extras = jailbreak;
     };
 

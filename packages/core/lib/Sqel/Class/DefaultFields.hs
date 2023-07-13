@@ -79,11 +79,11 @@ instance DefaultFields field fieldDef => DefaultFields [field] [fieldDef] where
   defaultFields = fmap defaultFields
 
 instance DefaultMeta tag => DefaultFields (Field tag) (Field Def) where
-  defaultFields (Field s) = Field (defaultSpine s)
+  defaultFields (Field q s) = Field q (defaultSpine s)
 
 instance DefaultMeta tag => DefaultFields (CondOperand tag) (CondOperand Def) where
   defaultFields = \case
-    CondOpField s -> CondOpField (defaultSpine s)
+    CondOpField f -> CondOpField (defaultFields f)
     CondOpLit lit -> CondOpLit lit
 
 instance (
@@ -91,14 +91,14 @@ instance (
     DefaultFields (CondOperand tag) (CondOperand Def)
   ) => DefaultFields (CondField tag) (CondField Def) where
     defaultFields = \case
-      CondField s -> CondField (defaultSpine s)
+      CondField f -> CondField (defaultFields f)
       CondOp op l r -> CondOp op (defaultFields l) (defaultFields r)
 
 instance DefaultMeta tag => DefaultFields (PrimField tag) (PrimField Def) where
-  defaultFields (PrimField s) = PrimField (defaultPrimMeta @tag s)
+  defaultFields (PrimField q s) = PrimField q (defaultPrimMeta @tag s)
 
 instance DefaultMeta tag => DefaultFields (RootField tag) (RootField Def) where
-  defaultFields (RootField s) = RootField (defaultSpine s)
+  defaultFields (RootField f) = RootField (defaultFields f)
 
 instance DefaultMeta tag => DefaultFields (TypeField tag) (TypeField Def) where
-  defaultFields (TypeField s) = TypeField (defaultSpine s)
+  defaultFields (TypeField f) = TypeField (defaultFields f)

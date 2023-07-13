@@ -1,12 +1,13 @@
 module Sqel.Clauses where
 
 import Generics.SOP (NP (Nil, (:*)))
+import Prelude hiding (Set)
 
 import Sqel.Class.AcceptClause (MkClause (mkClause))
 import Sqel.Data.Clause (ClauseArgs (FragsOnly, FragsP), Clauses (Clauses))
 import Sqel.Data.Drop (Drop)
 import Sqel.Data.Order (Order)
-import Sqel.Default (
+import Sqel.Default.Clauses (
   CreateTable,
   CreateType,
   DeleteFrom,
@@ -22,6 +23,8 @@ import Sqel.Default (
   OrderBy,
   Returning,
   Select,
+  Set,
+  Update,
   Values,
   Where,
   )
@@ -64,6 +67,12 @@ from = clause
 
 join :: ClauseCon Join
 join = clause
+
+update :: ClauseCon Update
+update = clause
+
+set :: ClauseCon Set
+set = clause
 
 on :: ClauseCon On
 on = clause

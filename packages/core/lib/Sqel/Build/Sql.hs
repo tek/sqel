@@ -3,10 +3,10 @@ module Sqel.Build.Sql where
 import qualified Exon
 import Exon (exon)
 import Generics.SOP (All, K (K), hcmap, hcollapse)
+import Prelude hiding (Set)
 
 import Sqel.Build.Condition (conditionsClause)
 import Sqel.Build.Create (createTableClause, createTypeClause)
-import Sqel.Build.DoUpdateSet (doUpdateSetClause)
 import Sqel.Build.Drop (dropTableClause)
 import Sqel.Build.Insert (insertIntoClause)
 import Sqel.Build.Limit (limitClause)
@@ -14,6 +14,7 @@ import Sqel.Build.Offset (offsetClause)
 import Sqel.Build.OnConflict (onConflictClause)
 import Sqel.Build.Order (orderByClause)
 import Sqel.Build.Select (selectorsClause)
+import Sqel.Build.Set (setClause)
 import Sqel.Build.Table (bindClause)
 import Sqel.Build.Values (valuesClause)
 import Sqel.Class.ClauseKeyword (ClauseKeyword (clauseKeyword))
@@ -21,12 +22,12 @@ import Sqel.Class.DefaultFields (DefaultFields, defaultFields)
 import Sqel.Class.Query (FragmentsDd, withFragmentsDd)
 import Sqel.Data.Clause (Clause, Clauses, pattern UnClauses, clauseFields)
 import Sqel.Data.ClauseConfig (ClauseFieldsFor)
+import Sqel.Data.Def (Def)
 import Sqel.Data.Fragments (Fragments)
 import Sqel.Data.Sql (Sql)
-import Sqel.Default (
+import Sqel.Default.Clauses (
   CreateTable,
   CreateType,
-  Def,
   DeleteFrom,
   DoUpdateSet,
   DropTable,
@@ -40,6 +41,8 @@ import Sqel.Default (
   OrderBy,
   Returning,
   Select,
+  Set,
+  Update,
   Values,
   Where,
   )
@@ -60,6 +63,12 @@ instance BuildClauseDef From where
 instance BuildClauseDef Join where
   buildClauseDef = bindClause
 
+instance BuildClauseDef Update where
+  buildClauseDef = bindClause
+
+instance BuildClauseDef Set where
+  buildClauseDef = setClause
+
 instance BuildClauseDef InsertInto where
   buildClauseDef _ = insertIntoClause
 
@@ -70,7 +79,7 @@ instance BuildClauseDef OnConflict where
   buildClauseDef _ = onConflictClause
 
 instance BuildClauseDef DoUpdateSet where
-  buildClauseDef _ = doUpdateSetClause
+  buildClauseDef = setClause
 
 instance BuildClauseDef Returning where
   buildClauseDef = selectorsClause

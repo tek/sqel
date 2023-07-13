@@ -29,12 +29,15 @@ valuesSub = \case
   SpineMerge _ compSort cols -> valuesComp compSort cols
   SpinePrim meta -> maybeToList (valuePrim meta)
 
+spineValues :: Spine Def -> Maybe (NonEmpty Sql)
+spineValues = \case
+  SpineComp _ compSort cols -> nonEmpty (valuesComp compSort cols)
+  SpinePrim meta -> pure <$> valuePrim meta
+
 -- TODO would be nice if this could be guaranteed nonempty
 -- maybe Spine could have NonEmpty?
 fieldValues :: Field Def -> Maybe (NonEmpty Sql)
-fieldValues (Field s) = case s of
-  SpineComp _ compSort cols -> nonEmpty (valuesComp compSort cols)
-  SpinePrim meta -> pure <$> valuePrim meta
+fieldValues (Field _ s) = spineValues s
 
 valuesClause :: [Field Def] -> Sql
 valuesClause fields =

@@ -5,7 +5,7 @@ import qualified Exon as Exon
 import Exon (exon)
 
 import Sqel.CondExpr (renderCondExpr)
-import Sqel.Data.Field (CondField (CondField, CondOp), CondOperand (CondOpField, CondOpLit))
+import Sqel.Data.Field (CondField (CondField, CondOp), CondOperand (CondOpField, CondOpLit), Field (Field))
 import Sqel.Data.Path (PrimPath)
 import qualified Sqel.Data.QueryMeta as QueryMeta
 import Sqel.Data.QueryMeta (CondMeta (CondMeta), QueryMeta (QueryMeta), index)
@@ -146,13 +146,15 @@ spineConditions multi = \case
   n -> node multi n
 
 -- TODO support ops on comps
+-- TODO this silently discards query op fields without @QueryMeta@
 condOperand ::
   Bool ->
   CondOperand Def ->
   Maybe Sql
 condOperand multi = \case
   CondOpLit s -> Just s
-  CondOpField (SpinePrim meta) -> Just (toSql (conditionPath multi meta))
+  CondOpField (Field False (SpinePrim meta)) -> Just (toSql (conditionPath multi meta))
+  CondOpField (Field True (SpinePrim PrimMeta {query = QueryMeta {index}})) -> Just (dollar index)
   CondOpField _ -> Nothing
 
 fieldOpCondition :: Bool -> Text -> CondOperand Def -> CondOperand Def -> Expr
@@ -165,7 +167,7 @@ fieldOpCondition multi op left right =
 
 fieldConditions :: Bool -> CondField Def -> Expr
 fieldConditions multi = \case
-  CondField s -> spineConditions multi s
+  CondField (Field _ s) -> spineConditions multi s
   CondOp op l r ->
     fieldOpCondition multi op l r
 

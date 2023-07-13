@@ -8,8 +8,9 @@ import qualified Sqel.Default
 import Sqel.Default (Def, PrimMeta (PrimMeta))
 import Sqel.Sql.Prepared (dollar)
 
+-- TODO what do
 offsetClause :: Bool -> PrimField Def -> Sql
-offsetClause _ (PrimField (PrimMeta {query = QueryMeta {index}})) =
+offsetClause _ (PrimField True (PrimMeta {query = QueryMeta {index}})) =
   dollar index
 offsetClause _ _ =
   error "not implemented"

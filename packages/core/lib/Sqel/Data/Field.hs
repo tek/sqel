@@ -4,37 +4,44 @@ import Sqel.Data.Spine (PrimFor, Spine)
 import Sqel.Data.Sql (Sql)
 
 data Field tag =
-  Field (Spine tag)
+  Field {
+    query :: Bool,
+    spine :: Spine tag
+  }
 
 deriving stock instance Show (Spine tag) => Show (Field tag)
 
 data CondOperand tag =
-  CondOpField (Spine tag)
+  CondOpField (Field tag)
   |
   CondOpLit Sql
 
 deriving stock instance Show (Spine tag) => Show (CondOperand tag)
 
 data CondField tag =
-  CondField (Spine tag)
+  CondField (Field tag)
   |
   CondOp Text (CondOperand tag) (CondOperand tag)
 
 deriving stock instance Show (Spine tag) => Show (CondField tag)
 
-data PrimField tag = PrimField (PrimFor tag)
+data PrimField tag =
+  PrimField {
+    query :: Bool,
+    meta :: PrimFor tag
+  }
 
 deriving stock instance Show (PrimFor tag) => Show (PrimField tag)
 
-data RootField tag = RootField (Spine tag)
+data RootField tag = RootField (Field tag)
 
 deriving stock instance Show (Spine tag) => Show (RootField tag)
 
-data TypeField tag = TypeField (Spine tag)
+data TypeField tag = TypeField (Field tag)
 
 deriving stock instance Show (Spine tag) => Show (TypeField tag)
 
-data TableField tag = TableField (Spine tag)
+data TableField tag = TableField (Field tag)
 
 deriving stock instance Show (Spine tag) => Show (TableField tag)
 

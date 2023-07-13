@@ -25,12 +25,12 @@ spineColumns cond = \case
         SpineMerge _ compSort cols -> prependIndexName compSort (sub =<< cols)
       | otherwise = []
 
--- TODO in @do update set@ this could also use ops
+-- TODO isQuery?
 fieldColumnsWhere ::
   (Spine Def -> Bool) ->
   Field Def ->
   [Sql]
-fieldColumnsWhere cond (Field s) = spineColumns cond s
+fieldColumnsWhere cond (Field _ s) = spineColumns cond s
 
 fieldColumns :: Field Def -> [Sql]
 fieldColumns = fieldColumnsWhere (const True)
@@ -39,7 +39,7 @@ rootColumnsWhere ::
   (Spine Def -> Bool) ->
   RootField Def ->
   [Sql]
-rootColumnsWhere cond (RootField s) = spineColumns cond s
+rootColumnsWhere cond (RootField (Field _ s)) = spineColumns cond s
 
 rootColumns :: RootField Def -> [Sql]
 rootColumns = rootColumnsWhere (const True)
