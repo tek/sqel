@@ -9,7 +9,7 @@ import Sqel.Clauses (deleteFrom, returning, where_)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
 import Sqel.Data.TestTables (query_Q, table_Cat)
-import Sqel.Syntax.Fragments (query1, table_)
+import Sqel.Syntax.Fragments (query, table_)
 import qualified Sqel.Syntax.Monad as S
 
 statementAll :: Sql
@@ -26,7 +26,7 @@ test_deleteAll = do
 
 statementCond :: Sql
 statementCond = statementSql S.do
-  f <- query1 query_Q table_Cat
+  f <- query query_Q table_Cat
   deleteFrom f.table
   where_ f.query
   returning f.table

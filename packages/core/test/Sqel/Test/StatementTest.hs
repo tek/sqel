@@ -11,6 +11,7 @@ import Sqel.Test.Statement.DeleteTest (test_delete)
 import Sqel.Test.Statement.DropTableTest (test_dropTable)
 import Sqel.Test.Statement.EmptyQueryTest (test_statement_emptyQuery)
 import Sqel.Test.Statement.IgnoreTest (test_statement_ignore)
+import Sqel.Test.Statement.JoinTest (test_join)
 import Sqel.Test.Statement.LiteralTest (test_statement_literal)
 import Sqel.Test.Statement.MergeProdTest (test_statement_merge_prod)
 import Sqel.Test.Statement.MergeSumTest (test_statement_merge_sum)
@@ -52,5 +53,6 @@ test_statement =
     unitTest "custom condition expression" test_condExpr,
     unitTest "literal in condition operator" test_statement_literal,
     unitTest "path prefix for query field" test_queryPrefix,
-    unitTest "static path for query field" test_queryPath
+    unitTest "static path for query field" test_queryPath,
+    unitTest "join" test_join
   ]

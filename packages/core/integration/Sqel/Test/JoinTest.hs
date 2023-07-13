@@ -4,9 +4,8 @@ import Hasql.Session (Session)
 import Hedgehog (TestT, (===))
 import Prelude hiding (join, on)
 
-import Sqel.Class.Query (QueryDd)
 import Sqel.Class.ReifySqel (ReifySqelFor)
-import Sqel.Clauses (createTable, from, insertInto, join, on, select, values, where_)
+import Sqel.Clauses (from, insertInto, join, on, select, values, where_)
 import Sqel.Data.Dd (Dd1)
 import Sqel.Data.Def (Def)
 import Sqel.Data.Statement (Statement)
@@ -16,27 +15,19 @@ import Sqel.Data.TestTables (
   Fur (Fur),
   FurQ (FurQ),
   Q (Q),
-  Query_Q,
   Table_Bird,
   Table_Cat,
+  query_Q,
   table_Bird,
   table_Cat,
   )
-import Sqel.Dd (DdType, EmptyQuery)
+import Sqel.Dd (DdType)
 import Sqel.Fragment ((.=))
 import Sqel.Migration.Init (initTable)
 import Sqel.Statement (runUnprepared)
-import Sqel.Syntax.Fragments (queryK, tableK)
+import Sqel.Syntax.Fragments (query, tableK)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Test.Run (integrationTest, stmt_)
-
-create ::
-  ∀ (table :: Dd1) .
-  QueryDd Def EmptyQuery '[table] =>
-  Statement '[DdType table] () ()
-create = S.do
-  c <- queryK @EmptyQuery @'[table]
-  createTable @Def c.table
 
 ins ::
   ∀ (table :: Dd1) .
@@ -49,7 +40,7 @@ ins = S.do
 
 selJoin :: Statement '[Cat, Bird] Q Int
 selJoin = S.do
-  c <- queryK @Query_Q @[Table_Cat, Table_Bird] @Def
+  c <- query query_Q (table_Cat, table_Bird)
   select c.bird.num
   from c.cat
   join c.bird

@@ -3,13 +3,13 @@ module Sqel.Test.Statement.IgnoreTest where
 import Hedgehog (TestT, (===))
 
 import Sqel.Clauses (from, select, where_)
+import Sqel.Data.Def (Def)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
-import Sqel.Data.Def (Def)
+import Sqel.Data.TestTables (Table_Simp)
 import Sqel.Dsl (Ignore, Prim, Prod, Query)
 import Sqel.Syntax.Fragments (query1K)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (Table_Simp)
 
 data Q =
   Q {

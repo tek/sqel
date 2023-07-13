@@ -14,7 +14,7 @@ import Sqel.Data.TestTables (table_Cat)
 import Sqel.Dd (DdType, EmptyQuery)
 import Sqel.Default (From, Select, Where)
 import Sqel.Sqel (emptyQuery)
-import Sqel.Syntax.Fragments (query1)
+import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
 
 statement ::
@@ -26,7 +26,7 @@ statement ::
   SqelFor tag table ->
   Statement '[DdType table] () (DdType table)
 statement table = S.do
-  frags <- query1 emptyQuery table
+  frags <- query emptyQuery table
   select frags.table
   from frags.table
   where_ frags.query

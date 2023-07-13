@@ -21,7 +21,7 @@ import Sqel.Dd (DdType)
 import Sqel.Default (CreateTable, Def, From, Select, Sqel, Where)
 import Sqel.Fragment ((.=))
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
-import Sqel.Syntax.Fragments (project, query1)
+import Sqel.Syntax.Fragments (project, query)
 import qualified Sqel.Syntax.Monad as Sqel
 
 stmt1 ::
@@ -145,8 +145,8 @@ selectQuery ::
   SqelFor tag proj ->
   SqelFor tag table ->
   Statement '[DdType table] (DdType query) (DdType proj)
-selectQuery query proj table = Sqel.do
-  frags <- project proj (query1 query table)
+selectQuery q proj table = Sqel.do
+  frags <- project proj (query q table)
   select frags.projection
   from frags.table
   where_ frags.query

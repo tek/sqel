@@ -15,7 +15,7 @@ import Sqel.Data.Uid (Uid)
 import Sqel.Dd (DdType)
 import Sqel.Default (Sqel)
 import Sqel.Dsl
-import Sqel.Syntax.Fragments (project, query1)
+import Sqel.Syntax.Fragments (project, query)
 import qualified Sqel.Syntax.Monad as S
 
 -- TODO when using the wrong result type, the error doesn't show @ProjectionNamed@, but @HFindT@.
@@ -30,8 +30,8 @@ statement ::
   Sqel table ->
   Sqel proj ->
   Statement '[DdType table] (DdType query) (DdType p)
-statement query table proj = S.do
-  frags <- project proj (query1 query table)
+statement q table proj = S.do
+  frags <- project proj (query q table)
   select frags.projections.fur
   from frags.table
   where_ frags.query
@@ -93,7 +93,7 @@ statement2 ::
   Sqel table ->
   Statement '[DdType table] Q2 (Uid Int64 PM2)
 statement2 table = S.do
-  frags <- project proj_PM2 (query1 query_Q2 table)
+  frags <- project proj_PM2 (query query_Q2 table)
   select frags.projection
   from frags.table
   where_ frags.query

@@ -8,7 +8,7 @@ import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Gen, Table)
-import Sqel.Syntax.Fragments (query1)
+import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
 import Sqel.Data.TestTables (query_NaNu)
 
@@ -27,7 +27,7 @@ table_Dat = sqel
 statement :: Sql
 statement =
   statementSql S.do
-    frags <- query1 query_NaNu table_Dat
+    frags <- query query_NaNu table_Dat
     select frags.table
     from frags.table
     where_ frags.query

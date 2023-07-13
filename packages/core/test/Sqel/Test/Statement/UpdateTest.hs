@@ -10,7 +10,7 @@ import Sqel.Data.TestTables (table_Cat)
 import Sqel.Default (Sqel)
 import Sqel.Dsl (Param, Prim, Prod, Query)
 import Sqel.Fragment ((.=))
-import Sqel.Syntax.Fragments (query1)
+import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
 
 data UQ =
@@ -29,7 +29,7 @@ query_UQ = sqel
 statement :: Sql
 statement =
   statementSql @_ @_ @() S.do
-    frags <- query1 query_UQ table_Cat
+    frags <- query query_UQ table_Cat
     update frags.table
     set (frags.table.nam .= frags.query.newName)
     where_ frags.query

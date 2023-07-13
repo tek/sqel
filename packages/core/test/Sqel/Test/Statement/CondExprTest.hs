@@ -9,11 +9,11 @@ import Sqel.Data.CondExpr (CondExpr (CondCall, CondField, CondLit, CondOp, CondP
 import Sqel.Data.Sqel (SqelFor (SqelComp, SqelPrim))
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
+import Sqel.Data.TestTables (Table_Simp)
 import Sqel.Default (Sqel, withCondExpr)
 import Sqel.Dsl (Gen, Query)
-import Sqel.Syntax.Fragments (query1)
+import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
-import Sqel.Data.TestTables (Table_Simp)
 
 data Qn =
   Qn {
@@ -38,7 +38,7 @@ sqel_Qn = case sqel @Query_Qn of
 
 stmt_condExpr :: Sql
 stmt_condExpr = statementSql S.do
-  fs <- query1 sqel_Qn sqel_Nc
+  fs <- query sqel_Qn sqel_Nc
   select fs.table
   from fs.table
   where_ fs.query

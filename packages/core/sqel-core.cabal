@@ -69,6 +69,7 @@ library
       Sqel.Class.ReifyPrimCodec
       Sqel.Class.ReifySqel
       Sqel.Class.ResultShape
+      Sqel.Class.TablesTuple
       Sqel.Class.TableTypes
       Sqel.Class.TransformMeta
       Sqel.Clauses
@@ -306,6 +307,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.DropTableTest
       Sqel.Test.Statement.EmptyQueryTest
       Sqel.Test.Statement.IgnoreTest
+      Sqel.Test.Statement.JoinTest
       Sqel.Test.Statement.LiteralTest
       Sqel.Test.Statement.MergeProdTest
       Sqel.Test.Statement.MergeSumTest

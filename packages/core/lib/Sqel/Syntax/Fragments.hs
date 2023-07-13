@@ -8,10 +8,10 @@ import Sqel.Class.Query (
   FragmentsSqel (fragmentsSqel),
   NoQueryDd (noQueryDd),
   NoQuerySqel,
-  QuerySqel,
   withProjection,
   )
 import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
+import Sqel.Class.TablesTuple (TablesTuple (tablesTuple))
 import Sqel.Data.Clause (Clauses (Clauses))
 import Sqel.Data.Fragment (Frag (Frag), Frag0 (Frag0), Fragment (Fragment))
 import Sqel.Data.Fragments (Fragments)
@@ -47,15 +47,15 @@ queryWith q t =
   where
     frags = fragmentsSqel q t
 
--- TODO use tuples here instead of NP
 query ::
-  ∀ tag query tables .
+  ∀ tag query texpr tables .
+  TablesTuple tag texpr tables =>
   FragmentsSqel tag ('Just query) tables =>
   SqelFor tag query ->
-  NP (SqelFor tag) tables ->
+  texpr ->
   Clauses tag '[] 'Nothing (Fragments tag ('Just query) tables '[])
-query =
-  queryWith . JustD
+query q ts =
+  queryWith (JustD q) (tablesTuple ts)
 
 query1K ::
   ∀ query table tag .
@@ -63,16 +63,6 @@ query1K ::
   Clauses tag '[] 'Nothing (Fragments tag ('Just query) '[table] '[])
 query1K =
   queryKWith
-
--- TODO rename this to query, and query to queryMulti or something
-query1 ::
-  ∀ tag query table .
-  QuerySqel tag query '[table] =>
-  SqelFor tag query ->
-  SqelFor tag table ->
-  Clauses tag '[] 'Nothing (Fragments tag ('Just query) '[table] '[])
-query1 q t =
-  query q (t :* Nil)
 
 tableK_ ::
   ∀ table tag .
@@ -112,12 +102,13 @@ tablesK =
   queryKWith @'Nothing @tables
 
 tables ::
-  ∀ tag tables .
+  ∀ tag texpr tables .
+  TablesTuple tag texpr tables =>
   NoQuerySqel tag tables =>
-  NP (SqelFor tag) tables ->
+  texpr ->
   Clauses tag '[] 'Nothing (Fragments tag 'Nothing tables '[])
 tables =
-  queryWith NothingD
+  queryWith NothingD . tablesTuple
 
 project ::
   ∀ tag proj query tables projs .

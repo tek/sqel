@@ -12,8 +12,8 @@ import Hedgehog.Internal.Property (failWith)
 import System.Environment (lookupEnv)
 
 import Sqel.Class.CompleteCodec (completeCodec)
-import Sqel.Data.Sql (Sql)
 import Sqel.Class.ResultShape (ResultShape)
+import Sqel.Data.Sql (Sql)
 import Sqel.Statement (unsafeRunSql)
 
 data DbConfig =

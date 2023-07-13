@@ -24,7 +24,7 @@ import Sqel.Default (
   Values,
   Where,
   )
-import Sqel.Syntax.Fragments (query1, table, table_)
+import Sqel.Syntax.Fragments (query, table, table_)
 import qualified Sqel.Syntax.Monad as S
 
 createTable ::
@@ -77,7 +77,7 @@ selectWhere ::
   SqelFor tag table ->
   Statement '[DdType table] (DdType query) (DdType table)
 selectWhere q t = S.do
-  c <- query1 q t
+  c <- query q t
   select c.table
   from c.table
   where_ c.query
@@ -129,7 +129,7 @@ delete ::
   SqelFor tag table ->
   Statement '[DdType table] (DdType query) (DdType table)
 delete q t = S.do
-  fs <- query1 q t
+  fs <- query q t
   deleteFrom fs.table
   where_ fs.query
   returning fs.table

@@ -12,7 +12,7 @@ import Sqel.Data.Statement (Statement, statementSql)
 import Sqel.Data.TestTables (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
 import Sqel.Data.Def (Def)
 import Sqel.Fragment ((.=))
-import Sqel.Syntax.Fragments (query1, query1K, queryK)
+import Sqel.Syntax.Fragments (query, query1K, queryK)
 import qualified Sqel.Syntax.Monad as S
 
 stmt1 :: Sql
@@ -25,7 +25,7 @@ stmt1 =
 stmt2 :: Sql
 stmt2 =
   statementSql @_ @Q @Fur S.do
-    c <- query1 query_Q table_Cat
+    c <- query query_Q table_Cat
     select (c.cat.fur.color, c.cat.fur.density)
     from c.cat
     where_ c.query.fur
