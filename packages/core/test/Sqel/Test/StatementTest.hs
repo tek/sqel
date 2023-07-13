@@ -23,6 +23,7 @@ import Sqel.Test.Statement.ProjectTest (test_project, test_project_merge)
 import Sqel.Test.Statement.QueryPathTest (test_queryPath)
 import Sqel.Test.Statement.QueryPrefixTest (test_queryPrefix)
 import Sqel.Test.Statement.SumQueryTest (test_sumQuery)
+import Sqel.Test.Statement.UpdateTest (test_update)
 import Sqel.Test.Statement.UpsertTest (test_upsert)
 
 test_statement :: TestTree
@@ -41,6 +42,7 @@ test_statement =
     unitTest "query with unguarded nullable field" test_statement_orNullQuery,
     test_delete,
     test_upsert,
+    unitTest "update" test_update,
     test_dropTable,
     unitTest "custom tag" test_customTag,
     unitTest "sum query" test_sumQuery,
