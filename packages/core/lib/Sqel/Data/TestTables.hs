@@ -2,7 +2,7 @@ module Sqel.Data.TestTables where
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Default (Sqel)
-import Sqel.Dsl (Con1, Gen, Name, Prim, Prod, Query, Sum, Table, Unique)
+import Sqel.Dsl (Con1, Gen, IntTable, Name, Prim, Prod, Query, Sum, Table, Unique)
 
 data Simp =
   Simp {
@@ -15,6 +15,11 @@ type Table_Simp = Table "simp" Simp Gen
 
 table_Simp :: Sqel Table_Simp
 table_Simp = sqel
+
+type UidTable_Simp = IntTable "simp" Simp Gen
+
+uidTable_Simp :: Sqel UidTable_Simp
+uidTable_Simp = sqel
 
 data QSimp =
   QSimp {

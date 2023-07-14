@@ -1,13 +1,21 @@
 module Sqel.Dd where
 
-import Fcf (Eval, Exp, type (@@))
+import Fcf (Eval, Exp, TyEq, type (@@))
 import Fcf.Class.Functor (FMap)
 import Fcf.Data.List (Concat)
 import Prelude hiding (Compose)
 import Type.Errors (ErrorMessage (Text))
 
 import Sqel.Class.Mods (FindMod)
-import Sqel.Data.Dd (Dd0, Dd (Dd), Ext (Ext), Ext0 (Ext0), Inc (Nest), Sort (Con, Prod, Sum), Struct (Comp, Prim))
+import Sqel.Data.Dd (
+  Dd (Dd),
+  Dd0,
+  Ext (Ext),
+  Ext0 (Ext0),
+  Inc (Merge, Nest),
+  Sort (Con, Prod, Sum),
+  Struct (Comp, Prim),
+  )
 import Sqel.Data.Mods (NoMods)
 import Sqel.Data.Mods.TableName (TableName)
 import Sqel.Data.Name (Name (Name), NamePrefix (DefaultPrefix), SetName)
@@ -22,6 +30,7 @@ import Sqel.Data.Sel (
   TSelName,
   )
 import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.List (type (++))
 
 type MapSub :: (o -> Exp ext) -> [Dd o] -> [Dd ext]
 type family MapSub f s where
@@ -42,20 +51,11 @@ type MapDdK :: (o -> Exp ext) -> Dd o -> Dd ext
 type family MapDdK f s where
   MapDdK f ('Dd o t s) = 'Dd (Eval (f o)) t (MapStruct f s)
 
-type DdKName :: Dd ext -> Symbol
-type family DdKName s
-
-type instance DdKName ('Dd ('Ext ('Paths name _ _) _) _ _) = name
-type instance DdKName ('Dd ('Ext0 ('Sel ('Name name) _) _) _ _) = name
-
-type DdKNames :: [Dd ext] -> [Symbol]
-type family DdKNames s where
-  DdKNames '[] = '[]
-  DdKNames (s : ss) = DdKName s : DdKNames ss
-
 type DdName :: Dd ext -> Symbol
-type family DdName s where
-  DdName ('Dd ('Ext ('Paths name _ _) _) _ _) = name
+type family DdName s
+
+type instance DdName ('Dd ('Ext ('Paths name _ _) _) _ _) = name
+type instance DdName ('Dd ('Ext0 ('Sel ('Name name) _) _) _ _) = name
 
 data DdNameF :: Dd ext -> Exp Symbol
 type instance Eval (DdNameF s) = DdName s
@@ -64,6 +64,11 @@ type DdNames :: [Dd ext] -> [Symbol]
 type family DdNames s where
   DdNames '[] = '[]
   DdNames (s : ss) = DdName s : DdNames ss
+
+type family DdNamesMerged ss :: [Symbol] where
+  DdNamesMerged '[] = '[]
+  DdNamesMerged ('Dd ext _ ('Comp _ _ 'Merge sub) : ss) = ExtName ext : DdNamesMerged sub ++ DdNamesMerged ss
+  DdNamesMerged (s : ss) = DdName s : DdNamesMerged ss
 
 type DdType :: ∀ {ext} . Dd ext -> Type
 type family DdType s where
@@ -183,6 +188,12 @@ type DdTypeNames :: [Dd ext] -> [Symbol]
 type family DdTypeNames s where
   DdTypeNames '[] = '[]
   DdTypeNames (s : ss) = DdTypeName s : DdTypeNames ss
+
+type ExtHasName :: Symbol -> ext -> Bool
+type ExtHasName name ext = TyEq name @@ ExtName ext
+
+type DdHasName :: Symbol -> Dd ext -> Bool
+type DdHasName name s = TyEq name @@ DdName s
 
 type ExtTableName :: ∀ ext . Dd ext -> Symbol
 type family ExtTableName s where

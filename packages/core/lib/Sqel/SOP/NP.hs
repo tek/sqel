@@ -27,10 +27,12 @@ appendNP ::
   NP f as ->
   NP f bs ->
   NP f (as ++ bs)
+appendNP as Nil =
+  as
 appendNP Nil bs =
   bs
-appendNP (h :* t) bs =
-  h :* appendNP t bs
+appendNP (h :* t) (b :* bs) =
+  h :* appendNP t (b :* bs)
 
 appendNPFcf ::
   ∀ {k} (as :: [k]) (bs :: [k]) f .

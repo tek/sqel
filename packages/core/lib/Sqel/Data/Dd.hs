@@ -20,7 +20,7 @@ data Ext0 =
 
 data Ext =
   Ext {
-    sel :: Paths,
+    path :: Paths,
     mods :: [Type]
   }
 

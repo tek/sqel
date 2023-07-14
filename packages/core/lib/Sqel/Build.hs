@@ -15,7 +15,7 @@ import Sqel.Default (Def, Sqel)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
 import Sqel.Kind.ResultTuple (ResultTuple)
 
-type Build :: ∀ {ext} . Type -> Type -> Maybe (Dd ext) -> [Dd ext] -> [Type] -> Maybe [Type] -> Constraint
+type Build :: ∀ {extq} {extt} . Type -> Type -> Maybe (Dd extq) -> [Dd extt] -> [Type] -> Maybe [Type] -> Constraint
 class Build tag result query tables cs results where
   build ::
     MaybeD (SqelFor tag) query ->
@@ -33,9 +33,10 @@ instance (
       frags = fragmentsSqel @tag query tables
 
 type BuildK ::
-  ∀ {ext} . Type ->
-  Maybe (Dd ext) ->
-  [Dd ext] ->
+  ∀ {extq} {extt} .
+  Type ->
+  Maybe (Dd extq) ->
+  [Dd extt] ->
   Type ->
   [Type] ->
   Maybe [Type] ->
@@ -54,9 +55,9 @@ instance (
 
 instance (
     ReifySqels tag tables,
-    Build tag result 'Nothing tables cs results
-  ) => BuildK tag 'Nothing tables result cs results where
-    buildK = build NothingD sqels
+    Build tag result ('Nothing :: Maybe (Dd extq)) tables cs results
+  ) => BuildK tag ('Nothing :: Maybe (Dd extq)) tables result cs results where
+    buildK = build @tag @result @('Nothing :: Maybe (Dd extq)) NothingD sqels
 
 buildAs ::
   ∀ result query tables cs results .

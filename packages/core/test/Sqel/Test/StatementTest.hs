@@ -24,6 +24,7 @@ import Sqel.Test.Statement.ProjectTest (test_project, test_project_merge)
 import Sqel.Test.Statement.QueryPathTest (test_queryPath)
 import Sqel.Test.Statement.QueryPrefixTest (test_queryPrefix)
 import Sqel.Test.Statement.SumQueryTest (test_sumQuery)
+import Sqel.Test.Statement.UidTest (test_uidProjection)
 import Sqel.Test.Statement.UpdateTest (test_update)
 import Sqel.Test.Statement.UpsertTest (test_upsert)
 
@@ -54,5 +55,6 @@ test_statement =
     unitTest "literal in condition operator" test_statement_literal,
     unitTest "path prefix for query field" test_queryPrefix,
     unitTest "static path for query field" test_queryPath,
-    unitTest "join" test_join
+    unitTest "join" test_join,
+    unitTest "uid projection" test_uidProjection
   ]

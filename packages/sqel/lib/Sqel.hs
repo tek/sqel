@@ -26,7 +26,7 @@ import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.CondExpr
 import Sqel.Data.Crud (Crud)
 import Sqel.Data.Order (Order (..))
-import Sqel.Data.Sqel (Project, SqelFor)
+import Sqel.Data.Sqel (Projection, SqelFor)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement, UidStatement)
 import Sqel.Data.Uid (Uid (..), Uuid)

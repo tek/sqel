@@ -9,15 +9,17 @@ import Prelude hiding (Mod, join, on)
 import Sqel.Build (buildAs, buildKAs, buildKTuple, buildTuple)
 import Sqel.Build.Sql (BuildClause, BuildClauses, buildSqlDd)
 import Sqel.Class.Check (Check, Checked)
-import Sqel.Class.Query (FragmentsDd)
+import Sqel.Class.NamedFragment (NamedTable)
+import Sqel.Class.Query (FragmentsDd, QuerySqel)
+import Sqel.Class.ReifySqel (ReifySqels)
 import Sqel.Clauses (createTable, from, join, on, select, where_)
 import Sqel.Data.Clause ((+>))
 import Sqel.Data.Dd (Dd, type (:>) ((:>)))
-import Sqel.Data.Sqel (Project, Projected, SqelFor, StatementDd)
+import Sqel.Data.Sqel (Projection, SqelFor, StatementDd)
 import Sqel.Data.Sql (Sql)
 import Sqel.Data.Statement (Statement)
 import Sqel.Data.TestTables (Bird, Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat)
-import Sqel.Dd (DdType)
+import Sqel.Dd (DdType, DdTypes)
 import Sqel.Default (CreateTable, Def, From, Select, Sqel, Where)
 import Sqel.Fragment ((.=))
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
@@ -25,15 +27,13 @@ import Sqel.Syntax.Fragments (project, query)
 import qualified Sqel.Syntax.Monad as Sqel
 
 stmt1 ::
-  ∀ {ext} (query :: Dd ext) .
+  ∀ {ext} (query :: Dd ext) fur .
   FragmentsDd Def ('Just query) '[Table_Cat] =>
-  Project "fur" query =>
+  Projection "fur" query fur =>
   Sql
 stmt1 =
   buildSqlDd @('Just query) @'[Table_Cat] @Def \ c ->
     select c.cat.fur +> from c.cat +> where_ c.query.fur
-
-type PF res = Projected "fur" res
 
 -- TODO the error message trying to be achieved:
 -- Could not deduce 'Check <tables> res' for the polymorphic type 'res'.
@@ -62,25 +62,23 @@ stmt4 =
   buildSqlDd @('Just Query_Q) @'[Table_Cat] @Def \ c ->
     select c.cat +> from c.cat +> where_ c.query.fur
 
--- -- TODO QuerySqel should be mentioned in error message if stuck
--- TODO apparently this is too polymorphic since the decoupling of the ext kinds of query/table
--- stmt5 ::
---   ∀ {extt} res (tables :: [Dd extt]) .
---   ReifySqels Def tables =>
---   NamedTable "cat" tables =>
---   NamedTable "bird" tables =>
---   Project "cat" (TableNamed "bird" tables) =>
---   Project "nam" (TableNamed "cat" tables) =>
---   QuerySqel Def Query_Q tables =>
---   ResultDecoder '[DdType (TableNamed "cat" tables)] res =>
---   Statement Q res
--- stmt5 =
---   buildKAs @('Just Query_Q) @tables @res \ c ->
---     select c.cat +>
---     from c.cat +>
---     join c.bird +>
---     on (c.cat.nam .= c.bird.cat) +>
---     where_ c.query.fur
+-- TODO QuerySqel should be mentioned in error message if stuck
+stmt5 ::
+  ∀ tables cat bird nam bcat .
+  ReifySqels Def tables =>
+  QuerySqel Def Query_Q tables =>
+  NamedTable "cat" tables cat =>
+  Projection "nam" cat nam =>
+  NamedTable "bird" tables bird =>
+  Projection "cat" bird bcat =>
+  Statement (DdTypes tables) Q (DdType cat)
+stmt5 =
+  buildKAs @('Just Query_Q) @tables \ c ->
+    select c.cat +>
+    from c.cat +>
+    join c.bird +>
+    on (c.cat.nam .= c.bird.cat) +>
+    where_ c.query.fur
 
 stmt6 :: Statement '[Cat, Bird] Q Cat
 stmt6 =

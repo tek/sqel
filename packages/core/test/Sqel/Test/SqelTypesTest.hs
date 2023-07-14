@@ -6,9 +6,9 @@ import Hedgehog (TestT, (===))
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Class.TableTypes (SqelTableTypes (sqelTableTypes))
-import Sqel.Data.Sqel (Projected)
 import Sqel.Default (Sqel)
-import Sqel.Dsl
+import Sqel.Dsl (Con, Con1, Prim, Prod, Sum, Table)
+import Sqel.Kind.Project (type (.))
 
 data Quality =
   Quality {
@@ -38,9 +38,9 @@ type Table_Tab =
     Sum [Con [Prim, Prim], Con1 (Prod [Prim, Prim])]
   ])
 
-type Type_Prop = Projected "prop" Table_Tab
-type Type_Good = Projected "Good" Type_Prop
-type Type_Quality = Projected "quality" (Projected "Unclear" Type_Prop)
+type Type_Prop = Table_Tab . "prop"
+type Type_Good = Type_Prop . "Good"
+type Type_Quality = Type_Prop . "Unclear" . "quality"
 
 table_Tab :: Sqel Table_Tab
 table_Tab = sqel
@@ -52,7 +52,7 @@ type_Good :: Sqel Type_Good
 type_Good = (getField @"Good" type_Prop)
 
 type_Quality :: Sqel Type_Quality
-type_Quality = (getField @"Unclear" type_Prop).quality
+type_Quality = type_Prop.quality
 
 target :: NP Sqel [Type_Prop, Type_Good, Type_Quality]
 target =

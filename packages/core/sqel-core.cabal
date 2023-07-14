@@ -150,11 +150,11 @@ library
       Sqel.Kind.Error
       Sqel.Kind.FieldPath
       Sqel.Kind.Fragment
-      Sqel.Kind.HasFieldK
       Sqel.Kind.List
       Sqel.Kind.Maybe
       Sqel.Kind.Nat
       Sqel.Kind.NormalizeFrags
+      Sqel.Kind.Project
       Sqel.Kind.ResultDds
       Sqel.Kind.ResultTuple
       Sqel.Kind.TableInfo
@@ -320,6 +320,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.QueryPathTest
       Sqel.Test.Statement.QueryPrefixTest
       Sqel.Test.Statement.SumQueryTest
+      Sqel.Test.Statement.UidTest
       Sqel.Test.Statement.UpdateTest
       Sqel.Test.Statement.UpsertTest
       Sqel.Test.StatementTest

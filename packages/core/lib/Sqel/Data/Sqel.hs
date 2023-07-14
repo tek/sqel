@@ -1,15 +1,16 @@
 module Sqel.Data.Sqel where
 
 import GHC.Records (HasField (getField))
-import Generics.SOP (K (K), NP (Nil), SListI, hcollapse, hmap)
+import Generics.SOP (K (K), NP (Nil, (:*)), SListI, hcollapse, hmap)
 
-import Sqel.Class.DdField (DdKField (ddKField), DdKFieldT)
+import Sqel.Class.NamedFragment (NoField)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (Dd (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), Struct (Comp, Prim))
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Data.Statement (Statement)
-import Sqel.Dd (DdSub, DdType)
-import Sqel.Kind.Error (Quoted)
+import Sqel.Dd (DdHasName, DdNamesMerged, DdSub, DdType, ExtHasName)
+import Sqel.Kind.List (type (++))
+import Sqel.SOP.NP (appendNP)
 
 type SqelFor :: ∀ {ext} . Type -> Dd ext -> Type
 data SqelFor tag s where
@@ -91,24 +92,49 @@ sqelCodec = \case
   SqelComp _ _ _ _ c -> c
 {-# noinline sqelCodec #-}
 
-type Projected :: ∀ {ext} . Symbol -> Dd ext -> Dd ext
-type family Projected name s where
-  Projected name ('Dd _ _ ('Comp _ _ _ sub)) = DdKFieldT name sub
-  Projected name ('Dd _ _ ('Prim _)) =
-    TypeError ("Cannot project field named " <> Quoted name <> " from primitive Dd")
+-- TODO measure performance impact when changing fundep to family
+type TryField :: ∀ {ext} . Void -> Bool -> Symbol -> Dd ext -> [Dd ext] -> Dd ext -> Constraint
+class TryField error match name s0 ss s | match name s0 ss -> s where
+  tryField :: SqelFor tag s0 -> NP (SqelFor tag) ss -> SqelFor tag s
 
-type Project :: ∀ {ext} . Symbol -> Dd ext -> Constraint
-class Project name s where
-  project :: SqelFor tag s -> SqelFor tag (Projected name s)
-
-instance DdKField name sub => Project name ('Dd ext a ('Comp tsel sort inc sub)) where
-  project (SqelComp _ _ _ sub _) = ddKField @name sub
+instance TryField error 'True name s0 ss s0 where
+  tryField = const
 
 instance (
-    Project name s,
-    field ~ Projected name s
+    FindField error name ss s
+  ) => TryField error 'False name s0 ss s where
+    tryField _ = findField @error @name
+
+type FindField :: ∀ {ext} . Void -> Symbol -> [Dd ext] -> Dd ext -> Constraint
+class FindField error name ss s | name ss -> s where
+  findField :: NP (SqelFor tag) ss -> SqelFor tag s
+
+instance {-# overlappable #-} (
+    match ~ DdHasName name s0,
+    TryField error match name s0 ss s
+  ) => FindField error name (s0 : ss) s where
+    findField (s0 :* ss) = tryField @error @match @name s0 ss
+
+instance (
+    match ~ ExtHasName name ext,
+    TryField error match name ('Dd ext a ('Comp tsel sort 'Merge sub)) (sub ++ ss) s
+  ) => FindField error name ('Dd ext a ('Comp tsel sort 'Merge sub) : ss) s where
+    findField (s@(SqelMerge _ _ sub _) :* ss) = tryField @error @match @name s (appendNP sub ss)
+
+type Projection :: ∀ {ext} . Symbol -> Dd ext -> Dd ext -> Constraint
+class Projection name s0 s | name s0 -> s where
+  projection :: SqelFor tag s0 -> SqelFor tag s
+
+instance (
+    error ~ NoField "field" name (DdNamesMerged sub) sub,
+    FindField error name sub s
+  ) => Projection name ('Dd ext a ('Comp tsel sort inc sub)) s where
+    projection (SqelComp _ _ _ sub _) = findField @error @name sub
+
+instance (
+    Projection name s field
   ) => HasField name (SqelFor tag s) (SqelFor tag field) where
-    getField = project @name
+    getField = projection @name
 
 sqelSub :: SqelFor tag s -> NP (SqelFor tag) (DdSub s)
 sqelSub = \case
