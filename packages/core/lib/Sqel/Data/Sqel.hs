@@ -1,15 +1,16 @@
 module Sqel.Data.Sqel where
 
+import Fcf (type (@@))
 import GHC.Records (HasField (getField))
 import Generics.SOP (K (K), NP (Nil, (:*)), SListI, hcollapse, hmap)
 
-import Sqel.Class.NamedFragment (NoField)
+import Sqel.Class.NamedFragment (MatchName, MatchNameExt, NoField)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (Dd (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), Struct (Comp, Prim))
 import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Data.Statement (Statement)
-import Sqel.Dd (DdHasName, DdNamesMerged, DdSub, DdType, ExtHasName)
+import Sqel.Dd (DdNamesMerged, DdSub, DdType)
 import Sqel.Kind.List (type (++))
 import Sqel.SOP.NP (appendNP)
 
@@ -111,13 +112,13 @@ class FindField error name ss s | name ss -> s where
   findField :: NP (SqelFor tag) ss -> SqelFor tag s
 
 instance {-# overlappable #-} (
-    match ~ DdHasName name s0,
+    match ~ MatchName name @@ s0,
     TryField error match name s0 ss s
   ) => FindField error name (s0 : ss) s where
     findField (s0 :* ss) = tryField @error @match @name s0 ss
 
 instance (
-    match ~ ExtHasName name ext,
+    match ~ MatchNameExt name @@ ext,
     TryField error match name ('Dd ext a ('Comp tsel sort 'Merge sub)) (sub ++ ss) s
   ) => FindField error name ('Dd ext a ('Comp tsel sort 'Merge sub) : ss) s where
     findField (s@(SqelMerge _ _ sub _) :* ss) = tryField @error @match @name s (appendNP sub ss)

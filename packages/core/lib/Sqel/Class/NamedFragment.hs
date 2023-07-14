@@ -6,7 +6,7 @@ import Generics.SOP (NP)
 import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (Dd)
-import Sqel.Dd (DdName, DdNames, DdTypeName, DdTypeNames)
+import Sqel.Dd (DdName, DdNames, DdTypeName, DdTypeNames, ExtName)
 import Sqel.Kind.Error (BulletedLines, Quoted, StuckError)
 import Sqel.Kind.List (type (++))
 import Sqel.SOP.HFind (HFind (HFindT, hfind))
@@ -34,6 +34,10 @@ type family NoField desc name avail frags where
     StuckError avail0
     (Abstract desc name frags)
     (NotFound desc name (avail0 : avail))
+
+data MatchNameExt :: Symbol -> ext -> Exp Bool
+type instance Eval (MatchNameExt name ext) =
+  Eval (TyEq name (ExtName ext)) || Eval (TyEq name ("_" ++ ExtName ext))
 
 data MatchName :: Symbol -> Dd ext -> Exp Bool
 type instance Eval (MatchName name s) =

@@ -157,7 +157,6 @@ library
       Sqel.Kind.Project
       Sqel.Kind.ResultDds
       Sqel.Kind.ResultTuple
-      Sqel.Kind.TableInfo
       Sqel.Migration.Class.Auto
       Sqel.Migration.Class.Hoist
       Sqel.Migration.Class.Syntax
