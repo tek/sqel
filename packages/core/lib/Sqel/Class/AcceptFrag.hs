@@ -82,7 +82,7 @@ instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort s root comp) (Field
   demoteFragment = sortField id
 
 instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort ('Dd ext a ('Prim prim)) root comp) (PrimField tag) where
-  demoteFragment (Fragment (SqelPrim meta _)) = PrimField (sortIsQuery @sort) meta
+  demoteFragment (Fragment (SqelPrim table meta _)) = PrimField (sortIsQuery @sort) table meta
 
 instance SortIsQuery sort => DemoteFragment ('Frag0 tag sort s root comp) (CondField tag) where
     demoteFragment = sortField CondField

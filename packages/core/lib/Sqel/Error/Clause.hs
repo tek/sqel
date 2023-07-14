@@ -5,7 +5,7 @@ import Type.Errors (DelayError, DelayErrorFcf, ErrorMessage, IfStuck)
 
 import Sqel.Data.ClauseConfig (ClauseKeywordFor)
 import Sqel.Data.Fragment (Frag)
-import Sqel.Kind.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted)
 
 type ClauseDesc :: Type -> ErrorMessage
 type family ClauseDesc clause where
@@ -15,7 +15,7 @@ type ClauseError :: Type -> Type -> [Frag ext] -> k
 type family ClauseError tag clause frags
 
 type GenericClause :: Type -> ErrorMessage
-type GenericClause clause = "clause of type " <> QuotedType clause
+type GenericClause clause = "clause of type " <> Quoted clause
 
 type SuggestInstance :: ErrorMessage -> Type -> ErrorMessage
 type family SuggestInstance tag clause where
@@ -32,7 +32,7 @@ type family ErrorNoTag clause where
 type GeneralError :: Type -> Type -> ErrorMessage -> ErrorMessage
 type family GeneralError tag clause desc where
   GeneralError tag clause desc =
-    "The custom tag " <> QuotedType tag <> " does not support these fragments for a " <> desc <> "." %
+    "The custom tag " <> Quoted tag <> " does not support these fragments for a " <> desc <> "." %
     SuggestInstance ('ShowType tag) clause
 
 type GeneralErrorWithDesc :: Type -> Type -> ErrorMessage -> k

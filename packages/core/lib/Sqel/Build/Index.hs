@@ -2,6 +2,7 @@ module Sqel.Build.Index where
 
 import Sqel.Class.DefaultFields (DefaultMeta (defaultPrimMeta))
 import Sqel.Data.PgType (columnNameQuoted)
+import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Spine (CompSort (CompSum), PrimFor, Spine (SpinePrim))
 import Sqel.Data.Sql (Sql)
 import qualified Sqel.Default
@@ -14,18 +15,18 @@ renderIndexName ::
   Sql
 renderIndexName (defaultPrimMeta @tag -> PrimMeta {name}) = columnNameQuoted name
 
-indexWith :: (PrimFor tag -> Maybe a) -> CompSort tag -> Maybe a
+indexWith :: (PgTableName -> PrimFor tag -> Maybe a) -> CompSort tag -> Maybe a
 indexWith f = \case
-  CompSum index -> f index
+  CompSum table index -> f table index
   _ -> Nothing
 
-prependIndexWithMaybe :: (PrimFor tag -> Maybe a) -> CompSort tag -> [a] -> [a]
+prependIndexWithMaybe :: (PgTableName -> PrimFor tag -> Maybe a) -> CompSort tag -> [a] -> [a]
 prependIndexWithMaybe f meta as =
   maybeToList (indexWith f meta) ++ as
 
-prependIndexWith :: (PrimFor tag -> a) -> CompSort tag -> [a] -> [a]
+prependIndexWith :: (PgTableName -> PrimFor tag -> a) -> CompSort tag -> [a] -> [a]
 prependIndexWith f =
-  prependIndexWithMaybe (Just . f)
+  prependIndexWithMaybe \ t m -> Just (f t m)
 
 prependIndexName ::
   ∀ tag .
@@ -33,7 +34,7 @@ prependIndexName ::
   CompSort tag ->
   [Sql] ->
   [Sql]
-prependIndexName = prependIndexWith (renderIndexName @tag)
+prependIndexName = prependIndexWith (const (renderIndexName @tag))
 
 prependIndex ::
   CompSort tag ->

@@ -13,7 +13,7 @@ import Sqel.Sql (concatMapComma)
 
 spineUnique :: Spine Def -> Bool
 spineUnique = \case
-  SpinePrim meta -> constrUnique meta.constr
+  SpinePrim _ meta -> constrUnique meta.constr
   SpineComp meta _ _ -> constrUnique meta.constr
 
 -- | This only uses base columns because composite type columns cannot have constraints like @unique@.

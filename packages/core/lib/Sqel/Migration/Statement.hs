@@ -115,7 +115,7 @@ addCol ::
   SqelFor tag s ->
   Writer [MigrationStatement] ()
 addCol typeName md = \case
-  SqelPrim (defaultPrimMeta @tag -> meta) _ ->
+  SqelPrim _ (defaultPrimMeta @tag -> meta) _ ->
     addPrim typeName meta md
   SqelNest (defaultCompMeta @tag -> meta) _ _ _ ->
     addComp typeName meta md
@@ -138,7 +138,7 @@ addIndexCol ::
   CompSort Def ->
   Writer [MigrationStatement] ()
 addIndexCol typeName = \case
-  CompSum index -> addPrim typeName index Nothing
+  CompSum _ index -> addPrim typeName index Nothing
   _ -> unit
 
 -- TODO Default value is now Text, can be set with `default`

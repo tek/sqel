@@ -3,7 +3,7 @@
 module Sqel.Statement.Common where
 
 import Sqel.Build.Sql (BuildClause)
-import Sqel.Class.Check (Checked1)
+import Sqel.Class.Check (Check1)
 import qualified Sqel.Clauses as Clauses
 import Sqel.Clauses (deleteFrom, doUpdateSet, from, insertInto, onConflict, returning, select, values, where_)
 import Sqel.Data.Drop (Cascade (Cascade), Drop (Drop))
@@ -69,7 +69,7 @@ createType s = S.do
 
 selectWhere ::
   ∀ tag query table .
-  Checked1 table tag query =>
+  Check1 table query =>
   BuildClause tag Select =>
   BuildClause tag From =>
   BuildClause tag Where =>
@@ -121,7 +121,7 @@ upsert s = S.do
 
 delete ::
   ∀ tag query table .
-  Checked1 table tag query =>
+  Check1 table query =>
   BuildClause tag DeleteFrom =>
   BuildClause tag Where =>
   BuildClause tag Returning =>

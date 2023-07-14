@@ -25,7 +25,7 @@ table_Dat = sqel
 
 use :: SqelFor tag table -> ()
 use (SqelComp _ _ _ _ _) = ()
-use (SqelPrim _ _) = ()
+use (SqelPrim _ _ _) = ()
 
 undeterminedParam ::
   ∀ (sa :: Type) .

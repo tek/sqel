@@ -41,7 +41,7 @@ transformWith ::
   Spine tag1 ->
   Spine tag2
 transformWith p c = \case
-  SpinePrim meta -> SpinePrim (p meta)
+  SpinePrim table meta -> SpinePrim table (p meta)
   SpineNest meta compSort sub -> c False meta compSort (transformWith p c <$> sub)
   SpineMerge meta compSort sub -> c True meta compSort (transformWith p c <$> sub)
 
@@ -51,7 +51,7 @@ transformSortWith ::
   CompSort tag2
 transformSortWith p = \case
   CompProd -> CompProd
-  CompSum index -> CompSum (p index)
+  CompSum table index -> CompSum table (p index)
   CompCon -> CompCon
 
 transformMeta ::

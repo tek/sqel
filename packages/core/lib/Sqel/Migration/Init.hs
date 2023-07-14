@@ -27,7 +27,7 @@ compNeedsInit ::
   SqelFor tag s ->
   m Bool
 compNeedsInit = \case
-  SqelPrim _ _ -> pure False
+  SqelPrim _ _ _ -> pure False
   SqelNest (defaultCompMeta @tag -> meta) _ _ _ ->
     withSome meta.typeName \ name -> do
       DbCols existing <- typeColumns typeColumnsSql name
@@ -42,7 +42,7 @@ createType ::
   SqelFor tag s ->
   m ()
 createType = \case
-  SqelPrim _ _ -> unit
+  SqelPrim _ _ _ -> unit
   s@(SqelNest _ _ _ _) -> do
     MigrationEffect.log [exon|Initializing type '#{getPgTypeName (sqelCompName s)}'|]
     MigrationEffect.runStatement_ () (Sqel.createType s)
@@ -75,7 +75,7 @@ initStructure ::
 initStructure = \case
   SqelNest _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag)) initComp cols
   SqelMerge _ _ cols _ -> hctraverse_ (Proxy @(InitComp tag)) initComp cols
-  SqelPrim _ _ -> unit
+  SqelPrim _ _ _ -> unit
 
 type InitTable :: ∀ {ext} . Type -> Dd ext -> Constraint
 class InitTable tag table where

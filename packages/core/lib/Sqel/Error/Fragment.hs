@@ -6,7 +6,7 @@ import Type.Errors (DelayError, ErrorMessage, IfStuck)
 import Sqel.Data.ClauseConfig (ClauseKeywordFor)
 import Sqel.Data.Spine (SpineDesc, SpineSort)
 import Sqel.Error.Clause (ClauseDesc, GenericClause)
-import Sqel.Kind.Error (Quoted, QuotedType, StuckError)
+import Sqel.Kind.Error (Quoted, StuckError)
 
 type FragmentMismatch :: Type -> Type -> SpineSort -> k
 type family FragmentMismatch tag clause sort
@@ -36,7 +36,7 @@ type family FragmentMismatchDefault clause sort where
 type FullDesc :: Type -> Type -> ErrorMessage -> SpineSort -> ErrorMessage
 type family FullDesc tag clause desc sort where
   FullDesc tag clause desc sort =
-    "The custom tag " <> QuotedType tag <> " does not accept " <> SpineDesc sort <>
+    "The custom tag " <> Quoted tag <> " does not accept " <> SpineDesc sort <>
     " fragments for a " <> desc <> "." %
     "You can define an instance to accept it:" %
     "instance AcceptFrag error " <> tag <> " " <> clause <> " " <> sort

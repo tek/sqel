@@ -1,5 +1,6 @@
 module Sqel.Data.Field where
 
+import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Spine (PrimFor, Spine)
 import Sqel.Data.Sql (Sql)
 
@@ -28,6 +29,7 @@ deriving stock instance Show (Spine tag) => Show (CondField tag)
 data PrimField tag =
   PrimField {
     query :: Bool,
+    table :: PgTableName,
     meta :: PrimFor tag
   }
 

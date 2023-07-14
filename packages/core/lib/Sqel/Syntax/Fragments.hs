@@ -2,7 +2,7 @@ module Sqel.Syntax.Fragments where
 
 import Generics.SOP (NP (Nil, (:*)))
 
-import Sqel.Class.Check (Checked)
+import Sqel.Class.Check (Check)
 import Sqel.Class.Query (
   FragmentsDd (fragmentsDd),
   FragmentsSqel (fragmentsSqel),
@@ -112,7 +112,7 @@ tables =
 
 project ::
   ∀ tag proj query tables projs .
-  Checked tables tag proj =>
+  Check tables proj =>
   SqelFor tag proj ->
   Clauses tag '[] 'Nothing (Fragments tag query tables projs) ->
   Clauses tag '[] 'Nothing (Fragments tag query tables (proj : projs))

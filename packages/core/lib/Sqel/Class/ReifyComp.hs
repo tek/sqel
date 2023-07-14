@@ -30,11 +30,10 @@ instance (
   ) => DemoteSort Def ('Sum prefix) tname ext where
     demoteSort table = do
       query <- queryMeta @'[] @'False @'Cond
-      pure $ CompSum PrimMeta {
+      pure $ CompSum table PrimMeta {
         name = pgColumnNameSym @name,
         path = ddPath @indexPath,
         colType = "bigint",
-        table,
         constr = def,
         query
       }

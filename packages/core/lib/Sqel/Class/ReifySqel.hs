@@ -28,8 +28,8 @@ instance (
     ReifyCodec FullCodec s
   ) => Node root tag ('Dd ext a ('Prim prim)) where
     node table = do
-      meta <- reifyPrim @tag @ext @a @prim table
-      pure (SqelPrim meta (reifyCodec @_ @s))
+      meta <- reifyPrim @tag @ext @a @prim
+      pure (SqelPrim table meta (reifyCodec @_ @s))
 
 instance (
     s ~ 'Dd ext a ('Comp tsel c i sub),

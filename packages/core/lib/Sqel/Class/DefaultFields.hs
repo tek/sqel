@@ -42,7 +42,7 @@ defaultSort ::
   CompSort Def
 defaultSort = \case
   CompProd -> CompProd
-  CompSum index -> CompSum (defaultPrimMeta @tag index)
+  CompSum table index -> CompSum table (defaultPrimMeta @tag index)
   CompCon -> CompCon
 
 defaultSpine ::
@@ -51,7 +51,7 @@ defaultSpine ::
   Spine tag ->
   Spine Def
 defaultSpine = \case
-  SpinePrim meta -> SpinePrim (defaultPrimMeta @tag meta)
+  SpinePrim table meta -> SpinePrim table (defaultPrimMeta @tag meta)
   SpineNest meta compSort sub -> SpineNest (defaultCompMeta @tag meta) (defaultSort compSort) (defaultSpine <$> sub)
   SpineMerge meta compSort sub -> SpineMerge (defaultCompMeta @tag meta) (defaultSort compSort) (defaultSpine <$> sub)
 
@@ -95,7 +95,7 @@ instance (
       CondOp op l r -> CondOp op (defaultFields l) (defaultFields r)
 
 instance DefaultMeta tag => DefaultFields (PrimField tag) (PrimField Def) where
-  defaultFields (PrimField q s) = PrimField q (defaultPrimMeta @tag s)
+  defaultFields (PrimField q t s) = PrimField q t (defaultPrimMeta @tag s)
 
 instance DefaultMeta tag => DefaultFields (RootField tag) (RootField Def) where
   defaultFields (RootField f) = RootField (defaultFields f)

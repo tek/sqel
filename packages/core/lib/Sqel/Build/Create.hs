@@ -26,13 +26,13 @@ createComp isTable meta =
 
 createSub :: Bool -> Bool -> SpineDef -> [Sql]
 createSub table sumCol = \case
-  SpinePrim meta -> [createPrim table sumCol meta]
+  SpinePrim _ meta -> [createPrim table sumCol meta]
   SpineNest meta _ _ -> [createComp table meta]
   SpineMerge _ compSort cols -> createSub table sumCol =<< prependIndex compSort cols
 
 create :: Bool -> SpineDef -> [Sql]
 create table = \case
-  SpinePrim meta -> [createPrim table False meta]
+  SpinePrim _ meta -> [createPrim table False meta]
   SpineComp _ compSort cols -> createSub table (isSum compSort) =<< prependIndex compSort cols
 
 createCols :: RootField Def -> [Sql]

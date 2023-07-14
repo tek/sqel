@@ -8,7 +8,7 @@ import Prelude hiding (Mod, join, on)
 
 import Sqel.Build (buildAs, buildKAs, buildKTuple, buildTuple)
 import Sqel.Build.Sql (BuildClause, BuildClauses, buildSqlDd)
-import Sqel.Class.Check (Check, Checked)
+import Sqel.Class.Check (Check, Check)
 import Sqel.Class.NamedFragment (NamedTable)
 import Sqel.Class.Query (FragmentsDd, QuerySqel)
 import Sqel.Class.ReifySqel (ReifySqels)
@@ -137,8 +137,8 @@ stmt12 table =
 selectQuery ::
   ∀ {extq} {extt} (query :: Dd extq) (proj :: Dd extt) (table :: Dd extt) tag .
   BuildClauses tag [Select, From, Where] =>
-  Checked '[table] tag proj =>
-  Checked '[table] tag query =>
+  Check '[table] proj =>
+  Check '[table] query =>
   SqelFor tag query ->
   SqelFor tag proj ->
   SqelFor tag table ->

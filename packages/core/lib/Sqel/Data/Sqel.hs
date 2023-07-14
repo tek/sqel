@@ -6,6 +6,7 @@ import Generics.SOP (K (K), NP (Nil, (:*)), SListI, hcollapse, hmap)
 import Sqel.Class.NamedFragment (NoField)
 import Sqel.Data.Codec (FullCodec)
 import Sqel.Data.Dd (Dd (Dd), Inc (Merge, Nest), SInc (SMerge, SNest), Struct (Comp, Prim))
+import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Spine (CompFor, CompSort, PrimFor, Spine (SpineMerge, SpineNest, SpinePrim))
 import Sqel.Data.Statement (Statement)
 import Sqel.Dd (DdHasName, DdNamesMerged, DdSub, DdType, ExtHasName)
@@ -15,7 +16,7 @@ import Sqel.SOP.NP (appendNP)
 type SqelFor :: ∀ {ext} . Type -> Dd ext -> Type
 data SqelFor tag s where
 
-  SqelPrim :: PrimFor tag -> FullCodec a -> SqelFor tag ('Dd ext a ('Prim pt))
+  SqelPrim :: PgTableName -> PrimFor tag -> FullCodec a -> SqelFor tag ('Dd ext a ('Prim pt))
 
   SqelComp ::
     SListI sub =>
@@ -81,14 +82,14 @@ sqelSpine =
   where
     spin :: ∀ s' . SqelFor tag s' -> Spine tag
     spin = \case
-      SqelPrim meta _ -> SpinePrim meta
+      SqelPrim table meta _ -> SpinePrim table meta
       SqelNest meta compSort sub _ -> SpineNest meta compSort (hcollapse (hmap (K . spin) sub))
       SqelMerge meta compSort sub _ -> SpineMerge meta compSort (hcollapse (hmap (K . spin) sub))
 
 -- | Allowing this to be inlined incurs a 5% increase in compile time.
 sqelCodec :: SqelFor tag s -> FullCodec (DdType s)
 sqelCodec = \case
-  SqelPrim _ c -> c
+  SqelPrim _ _ c -> c
   SqelComp _ _ _ _ c -> c
 {-# noinline sqelCodec #-}
 
@@ -138,7 +139,7 @@ instance (
 
 sqelSub :: SqelFor tag s -> NP (SqelFor tag) (DdSub s)
 sqelSub = \case
-  SqelPrim _ _ -> Nil
+  SqelPrim _ _ _ -> Nil
   SqelComp _ _ _ sub _ -> sub
 
 type StatementDd tables query table = Statement tables (DdType query) (DdType table)

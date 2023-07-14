@@ -13,14 +13,14 @@ spineColumns ::
   Spine Def ->
   [Sql]
 spineColumns cond = \case
-  s@(SpinePrim PrimMeta {name})
+  s@(SpinePrim _ PrimMeta {name})
     | cond s -> [columnNameQuoted name]
     | otherwise -> []
   SpineComp _ compSort cols -> prependIndexName compSort (sub =<< cols)
   where
     sub s'
       | cond s' = case s' of
-        SpinePrim PrimMeta {name} -> [columnNameQuoted name]
+        SpinePrim _ PrimMeta {name} -> [columnNameQuoted name]
         SpineNest CompMeta {name} _ _ -> [columnNameQuoted name]
         SpineMerge _ compSort cols -> prependIndexName compSort (sub =<< cols)
       | otherwise = []

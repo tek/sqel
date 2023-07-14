@@ -7,6 +7,7 @@ import Exon (exon)
 import Sqel.CondExpr (renderCondExpr)
 import Sqel.Data.Field (CondField (CondField, CondOp), CondOperand (CondOpField, CondOpLit), Field (Field))
 import Sqel.Data.Path (PrimPath)
+import Sqel.Data.PgTypeName (PgTableName)
 import qualified Sqel.Data.QueryMeta as QueryMeta
 import Sqel.Data.QueryMeta (CondMeta (CondMeta), QueryMeta (QueryMeta), index)
 import Sqel.Data.Selector (Selector)
@@ -94,9 +95,9 @@ conGuard indexParam conIndex = \case
   where
     grd = ExprAtom [exon|#{dollar indexParam} = #{show conIndex}|]
 
-conditionPath :: Bool -> PrimMeta -> Selector
-conditionPath multi meta =
-  primSelector (primMetaPath multi meta)
+conditionPath :: Bool -> PgTableName -> PrimMeta -> Selector
+conditionPath multi table meta =
+  primSelector (primMetaPath multi table meta)
 
 paramCondition :: PrimPath -> Int -> CondMeta -> Expr
 paramCondition path index (CondMeta code nullable) =
@@ -106,9 +107,9 @@ paramCondition path index (CondMeta code nullable) =
       QueryMeta.CondOp op -> [exon|##{primSelector path} #{op} #{dollar index}|]
       QueryMeta.CondExpr expr -> renderCondExpr path index expr
 
-prim :: Bool -> PrimMeta -> Expr
-prim multi meta
-  | QueryMeta index (Just cond) <- meta.query = paramCondition (primMetaPath multi meta) index cond
+prim :: Bool -> PgTableName -> PrimMeta -> Expr
+prim multi table meta
+  | QueryMeta index (Just cond) <- meta.query = paramCondition (primMetaPath multi table meta) index cond
   | otherwise = ExprEmpty
 
 joinConds :: (NonEmpty Expr -> Expr) -> [Expr] -> Expr
@@ -124,20 +125,20 @@ joinComp compSort sub =
   joinConds (op compSort) sub
   where
     op = \case
-      CompSum _ -> ExprOr
+      CompSum _ _ -> ExprOr
       CompProd -> ExprAnd
       CompCon -> ExprAnd
 
 comp :: Bool -> CompSort Def -> [SpineDef] -> Expr
 comp multi compSort sub
-  | CompSum PrimMeta {query = QueryMeta {index}} <- compSort =
+  | CompSum _ PrimMeta {query = QueryMeta {index}} <- compSort =
     joinComp compSort (uncurry (conGuard index) <$> zip [0..] (node multi <$> sub))
   | otherwise =
     joinComp compSort (node multi <$> sub)
 
 node :: Bool -> SpineDef -> Expr
 node multi = \case
-  SpinePrim meta -> prim multi meta
+  SpinePrim table meta -> prim multi table meta
   SpineComp _ compSort sub -> comp multi compSort sub
 
 spineConditions :: Bool -> SpineDef -> Expr
@@ -153,8 +154,8 @@ condOperand ::
   Maybe Sql
 condOperand multi = \case
   CondOpLit s -> Just s
-  CondOpField (Field False (SpinePrim meta)) -> Just (toSql (conditionPath multi meta))
-  CondOpField (Field True (SpinePrim PrimMeta {query = QueryMeta {index}})) -> Just (dollar index)
+  CondOpField (Field False (SpinePrim table meta)) -> Just (toSql (conditionPath multi table meta))
+  CondOpField (Field True (SpinePrim _ PrimMeta {query = QueryMeta {index}})) -> Just (dollar index)
   CondOpField _ -> Nothing
 
 fieldOpCondition :: Bool -> Text -> CondOperand Def -> CondOperand Def -> Expr

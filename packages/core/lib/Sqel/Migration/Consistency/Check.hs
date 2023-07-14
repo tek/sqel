@@ -52,7 +52,7 @@ instance TransformMeta Def CMC where
 
 colName :: Spine CMC -> PgColumnName
 colName = \case
-  SpinePrim meta -> meta.name
+  SpinePrim _ meta -> meta.name
   SpineComp meta _ _ -> meta.name
 
 indent ::
@@ -67,7 +67,7 @@ showType ::
   Text
 showType =
   squote . \case
-    SpinePrim (CMCPrim {colType = PgPrimName name}) -> name
+    SpinePrim _ (CMCPrim {colType = PgPrimName name}) -> name
     SpineComp (CMCComp {colType = PgTypeRef name}) _ _ -> name
 
 -- TODO handle constraints (have to be added to CMC)

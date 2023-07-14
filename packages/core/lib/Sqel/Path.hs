@@ -25,9 +25,9 @@ primPath multi table path =
     mayTable | multi = Just table
              | otherwise = Nothing
 
-primMetaPath :: Bool -> PrimMeta -> PrimPath
-primMetaPath multi meta =
-  primPath multi meta.table meta.path
+primMetaPath :: Bool -> PgTableName -> PrimMeta -> PrimPath
+primMetaPath multi table meta =
+  primPath multi table meta.path
 
 primSelector :: PrimPath -> Selector
 primSelector = \case

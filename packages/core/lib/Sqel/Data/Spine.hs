@@ -3,7 +3,7 @@ module Sqel.Data.Spine where
 import Data.Aeson (FromJSON, ToJSON)
 
 import Sqel.Data.PgType (PgTypeRef)
-import Sqel.Data.PgTypeName (PgCompName)
+import Sqel.Data.PgTypeName (PgCompName, PgTableName)
 
 type PrimFor :: Type -> Type
 type family PrimFor tag
@@ -15,7 +15,7 @@ type CompSort :: Type -> Type
 data CompSort tag =
   CompProd
   |
-  CompSum (PrimFor tag)
+  CompSum PgTableName (PrimFor tag)
   |
   CompCon
   deriving stock (Generic)
@@ -33,7 +33,7 @@ deriving anyclass instance (
 
 type Spine :: Type -> Type
 data Spine tag where
-  SpinePrim :: { primMeta :: PrimFor tag } -> Spine tag
+  SpinePrim :: { table :: PgTableName, primMeta :: PrimFor tag } -> Spine tag
   SpineNest :: { compMeta :: CompFor tag, compSort :: CompSort tag, sub :: [Spine tag] } -> Spine tag
   SpineMerge :: { compMeta :: CompFor tag, compSort :: CompSort tag, sub :: [Spine tag] } -> Spine tag
   deriving stock (Generic)
@@ -55,7 +55,7 @@ spineCompFields :: Spine tag -> Maybe (CompFor tag, CompSort tag, [Spine tag])
 spineCompFields = \case
   SpineNest {..} -> Just (compMeta, compSort, sub)
   SpineMerge {..} -> Just (compMeta, compSort, sub)
-  SpinePrim _ -> Nothing
+  SpinePrim _ _ -> Nothing
 
 pattern SpineComp :: CompFor tag -> CompSort tag -> [Spine tag] -> Spine tag
 pattern SpineComp {meta, sort, sub} <- (spineCompFields -> Just (meta, sort, sub))

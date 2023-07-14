@@ -4,7 +4,7 @@ import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (Dd (Dd), Ext (Ext), PrimType (Cond, NoCond), Struct (Comp, Prim))
 import Sqel.Data.Sel (Paths (Paths))
-import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.Error (Quoted, ShowPath, Unlines)
 import Sqel.Kind.List (type (++))
 
 data FieldPath =
@@ -39,7 +39,7 @@ type family PathEq f1 f2 where
 
 type ShowField :: FieldPath -> ErrorMessage
 type family ShowField field where
-  ShowField ('FieldPath path tpe) = "  " <> ShowPath path <> ": " <> QuotedType tpe
+  ShowField ('FieldPath path tpe) = "  " <> ShowPath path <> ": " <> Quoted tpe
 
 type ShowFields :: [FieldPath] -> [ErrorMessage]
 type family ShowFields fields where

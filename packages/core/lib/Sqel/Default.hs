@@ -27,7 +27,6 @@ data PrimMeta =
     name :: PgColumnName,
     path :: FieldPath,
     colType :: PgPrimName,
-    table :: PgTableName,
     constr :: Constraints,
     query :: QueryMeta
   }

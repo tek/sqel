@@ -81,12 +81,12 @@ columnMap =
   DbCols . Map.fromList . spin
   where
     spin = concatMap \case
-      SpinePrim (defaultPrimMeta @tag -> meta) -> [prim meta]
+      SpinePrim table (defaultPrimMeta @tag -> meta) -> [prim table meta]
       SpineNest (defaultCompMeta @tag -> meta) _ _ -> [(meta.name, (Left meta.colType, meta.constr.nullable))]
       SpineMerge (defaultCompMeta @tag -> _) (defaultSort -> compSort) cols -> withIndex compSort (spin cols)
     withIndex =
       prependIndexWith prim
-    prim meta =
+    prim _ meta =
       (meta.name, (Right meta.colType, meta.constr.nullable))
 
 pgKind :: PgTypeName table -> Text

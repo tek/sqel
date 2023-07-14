@@ -1,6 +1,6 @@
 module Main where
 
-import Sqel.Test.AbstractTest (test_abstract)
+import Sqel.Test.AbstractTest (test_abstract, test_abstract_query)
 import Sqel.Test.DslTest (test_dsl)
 import Sqel.Test.EnumTest (test_enum)
 import Sqel.Test.ErrorTest (test_errors)
@@ -31,6 +31,7 @@ tests =
     unitTest "enum column" test_enum,
     unitTest "prim table" test_primTable,
     unitTest "abstract column" test_abstract,
+    unitTest "abstract column with query" test_abstract_query,
     unitTest "condition operator as mod" test_condOp
   ]
 

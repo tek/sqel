@@ -29,7 +29,7 @@ import Sqel.Data.Sel (
   TSel (TSel),
   TSelName,
   )
-import Sqel.Kind.Error (QuotedType, ShowPath, Unlines)
+import Sqel.Kind.Error (Quoted, ShowPath, Unlines)
 import Sqel.Kind.List (type (++))
 
 type MapSub :: (o -> Exp ext) -> [Dd o] -> [Dd ext]
@@ -140,10 +140,10 @@ type family DescribeSort c where
 data ShowDdLinesL :: ErrorMessage -> Dd ext -> Exp [ErrorMessage]
 
 type instance Eval (ShowDdLinesL indent ('Dd ext t ('Prim _))) =
-  '[indent <> "* Prim " <> QuotedType t <> ShowPathShort ext]
+  '[indent <> "* Prim " <> Quoted t <> ShowPathShort ext]
 
 type instance Eval (ShowDdLinesL indent ('Dd ext t ('Comp _ c _ sub))) =
-  (indent <> "- " <> DescribeSort c <> " " <> QuotedType t <> ShowPathShort ext) :
+  (indent <> "- " <> DescribeSort c <> " " <> Quoted t <> ShowPathShort ext) :
   Concat @@ (FMap (ShowDdLinesL (indent <> "  ")) @@ sub)
 
 type ShowDdLines :: Dd ext -> ErrorMessage

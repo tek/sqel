@@ -10,7 +10,7 @@ import Sqel.Sql.Prepared (dollar)
 
 -- TODO :(
 limitClause :: Bool -> OrLiteral Int64 (PrimField Def) -> Sql
-limitClause _ (NotLiteral (PrimField True PrimMeta {query = QueryMeta {index}})) =
+limitClause _ (NotLiteral (PrimField True _ PrimMeta {query = QueryMeta {index}})) =
   dollar index
 limitClause _ (LiteralField n) =
   Sql (show n)

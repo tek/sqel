@@ -37,7 +37,7 @@ spineTypes table =
   Types table case table of
     SpineComp _ _ sub ->
       foldMap spineComps sub
-    SpinePrim _ ->
+    SpinePrim _ _ ->
       mempty
 
 spineTableName ::
@@ -47,7 +47,7 @@ spineTableName ::
   PgTableName
 spineTableName = \case
   SpineComp (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ -> pgTableName name
-  SpinePrim (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) -> pgTableName name
+  SpinePrim _ (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) -> pgTableName name
 
 mergeCols :: [Spine tag] -> [Spine tag]
 mergeCols cols =
@@ -58,7 +58,7 @@ mergeCols cols =
 
 spineTypeCols :: Spine tag -> [Spine tag]
 spineTypeCols = \case
-  s@(SpinePrim _) -> [s]
+  s@(SpinePrim _ _) -> [s]
   SpineComp _ compSort sub -> prependIndex compSort (mergeCols sub)
 
 spineColumnName ::
@@ -67,10 +67,10 @@ spineColumnName ::
   Spine tag ->
   PgColumnName
 spineColumnName = \case
-  SpinePrim (defaultPrimMeta @tag -> meta) -> meta.name
+  SpinePrim _ (defaultPrimMeta @tag -> meta) -> meta.name
   SpineComp (defaultCompMeta @tag -> meta) _ _ -> meta.name
 
 isSum :: CompSort tag -> Bool
 isSum = \case
-  CompSum _ -> True
+  CompSum _ _ -> True
   _ -> False

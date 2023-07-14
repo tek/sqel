@@ -11,7 +11,7 @@ import Sqel.Path (primMetaPath, primSelector)
 
 -- TODO order by comp?
 orderByClause :: Bool -> (ClauseParam (PrimField Def) Order) -> Sql
-orderByClause multi (ClauseParam (PrimField _ meta) order) =
+orderByClause multi (ClauseParam (PrimField _ table meta) order) =
   [exon|##{sel} ##{order}|]
   where
-    sel = primSelector (primMetaPath multi meta)
+    sel = primSelector (primMetaPath multi table meta)

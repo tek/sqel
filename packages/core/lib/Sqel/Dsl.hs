@@ -59,7 +59,7 @@ import Sqel.Dsl.Error (TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
-import Sqel.Kind.Error (PlainTypeError, Quoted, QuotedType)
+import Sqel.Kind.Error (PlainTypeError, Quoted)
 import Sqel.Migration.Ddl (Ddl, ToDdl)
 import Sqel.Normalize (NormalizeDd)
 
@@ -415,7 +415,7 @@ type family SetMerge s where
   SetMerge ('Dd ('Ext0 sel mods) a ('Comp tsel c _ s)) =
     'Dd ('Ext0 (SetPathSkip sel) mods) a ('Comp tsel c 'Merge s)
   SetMerge ('Dd _ a ('Prim _)) =
-    TypeError (Quoted "Merge" <> " cannot be used with primitive type " <> QuotedType a)
+    TypeError (Quoted "Merge" <> " cannot be used with primitive type " <> Quoted a)
 
 ------------------------------------------------------------------------------------------------------------------------
 

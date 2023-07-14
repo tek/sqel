@@ -4,8 +4,8 @@ import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragment (Frag (Frag, FragOp), Frag0 (Frag0), FragOperand (FragOpFrag, FragOpLit))
 import Sqel.Data.Spine (Spine)
 import Sqel.Dd (DdTypes)
+import Sqel.Kind.Error (Quoted)
 import Sqel.Kind.List (type (++))
-import Sqel.Kind.Error (Quoted, QuotedType)
 
 type Frag0Tag :: Frag0 ext -> Type
 type family Frag0Tag frag where
@@ -42,4 +42,4 @@ type FragDd :: Frag ext -> dd
 type family FragDd frag where
   FragDd ('Frag ('Frag0 _ _ s _ _)) = s
   FragDd ('FragOp _ _) =
-    TypeError ("Internal: " <> Quoted "FragDd" <> " called with " <> Quoted "FragOp" <> " or " <> QuotedType Spine)
+    TypeError ("Internal: " <> Quoted "FragDd" <> " called with " <> Quoted "FragOp" <> " or " <> Quoted Spine)

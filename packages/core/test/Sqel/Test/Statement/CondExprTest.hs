@@ -33,8 +33,8 @@ expr =
 
 sqel_Qn :: Sqel Query_Qn
 sqel_Qn = case sqel @Query_Qn of
-  SqelComp i meta s (n :* SqelPrim pmeta pcodec :* Nil) codec ->
-    SqelComp i meta s (n :* SqelPrim (withCondExpr expr pmeta) pcodec :* Nil) codec
+  SqelComp i meta s (n :* SqelPrim table pmeta pcodec :* Nil) codec ->
+    SqelComp i meta s (n :* SqelPrim table (withCondExpr expr pmeta) pcodec :* Nil) codec
 
 stmt_condExpr :: Sql
 stmt_condExpr = statementSql S.do

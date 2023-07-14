@@ -43,7 +43,7 @@ sqelTableName ::
 sqelTableName = \case
   SqelNest (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ _ -> pgTableName name
   SqelMerge (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ _ -> pgTableName name
-  SqelPrim (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) _ -> pgTableName name
+  SqelPrim _ (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) _ -> pgTableName name
 
 sqelCompName ::
   ∀ tag s .
@@ -53,7 +53,7 @@ sqelCompName ::
 sqelCompName = \case
   SqelNest (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ _ -> pgCompName name
   SqelMerge (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ _ -> pgCompName name
-  SqelPrim (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) _ -> pgCompName name
+  SqelPrim _ (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) _ -> pgCompName name
 
 foldTypes ::
   ∀ tag ext (table :: Dd ext) m .

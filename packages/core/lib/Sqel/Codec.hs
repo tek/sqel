@@ -16,7 +16,7 @@ import Sqel.Codec.PrimDecoder (PrimDecoder)
 import qualified Sqel.Codec.PrimEncoder as PrimEncoder
 import Sqel.Codec.PrimEncoder (PrimEncoder)
 import Sqel.Data.PgType (PgPrimName, pgPrimName)
-import Sqel.Kind.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted)
 
 ignoreEncoder :: Encoder.Value a -> Params b
 ignoreEncoder v =
@@ -91,11 +91,11 @@ type NoPrimColumn :: Type -> k
 type family NoPrimColumn a where
   NoPrimColumn a =
     TypeError (
-      "A column of type " <> QuotedType a <> " was declared as primitive," %
+      "A column of type " <> Quoted a <> " was declared as primitive," %
       "but there is no instance of " <> Quoted "PrimColumn" <> " for that type." %
       "If it is a newtype, ensure that it has " <> Quoted "Generic" <> " and use " <> Quoted "Newtype" <> "." %
       "If it is a sequence type, use " <> Quoted "Array" <> "." %
-      "If it is a " <> QuotedType Maybe <> " column, use " <> Quoted "Nullable" <> "."
+      "If it is a " <> Quoted Maybe <> " column, use " <> Quoted "Nullable" <> "."
     )
 
 type PrimColumnOrError :: Type -> Constraint

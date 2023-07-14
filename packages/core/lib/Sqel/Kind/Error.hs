@@ -35,17 +35,9 @@ type family JoinCommaSym ns where
   JoinCommaSym (n : n1 : ns) = 'Text n <> ", " <> JoinCommaSym (n1 : ns)
   JoinCommaSym '[n] = 'Text n
 
-type QuotedError :: ErrorMessage -> ErrorMessage
-type family QuotedError msg where
-  QuotedError err = "‘" <> err <> "’"
-
 type Quoted :: k -> ErrorMessage
 type family Quoted s where
-  Quoted s = QuotedError (ToErrorMessage s)
-
-type QuotedType :: k -> ErrorMessage
-type family QuotedType t where
-  QuotedType t = QuotedError ('ShowType t)
+  Quoted s = "‘" <> ToErrorMessage s <> "’"
 
 data LineBreak :: ErrorMessage -> ErrorMessage -> Exp ErrorMessage
 type instance Eval (LineBreak l r) = l % r

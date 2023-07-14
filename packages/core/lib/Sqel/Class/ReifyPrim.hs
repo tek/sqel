@@ -9,7 +9,6 @@ import Sqel.Data.Mods.CondOp (CondOp)
 import Sqel.Data.Mods.Ignore (Ignore)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (pgColumnNameSym)
-import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.QueryMeta (CondMeta (CondMeta), pattern CondOp, QueryMeta (QueryMeta, QuerySynthetic))
 import Sqel.Data.Sel (Paths (Paths))
 import Sqel.Data.Spine (PrimFor)
@@ -67,7 +66,7 @@ instance (
 
 type ReifyPrim :: ∀ {ext} . Type -> ext -> Type -> PrimType -> Constraint
 class ReifyPrim tag ext a prim where
-  reifyPrim :: PgTableName -> IndexState (PrimFor tag)
+  reifyPrim :: IndexState (PrimFor tag)
 
 instance (
     'Paths name dd tablePath ~ ExtPath ext,
@@ -80,13 +79,12 @@ instance (
     ignore ~ HasMod Ignore mods,
     MkQueryMeta mods ignore prim
   ) => ReifyPrim Def ext a prim where
-  reifyPrim table = do
+  reifyPrim = do
     query <- queryMeta @mods @ignore @prim
     pure PrimMeta {
       name = pgColumnNameSym @name,
       path = ddPath @tablePath,
       colType = reifyPrimName @Def @a @mods,
-      table,
       constr = demoteConstraints @constr,
       query
     }

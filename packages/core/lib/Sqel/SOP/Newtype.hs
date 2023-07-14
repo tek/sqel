@@ -5,7 +5,7 @@ import Generics.SOP.Type.Metadata (DatatypeInfo (Newtype))
 import Type.Errors (DelayError, ErrorMessage)
 import Unsafe.Coerce (unsafeCoerce)
 
-import Sqel.Kind.Error (Quoted, QuotedType)
+import Sqel.Kind.Error (Quoted)
 import Sqel.SOP.HasGeneric (HasGeneric)
 
 type ErrHead :: Type -> ErrorMessage
@@ -22,7 +22,7 @@ type NoGenericError a =
 -- "If you want to use " <> Quoted "Coercible" <> " instead, use " <> Quoted "primCoerce" <> "."
 
 type NotNewtypeError a =
-  "but " <> QuotedType a <> " is not a newtype."
+  "but " <> Quoted a <> " is not a newtype."
 
 type UN_CheckNewtype :: Void -> [[Type]] -> DatatypeInfo -> Type -> Type -> Constraint
 class UN_CheckNewtype err ass info a w | ass info a -> w where

@@ -2,7 +2,7 @@ module Sqel.Class.Query where
 
 import Generics.SOP (All, NP (Nil, (:*)), SListI, hcpure, hmap)
 
-import Sqel.Class.Check (Checked (checked), unchecked)
+import Sqel.Class.Check (Check (checked), unchecked)
 import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
 import Sqel.Data.Dd (Dd)
 import Sqel.Data.Fragment (Fragment (Fragment))
@@ -16,29 +16,21 @@ import Sqel.Data.Fragments (
   )
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Kind.Maybe (MaybeD (JustD, NothingD))
-import Sqel.SOP.HasGeneric (BoolVal (boolVal))
 
-type IsMulti :: [k] -> Bool
-type family IsMulti tables where
-  IsMulti (_ : _ : _) = 'True
-  IsMulti _ = 'False
+isMulti :: NP f as -> Bool
+isMulti = \case
+  _ :* _ :* _ -> True
+  _ -> False
 
 type NoQueryDd :: ∀ {ext} . Type -> [Dd ext] -> Constraint
 class NoQueryDd tag tables where
   noQueryDd :: Fragments tag 'Nothing tables '[]
 
-instance (
-    All (ReifySqelFor tag) tables,
-    multi ~ IsMulti tables,
-    BoolVal multi
-  ) => NoQueryDd tag tables where
-    noQueryDd =
-      Fragments NoQueryFragment (TableFragments tables) (ProjectionFragments Nil) multi
-      where
-        multi = boolVal @multi
-        tables = hcpure (Proxy @(ReifySqelFor tag)) tableSpine
-        tableSpine :: ReifySqelFor tag s => TableFragment tag s
-        tableSpine = TableFragment (Fragment sqel)
+instance All (ReifySqelFor tag) tables => NoQueryDd tag tables where
+  noQueryDd =
+    Fragments NoQueryFragment (TableFragments tables) (ProjectionFragments Nil) (isMulti tables)
+    where
+      tables = hcpure (Proxy @(ReifySqelFor tag)) (TableFragment (Fragment sqel))
 
 type QueryDd :: ∀ {ext} . Type -> Dd ext -> [Dd ext] -> Constraint
 class QueryDd tag query tables where
@@ -46,7 +38,7 @@ class QueryDd tag query tables where
 
 instance (
     ReifySqelFor tag query,
-    Checked tables tag query,
+    Check tables query,
     NoQueryDd tag tables
   ) => QueryDd tag query tables where
     queryDd =
@@ -88,24 +80,19 @@ type NoQuerySqel :: Type -> [Dd ext] -> Constraint
 class NoQuerySqel tag tables where
   noQuerySqel :: NP (SqelFor tag) tables -> Fragments tag 'Nothing tables '[]
 
-instance (
-    SListI tables,
-    multi ~ IsMulti tables,
-    BoolVal multi
-  ) => NoQuerySqel tag tables where
-    noQuerySqel tables =
-      Fragments NoQueryFragment (TableFragments (hmap tableSpine tables)) (ProjectionFragments Nil) multi
-      where
-        multi = boolVal @multi
-        tableSpine :: SqelFor tag s -> TableFragment tag s
-        tableSpine t = TableFragment (unchecked t)
+instance SListI tables => NoQuerySqel tag tables where
+  noQuerySqel tables =
+    Fragments NoQueryFragment (TableFragments (hmap tableSpine tables)) (ProjectionFragments Nil) (isMulti tables)
+    where
+      tableSpine :: SqelFor tag s -> TableFragment tag s
+      tableSpine t = TableFragment (unchecked t)
 
 type QuerySqel :: ∀ {extq} {extt} . Type -> Dd extq -> [Dd extt] -> Constraint
 class QuerySqel tag query tables where
   querySqel :: SqelFor tag query -> NP (SqelFor tag) tables -> Fragments tag ('Just query) tables '[]
 
 instance (
-    Checked tables tag query,
+    Check tables query,
     NoQuerySqel tag tables
   ) => QuerySqel tag query tables where
     querySqel query tables =
@@ -129,7 +116,7 @@ instance (
 
 withProjection ::
   ∀ tag query tables projs proj .
-  Checked tables tag proj =>
+  Check tables proj =>
   SqelFor tag proj ->
   Fragments tag query tables projs ->
   Fragments tag query tables (proj : projs)

@@ -15,22 +15,22 @@ import Sqel.Default (CompMeta (CompMeta), Def, PrimMeta (PrimMeta))
 typeNameText :: Spine Def -> Text
 typeNameText = \case
   SpineComp CompMeta {typeName = Some (PgTypeName name)} _ _ -> name
-  SpinePrim PrimMeta {name = PgColumnName name} -> name
+  SpinePrim _ PrimMeta {name = PgColumnName name} -> name
 
 tableNameText :: RootField Def -> Text
 tableNameText (RootField (Field _ s)) = case s of
   SpineComp CompMeta {typeName = Some (PgTypeName name)} _ _ -> name
-  SpinePrim PrimMeta {table = PgTableName name} -> name
+  SpinePrim (PgTableName name) _ -> name
 
 typeName :: Spine Def -> Sql
 typeName = \case
   SpineComp CompMeta {typeName = Some name} _ _ -> toSql name
-  SpinePrim PrimMeta {name} -> toSql name
+  SpinePrim _ PrimMeta {name} -> toSql name
 
 tableName :: RootField Def -> Sql
 tableName (RootField (Field _ s)) = case s of
   SpineComp CompMeta {typeName = Some name} _ _ -> toSql name
-  SpinePrim PrimMeta {table = name} -> toSql name
+  SpinePrim table _ -> toSql table
 
 bindClause :: Bool -> RootField Def -> Sql
 bindClause multi (tableNameText -> name) =

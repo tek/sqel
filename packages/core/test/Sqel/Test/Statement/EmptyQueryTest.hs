@@ -3,7 +3,7 @@ module Sqel.Test.Statement.EmptyQueryTest where
 import Hedgehog (TestT, (===))
 
 import Sqel.Build.Sql (BuildClause)
-import Sqel.Class.Check (Checked1)
+import Sqel.Class.Check (Check1)
 import Sqel.Class.ReifySqel (ReifySqelFor)
 import Sqel.Clauses (from, select, where_)
 import Sqel.Data.Sqel (SqelFor)
@@ -19,7 +19,7 @@ import qualified Sqel.Syntax.Monad as S
 
 statement ::
   ReifySqelFor tag EmptyQuery =>
-  Checked1 table tag EmptyQuery =>
+  Check1 table EmptyQuery =>
   BuildClause tag Select =>
   BuildClause tag From =>
   BuildClause tag Where =>

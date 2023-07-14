@@ -24,6 +24,7 @@ meta1 =
     ],
     "table": [
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "id"
@@ -31,6 +32,7 @@ meta1 =
         "tag": "SpinePrim"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "text",
           "name": "old"
@@ -59,6 +61,7 @@ meta1 =
     ],
     "table": [
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "id"
@@ -66,6 +69,7 @@ meta1 =
         "tag": "SpinePrim"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "size"
@@ -84,6 +88,7 @@ meta1 =
         "tag": "SpineNest"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "number"
@@ -103,6 +108,7 @@ meta1 =
         },
         "sub": [
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "bigint",
               "name": "p1"
@@ -131,6 +137,7 @@ meta1 =
     ],
     "table": [
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "id"
@@ -138,6 +145,7 @@ meta1 =
         "tag": "SpinePrim"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "number"
@@ -168,6 +176,7 @@ meta1 =
         },
         "sub": [
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "text",
               "name": "p1"
@@ -175,6 +184,7 @@ meta1 =
             "tag": "SpinePrim"
           },
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "text",
               "name": "p2"
@@ -194,6 +204,7 @@ meta1 =
         },
         "sub": [
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "bigint",
               "name": "p1"
@@ -201,6 +212,7 @@ meta1 =
             "tag": "SpinePrim"
           },
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "bigint",
               "name": "p2"
@@ -224,6 +236,7 @@ meta1 =
     ],
     "table": [
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "id"
@@ -231,6 +244,7 @@ meta1 =
         "tag": "SpinePrim"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "text",
           "name": "name"
@@ -238,6 +252,7 @@ meta1 =
         "tag": "SpinePrim"
       },
       {
+        "table": {"tag": "table", "value": "dat"},
         "primMeta": {
           "colType": "bigint",
           "name": "num"
@@ -268,6 +283,7 @@ meta1 =
         },
         "sub": [
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "bigint",
               "name": "p1"
@@ -275,6 +291,7 @@ meta1 =
             "tag": "SpinePrim"
           },
           {
+            "table": {"tag": "table", "value": "dat"},
             "primMeta": {
               "colType": "text",
               "name": "p2"

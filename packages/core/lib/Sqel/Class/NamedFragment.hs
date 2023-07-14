@@ -7,7 +7,7 @@ import Type.Errors (ErrorMessage)
 
 import Sqel.Data.Dd (Dd)
 import Sqel.Dd (DdName, DdNames, DdTypeName, DdTypeNames)
-import Sqel.Kind.Error (BulletedLines, Quoted, QuotedError, StuckError)
+import Sqel.Kind.Error (BulletedLines, Quoted, StuckError)
 import Sqel.Kind.List (type (++))
 import Sqel.SOP.HFind (HFind (HFindT, hfind))
 
@@ -20,7 +20,7 @@ type Abstract :: Symbol -> Symbol -> [Dd ext] -> ErrorMessage
 type family Abstract desc name frags where
   Abstract desc name frags =
     "The statement mentions a " <> desc <> " named " <> Quoted name <> ", but the " <> desc <> "s are abstract." %
-    "You can add a constraint: " <> QuotedError (ClassName desc <> " \"" <> name <> "\" " <> frags)
+    "You can add a constraint: " <> Quoted (ClassName desc <> " \"" <> name <> "\" " <> frags)
 
 type NotFound :: Symbol -> Symbol -> [Symbol] -> ErrorMessage
 type family NotFound desc name avail where

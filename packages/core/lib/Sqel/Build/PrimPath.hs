@@ -20,8 +20,8 @@ primPaths multi =
   spin
   where
     spin = \case
-      SpinePrim meta -> [primMetaPath multi meta]
-      SpineComp meta compSort sub -> prependIndexWith (indexPath multi meta) compSort (spin =<< sub)
+      SpinePrim table meta -> [primMetaPath multi table meta]
+      SpineComp meta compSort sub -> prependIndexWith (const (indexPath multi meta)) compSort (spin =<< sub)
 
 renderPrimPaths ::
   Bool ->
