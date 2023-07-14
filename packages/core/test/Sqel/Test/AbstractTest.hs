@@ -16,8 +16,8 @@ import qualified Sqel.Syntax.Monad as S
 
 data Dat a =
   Dat {
-    id :: Int64,
-    f2 :: a
+    f1 :: a,
+    f2 :: Int64
   }
   deriving stock (Eq, Show, Generic)
 
@@ -41,7 +41,7 @@ statement = S.do
     tab = table_Dat @sa @a
 
 target :: Sql
-target = [exon|select "id", "f2" from "dat"|]
+target = [exon|select "f1", "f2" from "dat"|]
 
 test_abstract :: TestT IO ()
 test_abstract =
@@ -49,7 +49,7 @@ test_abstract =
 
 data Q =
   Q {
-    id :: Int64
+    f2 :: Int64
   }
   deriving stock (Eq, Show, Generic)
 
@@ -72,7 +72,7 @@ statementQ = S.do
     tab = table_Dat @sa @a
 
 targetQ :: Sql
-targetQ = [exon|select "id", "f2" from "dat" where "id" = $1|]
+targetQ = [exon|select "f1", "f2" from "dat" where "f2" = $1|]
 
 test_abstract_query :: TestT IO ()
 test_abstract_query =
