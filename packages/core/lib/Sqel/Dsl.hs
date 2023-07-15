@@ -350,10 +350,14 @@ type family ConAutoCols spec cons ass where
   ConAutoCols spec ('Constructor _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
   ConAutoCols spec ('Record _ _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
 
+type family SetConColNullable s :: Dd0 where
+  SetConColNullable ('Dd ext a ('Prim prim)) = ApplyNullable 'False ('Dd ext a ('Prim prim))
+  SetConColNullable s = s
+
 type SetConColsNullable :: [Dd0] -> [Dd0]
 type family SetConColsNullable cols where
   SetConColsNullable '[] = '[]
-  SetConColsNullable (s : ss) = ApplyNullable 'False s : SetConColsNullable ss
+  SetConColsNullable (s : ss) = SetConColNullable s : SetConColsNullable ss
 
 type SetConNullable :: Sort -> [Dd0] -> [Dd0]
 type family SetConNullable con1 s where
