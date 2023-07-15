@@ -1,16 +1,14 @@
 module Sqel.Test.SyntaxTest where
 
-import Exon (exon)
-import Exon.SkipWs (intron)
 import Hedgehog (TestT, (===))
 import Prelude hiding (join, on)
 
 import Sqel.Build.Sql (buildSqlDd)
 import Sqel.Clauses (from, join, on, select, where_)
-import Sqel.Data.Sql (Sql)
+import Sqel.Data.Def (Def)
+import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (Statement, statementSql)
 import Sqel.Data.TestTables (Cat, Fur, Q, Query_Q, Table_Bird, Table_Cat, query_Q, table_Cat)
-import Sqel.Data.Def (Def)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (query, query1K, queryK)
 import qualified Sqel.Syntax.Monad as S
@@ -48,10 +46,10 @@ stmt3 =
     where_ c.query
 
 target1 :: Sql
-target1 = [exon|select ("fur")."color", ("fur")."density" from "cat" where ("fur")."color" = $2|]
+target1 = [sql|select ("fur")."color", ("fur")."density" from "cat" where ("fur")."color" = $2|]
 
 target2 :: Sql
-target2 = [intron|
+target2 = [sql|
   select ("cat"."fur")."color", ("cat"."fur")."density"
   from "cat" cat
   join "bird" bird

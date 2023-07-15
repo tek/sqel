@@ -134,7 +134,7 @@ logType name status dbCols targetCols =
   where
     message = \case
       Absent ->
-        [exon|Skipping nonexistent #{k} '#{n}'|]
+        [exon|Skipping column analysis for nonexistent #{k} '#{n}'|]
       Match ->
         [exon|DB #{k} '#{n}' matches|]
       Mismatch _ ->

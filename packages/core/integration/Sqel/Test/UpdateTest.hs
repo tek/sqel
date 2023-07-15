@@ -24,8 +24,7 @@ statement = S.do
   where_ (frags.query, frags.bird.cat .= frags.cat.nam)
 
 fur1 :: Fur
-fur1 =
-  Fur "red" 10
+fur1 = Fur "red" 10
 
 session :: Session (Set Cat)
 session = do
