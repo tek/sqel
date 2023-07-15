@@ -23,10 +23,10 @@ type Table_NaNu_3 =
 
 type Target_NaNu =
   'Dd ('Ext0 SelAuto NoMods) NaNu ('Comp ('TSel 'DefaultPrefix "NaNu") ('Kind.Sum 'DefaultPrefix) 'Kind.Nest [
-    'Dd ('Ext0 (SelSkip "Na") '[NullableCon]) (ConCol '[Text]) ('Comp (TSelNamed "Na") 'Kind.Con 'Kind.Merge '[
+    'Dd ('Ext0 (SelSkip "Na") NoMods) (ConCol '[Text]) ('Comp (TSelNamed "Na") 'Kind.Con 'Kind.Merge '[
       'Dd ('Ext0 (SelName "name") '[NullableCon]) Text ('Kind.Prim 'Cond)
       ]),
-    'Dd ('Ext0 (SelSkip "Nu") '[NullableCon]) (ConCol '[Int64]) ('Comp (TSelNamed "Nu") 'Kind.Con 'Kind.Merge '[
+    'Dd ('Ext0 (SelSkip "Nu") NoMods) (ConCol '[Int64]) ('Comp (TSelNamed "Nu") 'Kind.Con 'Kind.Merge '[
       'Dd ('Ext0 (SelName "Nu") '[NullableCon]) Int64 ('Kind.Prim 'Cond)
       ])
   ])

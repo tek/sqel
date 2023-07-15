@@ -90,7 +90,9 @@ stmtsTarget =
       [exon|alter table "dat" add column "old_sum_index__thing" bigint|],
       [exon|alter table "dat" alter column "old_sum_index__thing" set not null|],
       [exon|alter table "dat" add column "thing1" "sqel_type__thing1"|],
+      [exon|alter table "dat" alter column "thing1" set not null|],
       [exon|alter table "dat" add column "thing2" "sqel_type__thing2"|],
+      [exon|alter table "dat" alter column "thing2" set not null|],
       [exon|alter table "dat" add column "num" bigint|],
       [exon|create type "sqel_type__thing1" as ("x" bigint, "y" bigint)|],
       [exon|create type "sqel_type__thing2" as ("z" bigint, "a" bigint)|]
@@ -101,12 +103,12 @@ tableStmtsTarget :: [[Sql]]
 tableStmtsTarget =
   [
     [
-      [exon|create table "dat" ("num" bigint, "name" text not null, "sqel_sum_index__thing" bigint not null, "thing1" "sqel_type__thing1", "thing2" "sqel_type__thing2")|],
+      [exon|create table "dat" ("num" bigint, "name" text not null, "sqel_sum_index__thing" bigint not null, "thing1" "sqel_type__thing1" not null, "thing2" "sqel_type__thing2" not null)|],
       [exon|create type "sqel_type__thing1" as ("x" bigint, "y" bigint)|],
       [exon|create type "sqel_type__thing2" as ("z" bigint, "a" bigint)|]
     ],
     [
-      [exon|create table "dat" ("num" bigint, "name" text not null, "old_sum_index__thing" bigint not null, "thing1" "sqel_type__thing1", "thing2" "sqel_type__thing2")|],
+      [exon|create table "dat" ("num" bigint, "name" text not null, "old_sum_index__thing" bigint not null, "thing1" "sqel_type__thing1" not null, "thing2" "sqel_type__thing2" not null)|],
       [exon|create type "sqel_type__thing1" as ("x" bigint, "y" bigint)|],
       [exon|create type "sqel_type__thing2" as ("z" bigint, "a" bigint)|]
     ],

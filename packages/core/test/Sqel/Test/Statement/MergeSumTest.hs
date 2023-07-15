@@ -71,7 +71,7 @@ target_create_MergeCon1 =
 
 test_statement_merge_sum :: TestT IO ()
 test_statement_merge_sum = do
-  -- target_MergeSum === statementSql (Statement.selectAll table_MergeSum)
-  -- target_create_MergeSum === statementSql (Statement.createTable table_MergeSum)
-  -- target_insert_MergeSum === statementSql (Statement.insert table_MergeSum)
+  target_MergeSum === statementSql (Statement.selectAll table_MergeSum)
+  target_create_MergeSum === statementSql (Statement.createTable table_MergeSum)
+  target_insert_MergeSum === statementSql (Statement.insert table_MergeSum)
   target_create_MergeCon1 === statementSql (Statement.createTable table_MergeCon1)

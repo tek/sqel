@@ -350,9 +350,6 @@ type family ConAutoCols spec cons ass where
   ConAutoCols spec ('Constructor _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
   ConAutoCols spec ('Record _ _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
 
--- TODO just using Con1 is wrong here – a Con could use explicit Merge, in which case the user would have to set Nullable
--- on each column manually
--- This would probably have to be done in SetMerge, checking the sort
 type SetConColsNullable :: [Dd0] -> [Dd0]
 type family SetConColsNullable cols where
   SetConColsNullable '[] = '[]
@@ -366,12 +363,12 @@ type family SetConNullable con1 s where
 type ConFor :: Symbol -> [Type] -> [Field] -> [Type] -> Dd0
 type family ConFor name as fields cols where
   ConFor name as fields cols =
-    ApplyNullable 'False (ProdSort 'Con (ConCol as) as name fields cols)
+    ProdSort 'Con (ConCol as) as name fields cols
 
 type ConPrims :: Type -> Symbol -> [Type] -> [Field] -> Dd0
 type family ConPrims spec name as fields where
   ConPrims spec name as fields =
-    ApplyNullable 'False (ProdSort 'Con (ConCol as) as name fields (AllAuto (AutoPrim spec) as))
+    ProdSort 'Con (ConCol as) as name fields (AllAuto (AutoPrim spec) as)
 
 ------------------------------------------------------------------------------------------------------------------------
 
