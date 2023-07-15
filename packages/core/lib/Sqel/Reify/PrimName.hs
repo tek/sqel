@@ -1,13 +1,13 @@
 module Sqel.Reify.PrimName where
 
 import Sqel.Codec (PrimColumnOrError (PrimTypeNameOrError))
+import Sqel.Data.Def (Def)
 import Sqel.Data.Mods.Array (Array)
 import Sqel.Data.Mods.Json (Json, Jsonb)
 import Sqel.Data.Mods.Name (SetPrimName)
 import Sqel.Data.Mods.Newtype (Newtype)
 import Sqel.Data.Mods.Nullable (Nullable)
 import Sqel.Data.PgType (PgPrimName, pgPrimName)
-import Sqel.Data.Def (Def)
 import Sqel.Error.PrimCodec (ArrayMismatch)
 import Sqel.Kind.List (type (++))
 

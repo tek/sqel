@@ -323,6 +323,7 @@ test-suite sqel-core-test
       Sqel.Test.Statement.UpdateTest
       Sqel.Test.Statement.UpsertTest
       Sqel.Test.StatementTest
+      Sqel.Test.SumIdTest
       Sqel.Test.SyntaxTest
       Test
   hs-source-dirs:

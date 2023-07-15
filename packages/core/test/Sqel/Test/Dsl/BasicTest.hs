@@ -9,7 +9,7 @@ import Sqel.Data.Dd (Dd (Dd), Ext (Ext), Ext0 (Ext0), PrimType (Cond), Struct (C
 import Sqel.Data.Mods (NoMods)
 import qualified Sqel.Data.Mods.Array as Mods (Array)
 import qualified Sqel.Data.Mods.Newtype as Mods
-import qualified Sqel.Data.Mods.Nullable as Mods (Nullable)
+import qualified Sqel.Data.Mods.Nullable as Mods
 import qualified Sqel.Data.Mods.TableName as Mods
 import qualified Sqel.Data.Mods.Unique as Mods (Unique)
 import Sqel.Data.Name (NamePrefix (DefaultPrefix))
@@ -26,7 +26,7 @@ data Sub =
 
 type Target_Sub =
   'Dd ('Ext0 SelAuto NoMods) Sub ('Comp ('TSel 'DefaultPrefix "Sub") 'Kind.Prod 'Kind.Nest [
-    'Dd ('Ext0 (SelName "three") '[Mods.Nullable 'False]) (Maybe Int) ('Kind.Prim 'Cond),
+    'Dd ('Ext0 (SelName "three") '[Mods.NullableMaybe]) (Maybe Int) ('Kind.Prim 'Cond),
     'Dd ('Ext0 (SelName "four") '[Mods.Array []]) [Double] ('Kind.Prim 'Cond)
   ])
 

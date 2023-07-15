@@ -46,7 +46,7 @@ import Sqel.Data.Mods.MigrationRenameIndex (MigrationRenameIndex)
 import Sqel.Data.Mods.MigrationRenameType (MigrationRenameType)
 import Sqel.Data.Mods.Name (SetPrimName)
 import qualified Sqel.Data.Mods.Newtype as Mods (Newtype)
-import qualified Sqel.Data.Mods.Nullable as Mods (Nullable)
+import qualified Sqel.Data.Mods.Nullable as Mods (Nullable, NullableConf (NullableConf))
 import qualified Sqel.Data.Mods.PrimaryKey as Mods (PrimaryKey)
 import qualified Sqel.Data.Mods.TableName as Mods
 import qualified Sqel.Data.Mods.Unique as Mods (Unique)
@@ -80,8 +80,8 @@ type SetType :: Type -> Dd0 -> Dd0
 type family SetType a s where
   SetType a ('Dd ext _ s) = 'Dd ext a s
 
-data WrapType :: (Type -> Type) -> Dd0 -> Exp Dd0
-type instance Eval (WrapType f ('Dd ext a s)) = 'Dd ext (f a) s
+type family WrapType f s :: Dd0 where
+  WrapType f ('Dd ext a s) = 'Dd ext (f a) s
 
 data ApplyTypeName :: Symbol -> Dd0 -> Exp Dd0
 type instance Eval (ApplyTypeName name ('Dd ext a ('Comp ('TSel prefix _) c i s))) =
@@ -126,14 +126,22 @@ type instance Eval (ApplyPrefix pre s) =
 type ApplyNullable :: Bool -> Dd0 -> Dd0
 type family ApplyNullable guard s where
   ApplyNullable guard s =
-    AddMod (Mods.Nullable guard) (WrapType Maybe @@ s)
+    AddMod (Mods.Nullable ('Mods.NullableConf guard 'Nothing)) s
 
+type ApplyNullableF :: Bool -> (Type -> Type) -> Dd0 -> Dd0
+type family ApplyNullableF guard f s where
+  ApplyNullableF guard f s =
+    AddMod (Mods.Nullable ('Mods.NullableConf guard ('Just f))) (WrapType f s)
+
+-- TODO other types than Maybe should be possible to unwrap with Nullable.
+-- It probably should carry Maybe in its type.
+-- This should then be generalized with Array.
 type ReifyNullable :: Bool -> Type -> Type -> Dd0
 type family ReifyNullable guard a spec where
   ReifyNullable guard (Maybe a) spec =
+    ApplyNullableF guard Maybe (ReifyE a spec)
+  ReifyNullable guard a spec =
     ApplyNullable guard (ReifyE a spec)
-  ReifyNullable _ a _ =
-    TypeError ("A column was declared as nullable, but its type is not " <> Quoted Maybe <> ":" % Quoted a)
 
 type ApplyNewtype :: Type -> Type -> Dd0 -> Dd0
 type family ApplyNewtype a w s where
@@ -154,7 +162,7 @@ type instance Eval (ReifyNewtype a spec info ass) =
 type ApplyArray :: (Type -> Type) -> Dd0 -> Dd0
 type family ApplyArray f s where
   ApplyArray f s =
-    AddMod (Mods.Array f) (WrapType f @@ s)
+    AddMod (Mods.Array f) (WrapType f s)
 
 type ReifyArray :: Type -> (Type -> Type) -> Type -> Dd0
 type family ReifyArray a f spec where
@@ -286,7 +294,7 @@ type family PrimBasic a prim where
 
 type PrimInfer :: Type -> Type -> Dd0
 type family PrimInfer a prim where
-  PrimInfer (Maybe a) prim = ApplyNullable 'False (PrimInfer a prim)
+  PrimInfer (Maybe a) prim = ApplyNullableF 'False Maybe (PrimInfer a prim)
   PrimInfer [a] prim = ApplyArray [] (PrimInfer a prim)
   PrimInfer (NonEmpty a) prim = ApplyArray NonEmpty (PrimInfer a prim)
   PrimInfer (Seq a) prim = ApplyArray Seq (PrimInfer a prim)
@@ -333,6 +341,7 @@ type family ProdGen a cols where
 type ConMeta :: Symbol -> [Type] -> [Field] -> Type
 data ConMeta name as fields
 
+-- TODO these seem redundant
 type ConAutoCols :: Type -> [ConstructorInfo] -> [[Type]] -> [Type]
 type family ConAutoCols spec cons ass where
   ConAutoCols _ '[] _ = '[]
@@ -341,15 +350,28 @@ type family ConAutoCols spec cons ass where
   ConAutoCols spec ('Constructor _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
   ConAutoCols spec ('Record _ _ : cons) (_ : ass) = spec : ConAutoCols spec cons ass
 
+-- TODO just using Con1 is wrong here – a Con could use explicit Merge, in which case the user would have to set Nullable
+-- on each column manually
+-- This would probably have to be done in SetMerge, checking the sort
+type SetConColsNullable :: [Dd0] -> [Dd0]
+type family SetConColsNullable cols where
+  SetConColsNullable '[] = '[]
+  SetConColsNullable (s : ss) = ApplyNullable 'False s : SetConColsNullable ss
+
+type SetConNullable :: Sort -> [Dd0] -> [Dd0]
+type family SetConNullable con1 s where
+  SetConNullable 'Con cols = SetConColsNullable cols
+  SetConNullable _ cols = cols
+
 type ConFor :: Symbol -> [Type] -> [Field] -> [Type] -> Dd0
 type family ConFor name as fields cols where
   ConFor name as fields cols =
-    ProdSort 'Con (ConCol as) as name fields cols
+    ApplyNullable 'False (ProdSort 'Con (ConCol as) as name fields cols)
 
 type ConPrims :: Type -> Symbol -> [Type] -> [Field] -> Dd0
 type family ConPrims spec name as fields where
   ConPrims spec name as fields =
-    ProdSort 'Con (ConCol as) as name fields (AllAuto (AutoPrim spec) as)
+    ApplyNullable 'False (ProdSort 'Con (ConCol as) as name fields (AllAuto (AutoPrim spec) as))
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -412,8 +434,8 @@ type family SetPathSkip sel where
 
 type SetMerge :: Dd0 -> Dd0
 type family SetMerge s where
-  SetMerge ('Dd ('Ext0 sel mods) a ('Comp tsel c _ s)) =
-    'Dd ('Ext0 (SetPathSkip sel) mods) a ('Comp tsel c 'Merge s)
+  SetMerge ('Dd ('Ext0 sel mods) a ('Comp tsel sort _ s)) =
+    'Dd ('Ext0 (SetPathSkip sel) mods) a ('Comp tsel sort 'Merge (SetConNullable sort s))
   SetMerge ('Dd _ a ('Prim _)) =
     TypeError (Quoted "Merge" <> " cannot be used with primitive type " <> Quoted a)
 

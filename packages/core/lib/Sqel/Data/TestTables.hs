@@ -2,7 +2,7 @@ module Sqel.Data.TestTables where
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Default (Sqel)
-import Sqel.Dsl (Con1, Gen, IntTable, Name, Prim, Prod, Query, Sum, Table, Unique)
+import Sqel.Dsl (Con1, Gen, IntTable, Name, Prim, Prod, Query, Sum, Table, Unique, Newtype)
 
 data Simp =
   Simp {
@@ -98,3 +98,15 @@ type Query_NaNu = Query NaNu (Sum [Gen, Con1 (Name "number" Prim)])
 
 query_NaNu :: Sqel Query_NaNu
 query_NaNu = sqel
+
+newtype Nt =
+  Nt Int64
+  deriving stock (Eq, Show, Generic)
+
+data SI =
+  SI1 { si1 :: Nt }
+  |
+  SI2 { si2 :: Nt }
+  deriving stock (Eq, Show, Generic)
+
+type Type_SI = Sum [Con1 Newtype, Con1 Newtype]

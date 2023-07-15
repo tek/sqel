@@ -12,6 +12,7 @@ import Sqel.Test.SqelTypesTest (test_sqelTypes)
 import Sqel.Test.SqlCodeTest (test_sqlCodeNoInterpolation)
 import Sqel.Test.Statement.CondOpTest (test_condOp)
 import Sqel.Test.StatementTest (test_statement)
+import Sqel.Test.SumIdTest (test_sumId)
 import Sqel.Test.SyntaxTest (test_syntax)
 import Test (unitTest)
 import Test.Tasty (TestTree, defaultMain, testGroup)
@@ -32,7 +33,8 @@ tests =
     unitTest "prim table" test_primTable,
     unitTest "abstract column" test_abstract,
     unitTest "abstract column with query" test_abstract_query,
-    unitTest "condition operator as mod" test_condOp
+    unitTest "condition operator as mod" test_condOp,
+    unitTest "sum type for ID" test_sumId
   ]
 
 main :: IO ()

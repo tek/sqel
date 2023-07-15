@@ -4,36 +4,31 @@ import Exon (exon)
 
 import Sqel.Build.Index (prependIndex)
 import Sqel.Build.Table (tableName, typeName)
-import Sqel.Data.Constraints (Constraints (nullable))
 import Sqel.Data.Field (Field (Field), RootField (RootField), TypeField (TypeField))
 import Sqel.Data.Spine (Spine (SpineMerge, SpineNest, SpinePrim), pattern SpineComp)
 import Sqel.Data.Sql (Sql, sql, toSql)
 import qualified Sqel.Default
 import Sqel.Default (CompMeta, Def, PrimMeta, SpineDef)
-import Sqel.Spine (isSum)
 import Sqel.Sql (joinComma)
 
-createPrim :: Bool -> Bool -> PrimMeta -> Sql
-createPrim isTable sumCol meta =
-  [sql|##{meta.name} ##{meta.colType} #{if isTable then toSql constr else ""}|]
-  where
-    constr | sumCol = meta.constr { nullable = True }
-           | otherwise = meta.constr
+createPrim :: Bool -> PrimMeta -> Sql
+createPrim isTable meta =
+  [sql|##{meta.name} ##{meta.colType} #{if isTable then toSql meta.constr else ""}|]
 
 createComp :: Bool -> CompMeta -> Sql
 createComp isTable meta =
   [sql|##{meta.name} ##{meta.colType} #{if isTable then toSql meta.constr else ""}|]
 
-createSub :: Bool -> Bool -> SpineDef -> [Sql]
-createSub table sumCol = \case
-  SpinePrim _ meta -> [createPrim table sumCol meta]
+createSub :: Bool -> SpineDef -> [Sql]
+createSub table = \case
+  SpinePrim _ meta -> [createPrim table meta]
   SpineNest meta _ _ -> [createComp table meta]
-  SpineMerge _ compSort cols -> createSub table sumCol =<< prependIndex compSort cols
+  SpineMerge _ compSort cols -> createSub table =<< prependIndex compSort cols
 
 create :: Bool -> SpineDef -> [Sql]
 create table = \case
-  SpinePrim _ meta -> [createPrim table False meta]
-  SpineComp _ compSort cols -> createSub table (isSum compSort) =<< prependIndex compSort cols
+  SpinePrim _ meta -> [createPrim table meta]
+  SpineComp _ compSort cols -> createSub table =<< prependIndex compSort cols
 
 createCols :: RootField Def -> [Sql]
 createCols (RootField (Field _ s)) = create True s

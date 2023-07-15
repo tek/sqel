@@ -7,7 +7,7 @@ import Sqel.Data.Dd (PrimType (Cond, NoCond))
 import Sqel.Data.IndexState (IndexState, withNewIndex)
 import Sqel.Data.Mods.CondOp (CondOp)
 import Sqel.Data.Mods.Ignore (Ignore)
-import Sqel.Data.Mods.Nullable (Nullable)
+import Sqel.Data.Mods.Nullable (Nullable, NullableConf (NullableConf))
 import Sqel.Data.PgType (pgColumnNameSym)
 import Sqel.Data.QueryMeta (CondMeta (CondMeta), pattern CondOp, QueryMeta (QueryMeta, QuerySynthetic))
 import Sqel.Data.Sel (Paths (Paths))
@@ -21,13 +21,13 @@ import Sqel.Reify.PrimName (PrimName, reifyPrimName)
 import Sqel.SOP.Constraint (KnownSymbols, symbolText)
 import Sqel.SOP.HasGeneric (BoolVal (boolVal))
 
-type DemoteNullable :: Maybe Bool -> Constraint
+type DemoteNullable :: Maybe NullableConf -> Constraint
 class DemoteNullable mod where
   demoteNullable :: Maybe Bool
 
 instance (
     BoolVal guard
-  ) => DemoteNullable ('Just guard) where
+  ) => DemoteNullable ('Just ('NullableConf guard f)) where
     demoteNullable = Just (boolVal @guard)
 
 instance DemoteNullable 'Nothing where
