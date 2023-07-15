@@ -2,43 +2,29 @@ module Sqel.Test.Statement.UpdateTest where
 
 import Hedgehog (TestT, (===))
 
-import Sqel.Class.ReifySqel (sqel)
-import Sqel.Clauses (set, update, where_)
+import Sqel.Clauses (from, set, update, where_)
 import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
-import Sqel.Data.TestTables (table_Cat)
-import Sqel.Default (Sqel)
-import Sqel.Dsl (Param, Prim, Prod, Query)
+import Sqel.Data.TestTables (query_UQ, table_Bird, table_Cat)
 import Sqel.Fragment ((.=))
 import Sqel.Syntax.Fragments (query)
 import qualified Sqel.Syntax.Monad as S
 
-data UQ =
-  UQ {
-    nam :: Text,
-    num :: Int64,
-    newName :: Text
-  }
-  deriving stock (Eq, Show, Generic)
-
-type Query_UQ = Query UQ (Prod [Prim, Prim, Param Prim])
-
-query_UQ :: Sqel Query_UQ
-query_UQ = sqel
-
 statement :: Sql
 statement =
-  statementSql @_ @_ @() S.do
-    frags <- query query_UQ table_Cat
-    update frags.table
-    set (frags.table.nam .= frags.query.newName)
-    where_ frags.query
+  statementSql @() S.do
+    frags <- query query_UQ (table_Cat, table_Bird)
+    update frags.cat
+    set (frags.cat.nam .= frags.query.newName)
+    from frags.bird
+    where_ (frags.query, frags.bird.cat .= frags.cat.nam)
 
 target :: Sql
 target = [sql|
-  update "cat"
+  update "cat" cat
   set "nam" = $3
-  where "nam" = $1 and "num" = $2
+  from "bird" bird
+  where "bird"."cat" = $1 and "cat"."num" = $2 and "bird"."cat" = "cat"."nam"
   |]
 
 test_update :: TestT IO ()

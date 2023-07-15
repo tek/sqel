@@ -67,7 +67,7 @@ instance BuildClauseDef Update where
   buildClauseDef = bindClause
 
 instance BuildClauseDef Set where
-  buildClauseDef = setClause
+  buildClauseDef _ = setClause
 
 instance BuildClauseDef InsertInto where
   buildClauseDef _ = insertIntoClause
@@ -79,7 +79,7 @@ instance BuildClauseDef OnConflict where
   buildClauseDef _ = onConflictClause
 
 instance BuildClauseDef DoUpdateSet where
-  buildClauseDef = setClause
+  buildClauseDef _ = setClause
 
 instance BuildClauseDef Returning where
   buildClauseDef = selectorsClause

@@ -7,10 +7,8 @@ import Sqel.Build.Condition (fieldOpCondition, render)
 import Sqel.Build.Values (spineValues)
 import Sqel.Data.Def (Def)
 import Sqel.Data.Field (CondField (CondField, CondOp), Field (Field))
-import Sqel.Data.PgTypeName (PgTableName)
 import Sqel.Data.Spine (Spine)
 import Sqel.Data.Sql (Sql)
-import Sqel.Spine (spineTableName)
 import Sqel.Sql (joinComma)
 
 -- TODO this allows table and query to be mixed, so the indexes may be wrong, because in @do update set@ we assume that
@@ -20,24 +18,20 @@ import Sqel.Sql (joinComma)
 -- maybe clause configs can map fragment sorts to field types? a sum type that has CondField and Field constructors, and
 -- the sort is mapped to the constructor index and injected via NS.
 
-setter :: Bool -> PgTableName -> Sql -> Sql -> Sql
-setter multi table name value =
-  [exon|#{pre}#{name} = #{value}|]
-  where
-    pre | multi = [exon|##{table}.|]
-        | otherwise = ""
+setter :: Sql -> Sql -> Sql
+setter name value =
+  [exon|#{name} = #{value}|]
 
-tableSetters :: Bool -> Spine Def -> [Sql]
-tableSetters multi s =
-   uncurry (setter multi table) <$> zip names (foldMap toList (spineValues s))
+tableSetters :: Spine Def -> [Sql]
+tableSetters s =
+   uncurry setter <$> zip names (foldMap toList (spineValues s))
   where
-    table = spineTableName s
     names = spineColumns (const True) s
 
 -- TODO op is hardcoded
-setters :: Bool -> CondField Def -> [Sql]
-setters multi (CondField (Field _ s)) = tableSetters multi s
-setters multi (CondOp _ l r) = maybeToList (render (fieldOpCondition multi "=" l r))
+setters :: CondField Def -> [Sql]
+setters (CondField (Field _ s)) = tableSetters s
+setters (CondOp _ l r) = maybeToList (render (fieldOpCondition False "=" l r))
 
-setClause :: Bool -> [CondField Def] -> Sql
-setClause multi fields = joinComma (setters multi =<< fields)
+setClause :: [CondField Def] -> Sql
+setClause fields = joinComma (setters =<< fields)

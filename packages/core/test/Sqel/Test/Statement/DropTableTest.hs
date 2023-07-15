@@ -13,17 +13,17 @@ import Sqel.Syntax.Fragments (table)
 import qualified Sqel.Syntax.Monad as S
 
 statement1 :: Sql
-statement1 = statementSql @_ @_ @() S.do
+statement1 = statementSql @() S.do
   t <- table table_Cat
   dropTable t (Drop False Nothing)
 
 statement2 :: Sql
-statement2 = statementSql @_ @_ @() S.do
+statement2 = statementSql @() S.do
   t <- table table_Cat
   dropTable t (Drop True Nothing)
 
 statement3 :: Sql
-statement3 = statementSql @_ @_ @() S.do
+statement3 = statementSql @() S.do
   t <- table table_Cat
   dropTable t (Drop True (Just Cascade))
 

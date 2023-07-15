@@ -13,7 +13,7 @@ import qualified Sqel.Syntax.Monad as S
 
 statement :: Sql
 statement =
-  statementSql @_ @_ @() S.do
+  statementSql @() S.do
     t <- table table_Cat
     insertInto t
     values t

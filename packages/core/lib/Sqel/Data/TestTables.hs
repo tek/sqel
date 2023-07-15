@@ -2,7 +2,7 @@ module Sqel.Data.TestTables where
 
 import Sqel.Class.ReifySqel (sqel)
 import Sqel.Default (Sqel)
-import Sqel.Dsl (Con1, Gen, IntTable, Name, Prim, Prod, Query, Sum, Table, Unique, Newtype)
+import Sqel.Dsl (Con1, Gen, IntTable, Name, Newtype, Param, Prim, Prod, Query, Sum, Table, Unique)
 
 data Simp =
   Simp {
@@ -37,7 +37,7 @@ data Fur =
     color :: Text,
     density :: Int
   }
-  deriving stock (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic, Ord)
 
 data Cat =
   Cat {
@@ -45,7 +45,7 @@ data Cat =
     nam :: Text,
     fur :: Fur
   }
-  deriving stock (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic, Ord)
 
 data Bird =
   Bird {
@@ -53,7 +53,7 @@ data Bird =
     cat :: Text,
     fur :: Fur
   }
-  deriving stock (Eq, Show, Generic)
+  deriving stock (Eq, Show, Generic, Ord)
 
 type Table_Cat = Table "cat" Cat (Prod [Prim, Unique Prim, Gen])
 type Table_Bird = Table "bird" Bird (Prod [Prim "num", Prim, Gen])
@@ -110,3 +110,16 @@ data SI =
   deriving stock (Eq, Show, Generic)
 
 type Type_SI = Sum [Con1 Newtype, Con1 Newtype]
+
+data UQ =
+  UQ {
+    cat :: Text,
+    num :: Int64,
+    newName :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+
+type Query_UQ = Query UQ (Prod [Prim, Prim, Param Prim])
+
+query_UQ :: Sqel Query_UQ
+query_UQ = sqel

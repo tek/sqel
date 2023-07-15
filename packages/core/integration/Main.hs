@@ -4,6 +4,7 @@ import Hedgehog (TestT, property, test, withTests)
 import Sqel.Test.JoinTest (test_join)
 import Sqel.Test.NestedSumTest (test_nestedSum)
 import Sqel.Test.SumTest (test_sum)
+import Sqel.Test.UpdateTest (test_update)
 import Test.Tasty (TestName, TestTree, defaultMain, testGroup)
 import Test.Tasty.Hedgehog (testProperty)
 
@@ -18,6 +19,7 @@ tests :: TestTree
 tests =
   testGroup "integration" [
     unitTest "join statement" test_join,
+    unitTest "update statement" test_update,
     unitTest "sum table" test_sum,
     unitTest "nested sum table" test_nestedSum
   ]

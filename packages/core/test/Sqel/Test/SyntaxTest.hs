@@ -24,7 +24,7 @@ stmt1 =
 
 stmt2 :: Sql
 stmt2 =
-  statementSql @_ @Q @Fur S.do
+  statementSql @Fur S.do
     c <- query query_Q table_Cat
     select (c.cat.fur.color, c.cat.fur.density)
     from c.cat

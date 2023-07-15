@@ -49,7 +49,7 @@ table_E :: Sqel Table_E
 table_E = sqel
 
 sql_e :: Sql
-sql_e = statementSql @_ @_ @() S.do
+sql_e = statementSql @() S.do
   t <- tableK @Table_E @Def
   createTable t
 

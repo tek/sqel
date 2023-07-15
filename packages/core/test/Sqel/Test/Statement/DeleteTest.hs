@@ -13,7 +13,7 @@ import Sqel.Syntax.Fragments (query, table_)
 import qualified Sqel.Syntax.Monad as S
 
 statementAll :: Sql
-statementAll = statementSql @_ @_ @() S.do
+statementAll = statementSql @() S.do
   f <- table_ table_Cat
   deleteFrom f.table
 

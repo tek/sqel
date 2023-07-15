@@ -23,7 +23,7 @@ type UidStatement i table query proj =
   Statement '[Uid i table] query proj
 
 statementSql ::
-  ∀ tables query proj .
+  ∀ proj tables query .
   Statement tables query proj ->
   Sql
 statementSql Statement {sql} = sql
