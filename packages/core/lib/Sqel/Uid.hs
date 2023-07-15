@@ -5,11 +5,11 @@ import Data.UUID (UUID)
 import Sqel.Class.ReifySqel (ReifySqelFor, sqel)
 import Sqel.Data.Sqel (SqelFor)
 import Sqel.Dsl (Name, Query)
-import Sqel.Dsl.Prim (Prim)
+import Sqel.Dsl.Prim (PrimWith)
 
 type IdQuery i si = Query i (Name "id" si)
 
-type IdQuery_Prim i = IdQuery i Prim
+type IdQuery_Prim i = Query i (PrimWith "id" i)
 
 type IdQuery_Int = IdQuery_Prim Int64
 
