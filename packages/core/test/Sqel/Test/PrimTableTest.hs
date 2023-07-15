@@ -1,32 +1,26 @@
 module Sqel.Test.PrimTableTest where
 
-import Exon (exon)
 import Hedgehog (TestT, (===))
 
 import Sqel.Class.ReifySqel (sqel)
-import Sqel.Clauses (from, select)
-import Sqel.Data.Sql (Sql)
+import Sqel.Data.Sql (Sql, sql)
 import Sqel.Data.Statement (statementSql)
 import Sqel.Default (Sqel)
-import Sqel.Dsl (Table, PrimAs)
-import Sqel.Syntax.Fragments (table)
-import qualified Sqel.Syntax.Monad as S
+import Sqel.Dsl (PrimAs, Table)
+import qualified Sqel.Statement.Common as Statement
 
 type Table_Name = Table "tab" Text (PrimAs "col")
 
 table_Name :: Sqel Table_Name
 table_Name = sqel
 
-statement :: Sql
-statement =
-  statementSql S.do
-    t <- table table_Name
-    select t
-    from t
+targetSelect :: Sql
+targetSelect = [sql|select "col" from "tab"|]
 
-target :: Sql
-target = [exon|select "col" from "tab"|]
+targetCreate :: Sql
+targetCreate = [sql|create table "tab" ("col" text not null)|]
 
 test_primTable :: TestT IO ()
-test_primTable =
-  target === statement
+test_primTable = do
+  targetSelect === statementSql (Statement.selectAll table_Name)
+  targetCreate === statementSql (Statement.createTable table_Name)

@@ -4,7 +4,7 @@ import Data.Some (Some (Some))
 
 import Sqel.Build.Index (prependIndex)
 import Sqel.Class.DefaultFields (DefaultMeta (defaultCompMeta, defaultPrimMeta))
-import Sqel.Data.PgType (PgColumnName (PgColumnName), PgTypeRef)
+import Sqel.Data.PgType (PgColumnName, PgTypeRef)
 import Sqel.Data.PgTypeName (pattern PgCompName, PgTableName, pattern PgTypeName, pgTableName)
 import qualified Sqel.Data.Spine
 import Sqel.Data.Spine (
@@ -15,7 +15,7 @@ import Sqel.Data.Spine (
   Types (Types),
   )
 import qualified Sqel.Default
-import Sqel.Default (CompMeta (CompMeta), PrimMeta (PrimMeta))
+import Sqel.Default (CompMeta (CompMeta))
 
 spineComps ::
   ∀ tag .
@@ -47,7 +47,7 @@ spineTableName ::
   PgTableName
 spineTableName = \case
   SpineComp (defaultCompMeta @tag -> CompMeta {typeName = Some (PgTypeName name)}) _ _ -> pgTableName name
-  SpinePrim _ (defaultPrimMeta @tag -> PrimMeta {name = PgColumnName name}) -> pgTableName name
+  SpinePrim table _ -> table
 
 mergeCols :: [Spine tag] -> [Spine tag]
 mergeCols cols =
