@@ -5,65 +5,30 @@
         "hix": "hix"
       },
       "locked": {
-        "lastModified": 1684862295,
-        "narHash": "sha256-6ZbtqBSaPm/cSZmGFLhizKwbzdfBSis8MihSq46g3sA=",
+        "lastModified": 1689788620,
+        "narHash": "sha256-wGVzeey6pXaNCnFh3ZiD001tmM4/V47TnzD/Ohy85vU=",
         "ref": "refs/heads/main",
-        "rev": "de0fa476a84357a4ef5bb3b62fe73db4a70359df",
-        "revCount": 58,
+        "rev": "bae526be6d6fb981b21db8028fa24f4b5bbf4b3e",
+        "revCount": 59,
         "type": "git",
         "url": "https://git.tryp.io/tek/exon"
       },
       "original": {
         "type": "git",
         "url": "https://git.tryp.io/tek/exon"
-      }
-    },
-    "flake-utils": {
-      "locked": {
-        "lastModified": 1678901627,
-        "narHash": "sha256-U02riOqrKKzwjsxc/400XnElV+UtPUQWpANPlyazjH0=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "93a2b84fc4b70d9e089d029deacc3583435c2ed6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1685518550,
-        "narHash": "sha256-o2d0KcvaXzTrPRIo0kOLV0/QXHhDQ5DTi+OxcjO8xqY=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "a1720a10a6cfe8234c0e93907ffe81be440f4cef",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
       }
     },
     "hix": {
       "inputs": {
-        "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "nixpkgs_internal": "nixpkgs_internal",
         "thax": "thax"
       },
       "locked": {
-        "lastModified": 1681208216,
-        "narHash": "sha256-ApDYa7i3QaW192+JLmKQY2hWYP4M4joGb04sWl3+l9w=",
+        "lastModified": 1689722786,
+        "narHash": "sha256-DP67PvK2KO0+hzkdvSOximFbcmKxlAMKO0CRm6y3gwY=",
         "ref": "refs/heads/main",
-        "rev": "ebd40954a5ad35852ede21aa3d15c8d5414c47cc",
-        "revCount": 380,
+        "rev": "c8c3a4dfee19d87e446f3ce30e957cf7d8978c77",
+        "revCount": 484,
         "type": "git",
         "url": "https://git.tryp.io/tek/hix"
       },
@@ -74,16 +39,15 @@
     },
     "hix_2": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2",
         "thax": "thax_2"
       },
       "locked": {
-        "lastModified": 1687648528,
-        "narHash": "sha256-Q7g4802INz8cIZVg/be6HFuJF6pASFMQrh24rn2vh40=",
+        "lastModified": 1689793229,
+        "narHash": "sha256-O1PFadbIL5wCIzdRqyYYBbOtfx9Vyl/yJEzdKYlQcQ0=",
         "ref": "refs/heads/main",
-        "rev": "3b94367bc113b27a8d897682399819710a5c69e3",
-        "revCount": 445,
+        "rev": "91a78313da7fc57ea7710095ad7315c5c1b4f5ba",
+        "revCount": 487,
         "type": "git",
         "url": "https://git.tryp.io/tek/hix"
       },
@@ -94,17 +58,17 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1672057183,
-        "narHash": "sha256-GN7/10DNNvs1FPj9tlZA2qgNdFuYKKuS3qlHTqAxasQ=",
-        "owner": "NixOS",
+        "lastModified": 1686582075,
+        "narHash": "sha256-vtflsfKkHtF8IduxDNtbme4cojiqvlvjp5QNYhvoHXc=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "b139e44d78c36c69bcbb825b20dbfa51e7738347",
+        "rev": "7e63eed145566cca98158613f3700515b4009ce3",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "b139e44d78c36c69bcbb825b20dbfa51e7738347",
+        "rev": "7e63eed145566cca98158613f3700515b4009ce3",
         "type": "github"
       }
     },
@@ -124,41 +88,10 @@
         "type": "github"
       }
     },
-    "nixpkgs_internal": {
-      "locked": {
-        "lastModified": 1679109242,
-        "narHash": "sha256-m5g2jauKuB6SB2u9eQ4CXSfNhW6Yb0l6lZO1zTIVJpo=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "f012515eb23bcda6a18ee606b7071dd0b2740d66",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "f012515eb23bcda6a18ee606b7071dd0b2740d66",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "exon": "exon",
         "hix": "hix_2"
-      }
-    },
-    "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
       }
     },
     "thax": {

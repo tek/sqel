@@ -11,6 +11,7 @@
     depsFull = [exon];
     main = "sqel";
     compiler = "ghc94";
+    gen-overrides.enable = true;
 
     cabal = {
       license = "BSD-2-Clause-Patent";
@@ -123,6 +124,7 @@
     };
 
     envs.sqel-integration = {
+      systems = ["x86_64-linux"];
       basePort = 25000;
       services.postgres = {
         enable = true;
