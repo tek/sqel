@@ -57,7 +57,6 @@
         "exon ^>= 1.4"
         "extra ^>= 1.7"
         "first-class-families ^>= 0.8"
-        "generic-lens ^>= 2.2"
         "generics-sop ^>= 0.5"
         "hasql ^>= 1.6"
         "invariant ^>= 0.6"
