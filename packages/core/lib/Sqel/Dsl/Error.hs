@@ -43,3 +43,8 @@ type family NoSpec a spec where
   NoSpec a spec =
     "The type (variable) " <> Quoted spec <> " specifying a column of type " <> Quoted a <> " is undetermined." %
     UndetGeneral spec
+
+type FieldCountMismatch :: (Type, Nat, Nat) -> ErrorMessage
+type family FieldCountMismatch meta where
+  FieldCountMismatch '(a, fields, specs) =
+    "The type " <> Quoted a <> " has " <> fields <> " fields, but the sqel type specifies " <> specs <> "."

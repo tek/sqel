@@ -280,6 +280,7 @@ test-suite sqel-core-test
       Sqel.Test.Dsl.SumTest
       Sqel.Test.DslTest
       Sqel.Test.EnumTest
+      Sqel.Test.Error.CountMismatch
       Sqel.Test.Error.FragmentMismatch
       Sqel.Test.Error.ModOrder
       Sqel.Test.Error.UndeterminedParam

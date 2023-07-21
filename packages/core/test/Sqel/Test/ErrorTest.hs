@@ -7,6 +7,7 @@ import Hedgehog (TestT, (===))
 import Test (unitTest)
 import Test.Tasty (TestTree, testGroup)
 
+import Sqel.Test.Error.CountMismatch (countMismatch)
 import Sqel.Test.Error.FragmentMismatch (notAFragment, notRoot, tableForQuery)
 import Sqel.Test.Error.UndeterminedParam (invalidSpec, undeterminedParam)
 
@@ -31,19 +32,19 @@ typeError msg t =
 
 tableForQueryMessage :: [Text]
 tableForQueryMessage =
-    [
-      "• Cannot use a table fragment for a ‘where’ clause."
-    ]
+  [
+    "• Cannot use a table fragment for a ‘where’ clause."
+  ]
 
 notAFragmentMessage :: [Text]
 notAFragmentMessage =
-    [
-      "• The argument of this clause has an invalid type.",
-      "It should be one of the fields of the fragments bound by ‘frags <- query’,",
-      "like ‘frags.tables.users’ or ‘frags.query’, or combinations of fields like",
-      "‘(frags.users.name, frags.users.address)’."
+  [
+    "• The argument of this clause has an invalid type.",
+    "It should be one of the fields of the fragments bound by ‘frags <- query’,",
+    "like ‘frags.tables.users’ or ‘frags.query’, or combinations of fields like",
+    "‘(frags.users.name, frags.users.address)’."
 
-    ]
+  ]
 
 notRootMessage :: [Text]
 notRootMessage =
@@ -90,8 +91,7 @@ modOrderMessage =
 countMismatchMessage :: [Text]
 countMismatchMessage =
   [
-    "• The number of specified columns does not match the data type.",
-    "The type Foo has three fields, but the sqel type specifies two."
+    "• The type ‘Dat’ has 3 fields, but the sqel type specifies 4."
   ]
 
 test_error_tableForQuery :: TestT IO ()
@@ -103,6 +103,9 @@ test_error_undeterminedParam = typeError undeterminedParamMessage undeterminedPa
 test_error_invalidSpec :: TestT IO ()
 test_error_invalidSpec = typeError invalidSpecMessage invalidSpec
 
+test_error_countMismatch :: TestT IO ()
+test_error_countMismatch = typeError countMismatchMessage countMismatch
+
 test_errors :: TestTree
 test_errors =
   testGroup "type errors" [
@@ -110,7 +113,6 @@ test_errors =
     unitTest "not a fragment" (typeError notAFragmentMessage notAFragment),
     unitTest "not a root fragment" (typeError notRootMessage notRoot),
     unitTest "undetermined Dd param" test_error_undeterminedParam,
-    unitTest "invalid spec" test_error_invalidSpec
-    -- TODO
-    -- unitTest "count mismatch" (typeError countMismatchMessage countMismatch)
+    unitTest "invalid spec" test_error_invalidSpec,
+    unitTest "count mismatch" test_error_countMismatch
   ]

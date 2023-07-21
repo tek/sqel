@@ -15,7 +15,7 @@ module Sqel.Dsl (
 
 import Data.UUID (UUID)
 import Data.Vector (Vector)
-import Fcf (Eval, Exp, Pure, type (@@))
+import Fcf (Eval, Exp, Pure, type (@@), Length)
 import Generics.SOP.GGP (GCode, GDatatypeInfoOf)
 import qualified Generics.SOP.Type.Metadata as SOP
 import Generics.SOP.Type.Metadata (ConstructorInfo (Constructor, Infix, Record), DatatypeInfo (ADT))
@@ -55,7 +55,7 @@ import Sqel.Data.Sel (Path (PathSkip), Sel (Sel), SelAuto, TSel (TSel), TSelWith
 import Sqel.Data.Uid (Uid)
 import Sqel.Dd (SetDdName, SetDdPath, SetDdPrefix)
 import Sqel.Dsl.Comp
-import Sqel.Dsl.Error (NoReify, NoSpec, TypeNamePrimError)
+import Sqel.Dsl.Error (NoReify, NoSpec, TypeNamePrimError, FieldCountMismatch)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
@@ -319,17 +319,16 @@ type ProdCol :: Symbol -> Type -> Type -> Dd0
 type family ProdCol name a spec where
   ProdCol name a spec = AmendDdName name (ReifyE a spec)
 
--- TODO include specifics in count mismatch error
-type ProdCols :: [Symbol] -> [Type] -> [Type] -> [Dd0]
-type family ProdCols fields as cols where
-  ProdCols '[] '[] '[] = '[]
-  ProdCols (name : fields) (a : as) (col : cols) = ProdCol name a col : ProdCols fields as cols
-  ProdCols _ _ _ = PlainTypeError "The number of specified columns does not match the data type."
+type ProdCols :: (Type, Nat, Nat) -> [Symbol] -> [Type] -> [Type] -> [Dd0]
+type family ProdCols meta fields as cols where
+  ProdCols _ '[] '[] '[] = '[]
+  ProdCols meta (name : fields) (a : as) (col : cols) = ProdCol name a col : ProdCols meta fields as cols
+  ProdCols meta _ _ _ = TypeError (FieldCountMismatch meta)
 
 type ProdSort :: Sort -> Type -> [Type] -> Symbol -> [Field] -> [Type] -> Dd0
 type family ProdSort sort a as name fields cols where
   ProdSort sort a as name fields cols =
-    CompDd a ('TSel 'DefaultPrefix name) sort 'Nest (ProdCols (ReifyFieldNames name fields) as cols)
+    CompDd a ('TSel 'DefaultPrefix name) sort 'Nest (ProdCols '(a, Length @@ as, Length @@ cols) (ReifyFieldNames name fields) as cols)
 
 type ProdInfo :: Type -> [[Type]] -> DatatypeInfo -> [Type] -> Dd0
 type family ProdInfo a as info cols where
