@@ -8,6 +8,7 @@ import Test (unitTest)
 import Test.Tasty (TestTree, testGroup)
 
 import Sqel.Test.Error.FragmentMismatch (notAFragment, notRoot, tableForQuery)
+import Sqel.Test.Error.UndeterminedParam (invalidSpec, undeterminedParam)
 
 typeError ::
   Show a =>
@@ -63,10 +64,16 @@ undeterminedParamMessage =
 invalidSpecMessage :: [Text]
 invalidSpecMessage =
   [
-      "• The spec ‘Int’",
-      "given for a column of type ‘Int64’ is not supported.",
-      "If you intend to use it as a custom spec, you need to define:",
-      "type instance Reify a (Int) = <impl>"
+    "• The spec:",
+    "‘Int’",
+    "given for a column of type ‘Int64’ is not supported.",
+    "If you intend to use it as a custom spec, you need to define:",
+    "type instance Reify a (Int) = <impl>",
+    "If there is an undetermined type variable in the spec:",
+    "If you are calling a polymorphic function that has a constraint like ‘ReifySqel’,",
+    "you probably need to use a type application to specify the spec, like ‘Prim’.",
+    "If the variable is supposed to be polymorphic, you need to add ‘ReifySqel’ to its function's context",
+    "and use the variable in the type application."
   ]
 
 modOrderMessage :: [Text]
@@ -87,14 +94,23 @@ countMismatchMessage =
     "The type Foo has three fields, but the sqel type specifies two."
   ]
 
+test_error_tableForQuery :: TestT IO ()
+test_error_tableForQuery = typeError tableForQueryMessage tableForQuery
+
+test_error_undeterminedParam :: TestT IO ()
+test_error_undeterminedParam = typeError undeterminedParamMessage undeterminedParam
+
+test_error_invalidSpec :: TestT IO ()
+test_error_invalidSpec = typeError invalidSpecMessage invalidSpec
+
 test_errors :: TestTree
 test_errors =
   testGroup "type errors" [
-    unitTest "table fragment for query clause" (typeError tableForQueryMessage tableForQuery),
+    unitTest "table fragment for query clause" test_error_tableForQuery,
     unitTest "not a fragment" (typeError notAFragmentMessage notAFragment),
-    unitTest "not a root fragment" (typeError notRootMessage notRoot)
-    -- unitTest "undetermined Dd param" (typeError undeterminedParamMessage undeterminedParam),
-    -- unitTest "invalid spec" (typeError invalidSpecMessage invalidSpec)
+    unitTest "not a root fragment" (typeError notRootMessage notRoot),
+    unitTest "undetermined Dd param" test_error_undeterminedParam,
+    unitTest "invalid spec" test_error_invalidSpec
     -- TODO
     -- unitTest "count mismatch" (typeError countMismatchMessage countMismatch)
   ]

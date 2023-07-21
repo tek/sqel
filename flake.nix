@@ -145,7 +145,7 @@
     };
 
     envs.bench = {
-      overrides = {minimal, ...}: { sqel = minimal; };
+      overrides = {minimal, ...}: { sqel = minimal; sqel-core = minimal; };
       haskellPackages = ["sqel" "sqel-core"];
     };
 

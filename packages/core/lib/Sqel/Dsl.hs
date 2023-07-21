@@ -15,12 +15,12 @@ module Sqel.Dsl (
 
 import Data.UUID (UUID)
 import Data.Vector (Vector)
-import Fcf (Eval, Exp, type (@@))
+import Fcf (Eval, Exp, Pure, type (@@))
 import Generics.SOP.GGP (GCode, GDatatypeInfoOf)
 import qualified Generics.SOP.Type.Metadata as SOP
 import Generics.SOP.Type.Metadata (ConstructorInfo (Constructor, Infix, Record), DatatypeInfo (ADT))
 import Prelude hiding (Enum, Mod)
-import Type.Errors (ErrorMessage)
+import Type.Errors (DelayError, IfStuck)
 
 import Sqel.Data.Dd (
   ConCol,
@@ -55,7 +55,7 @@ import Sqel.Data.Sel (Path (PathSkip), Sel (Sel), SelAuto, TSel (TSel), TSelWith
 import Sqel.Data.Uid (Uid)
 import Sqel.Dd (SetDdName, SetDdPath, SetDdPrefix)
 import Sqel.Dsl.Comp
-import Sqel.Dsl.Error (TypeNamePrimError)
+import Sqel.Dsl.Error (NoReify, NoSpec, TypeNamePrimError)
 import Sqel.Dsl.Fields (Field (FieldNum), NamedFields, ReifyFieldNames)
 import Sqel.Dsl.Mod (AddMod, AddModWith, AddMods, Mod, ModTrans, ModWith, Mods)
 import Sqel.Dsl.Prim (AllAuto, Param, Prim, PrimAs, PrimAuto, PrimEnum, PrimJson, PrimJsonb, PrimUsing, PrimWith)
@@ -291,6 +291,7 @@ type family PrimBasic a prim where
   PrimBasic a PrimJson = AddMod Mods.Json (PrimDd a)
   PrimBasic a PrimJsonb = AddMod Mods.Jsonb (PrimDd a)
   PrimBasic a (NewtypeOf spec) = FromGen (ReifyNewtype a spec) a
+  PrimBasic a spec = TypeError ("PrimBasic" % a % spec)
 
 type PrimInfer :: Type -> Type -> Dd0
 type family PrimInfer a prim where
@@ -301,6 +302,11 @@ type family PrimInfer a prim where
   PrimInfer (Vector a) prim = ApplyArray Vector (PrimInfer a prim)
   PrimInfer (Set a) prim = ApplyArray Set (PrimInfer a prim)
   PrimInfer a prim = PrimBasic a prim
+
+type PrimInferOrError :: Type -> Type -> Dd0
+type family PrimInferOrError a prim where
+  PrimInferOrError a prim =
+    IfStuck prim (DelayError (NoSpec a prim)) (Pure (PrimInfer a prim))
 
 type AutoPrim :: Type -> Type
 type family AutoPrim spec where
@@ -458,67 +464,43 @@ type family Prims a spec where
 ------------------------------------------------------------------------------------------------------------------------
 
 type Reify :: Type -> Type -> Dd0
-type family Reify a spec
+type family Reify a spec where
+  Reify a Gen = Prims a Gen
+  Reify a Newtypes = Prims a Newtypes
 
-type instance Reify a Gen = Prims a Gen
-type instance Reify a Newtypes = Prims a Newtypes
+  Reify a (Prod cols) = ProdGen a cols
+  Reify a (ProdAs tname cols) = Reify a (TypeName tname (Prod cols))
+  Reify a (UidProd i b) = Reify a (Prod [i, b])
 
-type instance Reify a (Prod cols) = ProdGen a cols
-type instance Reify a (ProdAs tname cols) = Reify a (TypeName tname (Prod cols))
-type instance Reify a (UidProd i b) = Reify a (Prod [i, b])
+  Reify a (Sum cols) = SumGenDef a cols
 
-type instance Reify a (Sum cols) = SumGenDef a cols
+  Reify (ConMeta name as fields) (Con cols) = ConFor name as fields cols
+  Reify (ConMeta name '[a] '[field]) (Con1 cols) = SetMerge (ConFor name '[a] '[field] '[cols])
 
-type instance Reify (ConMeta name as fields) (Con cols) = ConFor name as fields cols
-type instance Reify (ConMeta name '[a] '[field]) (Con1 cols) = SetMerge (ConFor name '[a] '[field] '[cols])
+  Reify a (Merge spec) = SetMerge (Reify a spec)
 
-type instance Reify a (Merge spec) = SetMerge (Reify a spec)
+  Reify a PrimAuto = PrimInferOrError a PrimAuto
+  Reify a (PrimAs name) = AmendDdName name (PrimInferOrError a PrimAuto)
+  Reify a (PrimUsing prim) = PrimInferOrError a prim
+  Reify _ (PrimWith name a) = AmendDdName name (PrimBasic a Prim)
+  Reify a (Param spec) = SetNoCond (Reify a spec)
 
-type instance Reify a PrimAuto = PrimInfer a PrimAuto
-type instance Reify a (PrimAs name) = AmendDdName name (PrimInfer a PrimAuto)
-type instance Reify a (PrimUsing prim) = PrimInfer a prim
-type instance Reify _ (PrimWith name a) = AmendDdName name (PrimBasic a Prim)
-type instance Reify a (Param spec) = SetNoCond (Reify a spec)
+  Reify a (Mod mod spec) = AddMod mod (Reify a spec)
+  Reify a (Mods mods spec) = AddMods mods (Reify a spec)
+  Reify a (ModTrans f spec) = f @@ Reify a spec
+  Reify a (ModWith f mod spec) = AddModWith f mod (Reify a spec)
 
-type instance Reify a (Mod mod spec) = AddMod mod (Reify a spec)
-type instance Reify a (Mods mods spec) = AddMods mods (Reify a spec)
-type instance Reify a (ModTrans f spec) = f @@ Reify a spec
-type instance Reify a (ModWith f mod spec) = AddModWith f mod (Reify a spec)
+  Reify a (Nullable spec) = ReifyNullable 'False a spec
+  Reify a (OrNull spec) = ReifyNullable 'True a spec
+  Reify a (NewtypeOf spec) = PrimInferOrError a (NewtypeOf spec)
+  Reify a (Array f spec) = ReifyArray a f spec
 
-type instance Reify a (Nullable spec) = ReifyNullable 'False a spec
-type instance Reify a (OrNull spec) = ReifyNullable 'True a spec
-type instance Reify a (NewtypeOf spec) = PrimInfer a (NewtypeOf spec)
-type instance Reify a (Array f spec) = ReifyArray a f spec
-
-type UndetGeneral :: Type -> ErrorMessage
-type UndetGeneral spec =
-  "If you are calling a polymorphic function that has a constraint like " <> Quoted "ReifySqel" <> "," %
-  "you probably need to use a type application to specify the spec, like " <> Quoted "Prim" <> "." %
-  "If the variable is supposed to be polymorphic, you need to add " <> Quoted "ReifySqel" <>
-  " to its function's context" %
-  "and use the variable in the type application."
-
-type NoSpec :: Type -> Type -> ErrorMessage
-type family NoSpec a spec where
-  NoSpec a spec =
-    "The type (variable) " <> Quoted spec <> " specifying a column of type " <> Quoted a <> " is undetermined." %
-    UndetGeneral spec
-
-type NoReify :: Type -> Type -> ErrorMessage
-type family NoReify a spec where
-  NoReify a spec =
-    "The spec " <> Quoted spec % " given for a column of type " <> Quoted a <> " is not supported." %
-    "If you intend to use it as a custom spec, you need to define:" %
-    "type instance Reify a (" <> spec <> ") = <impl>" %
-    "If there is an undetermined type variable in the spec:" %
-    UndetGeneral spec
+  Reify a spec = TypeError (NoReify a spec)
 
 type ReifyE :: Type -> Type -> Dd0
 type family ReifyE a spec where
   ReifyE a spec =
-    Reify a spec
-    -- IfStuck spec (DelayError (NoSpec a spec))
-    -- (Pure (IfStuck (Reify a spec) (DelayError (NoReify a spec)) (Pure (Reify a spec))))
+    IfStuck spec (DelayError (NoSpec a spec)) (Pure (Reify a spec))
 
 type Table :: Symbol -> Type -> Type -> Dd1
 type family Table name a spec where
