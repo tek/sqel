@@ -54,7 +54,7 @@ let
 
   type Type_A d sd = Prod [Merge sd, Prim, Prim, Prim]
 
-  type Type_B = Prod [Newtype Prim, Newtype Prim, Newtype Prim, Newtype Prim, Newtype Prim]
+  type Type_B = Newtypes
 
   type Table_C name d sd = IntTable name (A d) (Type_A d sd)
 
