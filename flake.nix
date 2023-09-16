@@ -6,8 +6,7 @@
     exon.url = "git+https://git.tryp.io/tek/exon";
   };
 
-  outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: let
-  in {
+  outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: {
     depsFull = [exon];
     main = "sqel";
     compiler = "ghc94";
@@ -55,14 +54,14 @@
         "contravariant ^>= 1.5"
         "dependent-sum-template ^>= 0.1"
         "dependent-sum-aeson-orphans ^>= 0.3"
-        "exon ^>= 1.4"
+        "exon >= 1.4 && < 1.6"
         "extra ^>= 1.7"
         "first-class-families ^>= 0.8"
         "generics-sop ^>= 0.5"
         "hasql ^>= 1.6"
         "invariant ^>= 0.6"
         "path ^>= 0.9"
-        "path-io ^>= 1.7"
+        "path-io >= 1.7 && < 1.9"
         "prettyprinter ^>= 1.7"
         "scientific ^>= 0.3"
         "some ^>= 1.0"
@@ -71,7 +70,7 @@
         "transformers"
         "type-errors ^>= 0.2"
         "uuid ^>= 1.3"
-        "vector ^>= 0.12"
+        "vector >= 0.12 && < 0.14"
       ];
 
       test = {
@@ -79,7 +78,7 @@
         default-extensions = ["QualifiedDo"];
         dependencies = [
           "aeson >= 2.0 && < 2.2"
-          "exon ^>= 1.4"
+          "exon >= 1.4 && < 1.6"
           "generics-sop ^>= 0.5"
           "hasql ^>= 1.6"
           "hedgehog >= 1.1 && < 1.3"
@@ -94,7 +93,7 @@
         env = "sqel-integration";
         default-extensions = ["QualifiedDo"];
         dependencies = [
-          "exon ^>= 1.4"
+          "exon >= 1.4 && < 1.6"
           "hasql ^>= 1.6"
           "hedgehog >= 1.1 && < 1.3"
           "lifted-base ^>= 0.2"
