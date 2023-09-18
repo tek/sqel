@@ -7,6 +7,7 @@
   };
 
   outputs = { hix, exon, ... }: hix.lib.pro ({config, lib, ...}: {
+    ghcVersions = ["ghc92" "ghc94" "ghc96"];
     depsFull = [exon];
     main = "sqel";
     compiler = "ghc94";
@@ -34,6 +35,12 @@
     };
 
     ghci.args = ["-fprint-potential-instances"];
+
+    envs.ghc96.overrides = {jailbreak, ...}: {
+      chronos = jailbreak;
+      bytebuild = jailbreak;
+      zigzag = jailbreak;
+    };
 
     overrides = {jailbreak, ...}: {
       th-extras = jailbreak;
